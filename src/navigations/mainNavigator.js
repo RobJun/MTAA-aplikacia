@@ -4,25 +4,16 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { globContext } from '../context/globContext';
+import CallButton from '../components/callButton';
+import { useNavigation } from '@react-navigation/native';
+import VideoContainer from '../screens/video';
+import { createStackNavigator } from '@react-navigation/stack';
 
 var token = ""
 
-async function retrieveUserSession(dispatchToken,dispatch) {
-  try {   
-      const session = await EncryptedStorage.getItem("user_token");
-      if (session !== undefined) {
-          // Congrats! You've just retrieved your first value! 
-          console.log(session)
-          dispatch(JSON.parse(session).token)
-
-      }
-  } catch (error) {
-      // There was an error on the native side
-  }
-}
-
 function HomeScreen() {
-    console.log("erer")
+    const s = useContext(globContext)
+    console.log(s)
     const {auth:{user:{user_id,token}}} = useContext(globContext)
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -31,20 +22,38 @@ function HomeScreen() {
       </View>
     );
   }
+
+
+
   
   function SettingsScreen() {
+    const {navigate} = useNavigation();
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Settings!</Text>
+        <Text>Setting s!</Text>
+        <CallButton icon={"video"} onPress={() =>{navigate('ClubsNav',{screen: 'Video'})}}></CallButton>
       </View>
     );
   }
+
+const stack = createStackNavigator()
+
+  const ScreenWithVideo = () => {
+    return (
+      <stack.Navigator>
+        <stack.Screen name="Clubs" component={SettingsScreen} />
+        <stack.Screen name="Video" component={VideoContainer} />
+      </stack.Navigator>
+    )
+  }
+
+
   
   const Tab = createBottomTabNavigator();
   
   export default function MainNavigator() {
     return (
-        <Tab.Navigator initialRouteName="Home" tabBarOptions={{ showLabel: false }}>
+        <Tab.Navigator initialRouteName="Home" screenOptions={{ showLabel: false }}>
           <Tab.Screen 
                 name="Home"
                 component={HomeScreen}
@@ -55,10 +64,11 @@ function HomeScreen() {
                     )
                 }} />
           <Tab.Screen 
-          name="Clubs"
-          component={SettingsScreen} 
+          name="ClubsNav"
+          component={ScreenWithVideo}  
           options={{
             tabBarLabel: "Clubs",
+            headerShown:false,
             tabBarIcon: ({color,size}) => (
                 <MaterialCommunityIcons name="account-group" color={color} size={size} />
             )
