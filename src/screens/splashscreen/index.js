@@ -3,7 +3,7 @@ import {View,Image,Text,StyleSheet} from 'react-native'
 
 
 const SplashScreen = () => {
- return <View style={styles.view}>
+ return <View style = {styles.view}>
      <Image source={require('../../../assets/logo.png')} style={styles.logo}></Image>
      <Text style={styles.text}>BookRef</Text>
      <Text style={styles.credit}>App by Dana Hrivnákova & Róbert Junas</Text>
@@ -11,30 +11,32 @@ const SplashScreen = () => {
 }
 
 
-const styles= StyleSheet.create({
-    view :{
+const styles = StyleSheet.create({
+    view : {
         justifyContent:'center',
         alignItems:'center',
-        flex:1
+        flex: 1,
+        backgroundColor: "#393991",
     },
     text : {
         display:'flex',
         flexDirection:'row',
-        fontSize:30,
-        fontFamily:'serif'
+        fontSize: 30,
+        fontFamily:'serif', 
+        color: "white"
     },
     logo : {
         display:'flex',
     
         flexDirection:'row',
-        width: '40%',
-        height: '40%',
+        width: '50%',
+        height: '50%',
     },
     credit : {
         position:'absolute',
-        bottom: 10
-    }
+        bottom: 10,
+        color: "white"
+    },
 })
-
 
 export default SplashScreen

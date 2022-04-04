@@ -1,5 +1,5 @@
 import React, {useContext,useState} from 'react'
-import { Text, View, } from 'react-native';
+import { Text, View,Image } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import EncryptedStorage from 'react-native-encrypted-storage';
@@ -8,6 +8,10 @@ import CallButton from '../components/callButton';
 import { useNavigation } from '@react-navigation/native';
 import VideoContainer from '../screens/video';
 import { createStackNavigator } from '@react-navigation/stack';
+
+import Profile from '../screens/profile';
+import Search from '../screens/search';
+import BookProfile from '../screens/bookProfile';
 
 var token = ""
 
@@ -19,6 +23,7 @@ function HomeScreen() {
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>{user_id}</Text>
         <Text>{token}</Text>
+        <Image source={{uri:'https://www.adoptuj.psiadusa.sk/wp-content/uploads/270101306_2690459687930495_6947736704567391124_n.jpg'}} style={{width: 100, height: 50}}></Image>
       </View>
     );
   }
@@ -76,7 +81,7 @@ const stack = createStackNavigator()
           />
            <Tab.Screen 
           name="Search"
-          component={SettingsScreen} 
+          component={Search} 
           options={{
             tabBarLabel: "Search",
             tabBarIcon: ({color,size}) => (
@@ -86,7 +91,7 @@ const stack = createStackNavigator()
           />
            <Tab.Screen 
           name="My library"
-          component={SettingsScreen} 
+          component={BookProfile} 
           options={{
             tabBarLabel: "Library",
             tabBarIcon: ({color,size}) => (
@@ -96,7 +101,7 @@ const stack = createStackNavigator()
           />
            <Tab.Screen 
           name="Profile"
-          component={SettingsScreen} 
+          component={Profile} 
           options={{
             tabBarLabel: "Profile",
             tabBarIcon: ({color,size}) => (

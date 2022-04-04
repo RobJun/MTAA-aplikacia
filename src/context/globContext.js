@@ -6,7 +6,7 @@ export const globContext = createContext({});
 
 //pociatocny stav authObjektu
 const initAuthState = {
-    isLogged: false,
+    isLogged: true,
     user : { },
     error : null,
     loading : false
