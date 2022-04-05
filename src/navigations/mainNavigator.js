@@ -12,26 +12,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Profile from '../screens/profile';
 import Search from '../screens/search';
 import BookProfile from '../screens/bookProfile';
+import HomeScreen from '../screens/home';
 
 var token = ""
 
-function HomeScreen() {
-    const s = useContext(globContext)
-    console.log(s)
-    const {auth:{user:{user_id,token}}} = useContext(globContext)
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>{user_id}</Text>
-        <Text>{token}</Text>
-        <Image source={{uri:'https://www.adoptuj.psiadusa.sk/wp-content/uploads/270101306_2690459687930495_6947736704567391124_n.jpg'}} style={{width: 100, height: 50}}></Image>
-      </View>
-    );
-  }
-
-
-
-  
-  function SettingsScreen() {
+function SettingsScreen() {
     const {navigate} = useNavigation();
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

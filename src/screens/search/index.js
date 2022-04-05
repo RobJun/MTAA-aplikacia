@@ -16,120 +16,79 @@ const Search = () => {
         fetch("http://10.0.2.2:8000/find/books/")
         .then(response => response.json())
         .then(data => setBooks(data))
-        .then(data => console.log(data))
     }
     
     useEffect(() => {
         fetchGroups(),
         fetchBooks()
     }, [], [])
-    console.log('dsdsd')
+    
     //<Searchbar placeholder="Search" value={searchPhrase} onChangeText={setSearchPhrase} onFocus={() => {setClicked(true);}}/>
     return (
-        <View>
+        <ScrollView>
             <Text style={styles.text}>Clubs</Text>
             <View>
                 <FlatList
                     horizontal
                     scrollEnabled
+                    showsHorizontalScrollIndicator={false}
                     data={groups}
                     renderItem={({item})=>{
-                        console.log(item)
                         return (<View>
-                            <Image source={{uri:item.photoPath}} style={{width: 100, height: 100}}/>
-                            <Text style={styles.titles} key={item.id} onPress={ ()=> Profile} >{item.name}</Text>
+                            <Image source={{uri:item.photoPath}} style={styles.image}/>
+                            <Text style={styles.name} key={item.id} onPress={ ()=> Profile} >{item.name}</Text>
                         </View>)
                     }}
                     keyExtractor={(item)=>item.id}
                 />
             </View>
             <Text style={styles.text}>Books</Text>
-            <ScrollView horizontal = {true} style={containerStyle.rowContainer} showsHorizontalScrollIndicator={false}>
-                {books.filter((x, index) => index < 5).map(book => (
-                    <ImageBackground key={book.id}>{book.cover}</ImageBackground>,
-                    <Text style={styles.titles} key={book.id}>{book.title}</Text>
-                ))}
-            </ScrollView>
-            <ScrollView horizontal = {true} style={containerStyle.rowContainer} showsHorizontalScrollIndicator={false}>
-                {books.filter((x, index) => 5 <= index & index < 10).map(book => (
-                    <ImageBackground key={book.id}>{book.cover}</ImageBackground>,
-                    <Text style={styles.titles} key={book.id}>{book.title}</Text>
-                ))}
-            </ScrollView>
-            <ScrollView horizontal = {true} style={containerStyle.rowContainer} showsHorizontalScrollIndicator={false}>
-                {books.filter((x, index) => 10 <= index & index < 15).map(book => (
-                    <ImageBackground key={book.id}>{book.cover}</ImageBackground>,
-                    <Text style={styles.titles} key={book.id}>{book.title}</Text>
-                ))}
-            </ScrollView>
-            <ScrollView horizontal = {true} style={containerStyle.rowContainer} showsHorizontalScrollIndicator={false}>
-                {books.filter((x, index) => 15 <= index & index < 20).map(book => (
-                    <ImageBackground key={book.id}>{book.cover}</ImageBackground>,
-                    <Text style={styles.titles} key={book.id}>{book.title}</Text>
-                ))}
-            </ScrollView>
-            <ScrollView horizontal = {true} style={containerStyle.rowContainer} showsHorizontalScrollIndicator={false}>
-                {books.filter((x, index) => 20 <= index & index < 25).map(book => (
-                    <ImageBackground key={book.id}>{book.cover}</ImageBackground>,
-                    <Text style={styles.titles} key={book.id}>{book.title}</Text>
-                ))}
-            </ScrollView>
-            <ScrollView horizontal = {true} style={containerStyle.rowContainer} showsHorizontalScrollIndicator={false}>
-                {books.filter((x, index) => 25 <= index & index< 30).map(book => (
-                    <ImageBackground key={book.id}>{book.cover}</ImageBackground>,
-                    <Text style={styles.titles} key={book.id}>{book.title}</Text>
-                ))}
-            </ScrollView>
-            <ScrollView horizontal = {true} style={containerStyle.rowContainer} showsHorizontalScrollIndicator={false}>
-                {books.filter((x, index) => 30 <= index & index < 35).map(book => (
-                    <ImageBackground key={book.id}>{book.cover}</ImageBackground>,
-                    <Text style={styles.titles} key={book.id}>{book.title}</Text>
-                ))}
-            </ScrollView>
-            <ScrollView horizontal = {true} style={containerStyle.rowContainer} showsHorizontalScrollIndicator={false}>
-                {books.filter((x, index) => 35 <= index & index < 40).map(book => (
-                    <ImageBackground key={book.id}>{book.cover}</ImageBackground>,
-                    <Text style={styles.titles} key={book.id}>{book.title}</Text>
-                ))}
-            </ScrollView>
-        </View>
+            <View>
+                <FlatList
+                    columnWrapperStyle={{justifyContent: "space-around"}}
+                    numColumns={3}
+                    data={books}
+                    renderItem={({item})=>{
+                        return (<View>
+                            <Image source={{uri:item.cover}} style={{width:  120, height: 180, marginBottom: 10}}/>
+                        </View>)
+                    }}
+                    keyExtractor={(item)=>item.id}
+                />
+            </View>
+        </ScrollView>
         )
 }
 
-const containerStyle = StyleSheet.create({
-    container: {
-      padding: 8,
-      backgroundColor: "#ffffff",
-    },
-    rowContainer: {
-      flexDirection: 'row',
-    }
-  }); 
-
 const styles = StyleSheet.create({
-    photos: {
-        width: '10%',
-        height: '10%'
-    },
+    image: {
+        width: 100,
+        height: 100,
+        borderRadius: 150 / 2,
+        overflow: "hidden",
+        marginLeft: 20,
+        alignItems: "center"
+      },
     text : {
         display:'flex',
         flexDirection:'row',
         fontSize: 30,
         fontFamily:'serif',
         color: "black",
-        marginTop: 30,
+        marginTop: 20,
         marginLeft: 20,
+        marginBottom: 10,
         fontWeight: 'bold',
     },
-    titles: {
+    name: {
         display:'flex',
         flexDirection:'row',
         fontSize: 15,
         fontFamily:'serif',
         color: "black",
-        marginTop: 30,
-        marginLeft: 20,
+        textAlign: "center",
         fontWeight: 'bold',
+        marginLeft: 25
     }
 })
 
