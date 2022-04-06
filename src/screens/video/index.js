@@ -1,105 +1,289 @@
 import React, {useContext,useState,useEffect, useRef} from 'react'
-import { Text, View, StyleSheet } from 'react-native';
-import { globContext } from '../../context/globContext';
+import { Text, View, StyleSheet,FlatList,PanResponder,Animated } from 'react-native';
 import {
     RTCPeerConnection,
-    RTCIceCandidate,
-    RTCSessionDescription,
     RTCView,
     MediaStream,
-    MediaStreamTrack,
     mediaDevices,
-    registerGlobals,
   } from 'react-native-webrtc';
+import { API_SERVER } from '../../api_calls/constants';
 
-
-
-const VideoContainer = () => {
-  const {auth:{user:{token,user_id}}} = useContext(globContext)
-  const username = user_id
-  const id = "13a13c87-b715-4781-8623-48518cf40e7c"
-  const [localStream, setLocalStream] = useState(new MediaStream());
-  const [remoteStream, setRemoteStream] = useState({toURL: () => {}});
-  const [mapPeers,setMapPeers] = useState({})
-
-  var ws = useRef(null)
-  const urls = {
-    iceServers: [
-      {
-        urls: 'stun:stun.l.google.com:19302',  
-      }, {
-        urls: 'stun:stun1.l.google.com:19302',    
-      }, {
-        urls: 'stun:stun2.l.google.com:19302',    
-      }
-
-    ],
-  }
-  const [hasRemote, setHasRemote] = useState(false)
-
-
-  const signal = (user,action,message) => {
-    const msg = {
-      peer : user,
-      action : action,
-      message : message
-  }
-    console.log()
-    ws.current.send(JSON.stringify(msg))
+const urls = {
+  iceServers: [
+    {
+      urls: 'stun:stun.l.google.com:19302',  
+    }, {
+      urls: 'stun:stun1.l.google.com:19302',    
+    }, {
+      urls: 'stun:stun2.l.google.com:19302',    
+    }
+  ],
 }
 
-  console.log("video_init")
-  console.log(token)
-  console.log("remoteStream")
-  console.log(remoteStream)
-  console.log("-----------------------------------------------------")
-  console.log("localStream")
-  console.log(localStream)
-  console.log("-----------------------------------------------------")
-
-  
-
-  const handlePeer = (peerUsername,receiver_channel_name)=> {
-    console.log("VIDEO --- new peer -- ",peerUsername, " [",receiver_channel_name,"]")
-  }
 
 
-  const handleOffer = (sdp,peerUsername,receiver_channel_name) =>{
-    console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\nOFFER SDP:",sdp,"\n------------------------------")
-  }
+const VideoContainer = ({route,navigation}) => {
+  console.log(route)
+  const {roomID,username,token} = route.params
+  const [localStream, setLocalStream] = useState(new MediaStream());
 
-  const handleAnswer = (sdp,peerUsername,receiver_channel_name) =>{
-    console.log("VIDEO --- new answer",peerUsername, " [",receiver_channel_name,"]\nANSWER SDP:",sdp,"\n------------------------------")
-  }
+  const [pan,setPan] = useState(new Animated.ValueXY())
+
+
+
+  var ws = useRef(null)
+
+  const [hasRemote, setHasRemote] = useState(false)
+  const [hasLocal, setHasLocal] = useState(false)
+
+  const peerConnections = {}
+  const [peerConns,setPeerCons] = useState([])
+  const [streams,setStreams] = useState({})
+
+
+  const presponder = PanResponder.create({
+    onStartShouldSetPanResponder : ()=>true,
+    onPanResponderMove : Animated.event([null,{
+      dx : pan.x,
+      dy : pan.y
+    }]),
+    onPanResponderRelease : (e,gesture)=> {
+      pan.flattenOffset()
+    },
+    onPanResponderGrant: (e, gestureState) => {
+      // Set the initial value to the current state
+      pan.setOffset({x: pan.x._value, y: pan.y._value});
+      pan.setValue({x: 0, y: 0});
+
+    }
+  })
+
+  useEffect(
+    () => navigation.addListener('blur', () => {
+      console.log("BLUR -- PEER CONS -- ",peerConns)
+      peerConns.forEach(e=>{
+        e.close()
+      })
+      //conn.close()
+      ws.current.close()
+    }),
+    [navigation])
+
+
+  useEffect(()=>{
+    let isFront = true;
+    mediaDevices.enumerateDevices().then(sourceInfos => {
+      let videoSourceId;
+      for (let i = 0; i < sourceInfos.length; i++) {
+          const sourceInfo = sourceInfos[i];
+          if (
+          sourceInfo.kind == 'videoinput' &&
+          sourceInfo.facing == (isFront ? 'front' : 'environment')
+          ) {
+              videoSourceId = sourceInfo.deviceId;
+          }
+      }
+      mediaDevices.getUserMedia({
+        audio: true,
+        video: {
+          mandatory: {
+            minWidth: 500, // Provide your own width, height and frame rate here
+            minHeight: 300,
+            minFrameRate: 30,
+          },
+          facingMode: isFront ? 'user' : 'environment',
+          optional: videoSourceId ? [{sourceId: videoSourceId}] : [],
+        },
+      })
+      .then(stream => {
+        // Got stream!
+        setLocalStream(stream);
+    
+        setHasLocal(true);
+        console.log("local stream set ", localStream)
+
+      })
+      .catch(error => {
+        console.error('Error accessing media devices.', error);
+      });
+    });
+  },[])
 
 
   useEffect(() => {
-      ws.current = new WebSocket('ws://10.0.2.2:8000/video/'+id+'/?q='+token)
+    if(hasLocal){
+
+      const signal = (user,action,message) => {
+        const msg = {
+          peer : user,
+          action : action,
+          message : message
+      }
+        ws.current.send(JSON.stringify(msg))
+    }
+    
+      const handlePeer = (peerUsername,receiver_channel_name)=> {
+        const conn = new RTCPeerConnection(urls)
+        peerConnections[peerUsername] = conn
+        peerConns.push(conn)
+        //console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
+        //connections.push({user: peerUsername,conn:conn})
+        //console.log("VIDEO --- new peer -- ",peerUsername, " [",receiver_channel_name,"]")
+        conn.addStream(localStream)
+         
+        conn.onaddstream =(event)=>{
+          //console.log("CONN.ONADDSTREAM- NEW PEER - adding stream")
+          //streams[peerUsername] = event.stream
+          setStreams((prev)=>{return {...prev,[peerUsername]: event.stream}})
+        }
+
+        conn.oniceconnectionstatechange = () => {
+          var iceConnectionState = conn.iceConnectionState;
+            if (iceConnectionState === "failed" || iceConnectionState === "disconnected" || iceConnectionState === "closed"){
+                console.log('Deleting peer');
+                //delete mapPeers[peerUsername];
+                if(iceConnectionState != 'closed'){
+                   conn.close();
+                   //streams[peerUsername] = undefined
+                   setStreams((prev) => {return {...prev,[peerUsername]: undefined}})
+                  //setRemoteStream({toURL: ()=>{}})
+                   //setHasRemote(false)
+                }
+            }
+        }
+
+        conn.onicecandidate = (event) => {
+          if(event.candidate){
+            //console.log("New Ice Candidate! Reprinting SDP")// + JSON.stringify(conn.localDescription));
+            return;
+          }
+          //console.log('Gathering finished! Sending offer SDP to ', peerUsername, '.');
+          //console.log('receiverChannelName: ', receiver_channel_name);
+
+          signal(username,'new-offer', {
+            sdp: conn.localDescription,
+            receiver_channel_name: receiver_channel_name,
+            local_screen_sharing: false,
+            remote_screen_sharing: false,
+          })
+        }
+
+        conn.createOffer()
+            .then(o => conn.setLocalDescription(o))
+            .then(e=>{console.log("local description set")})
+
+
+      }
+    
+      const handleOffer = (sdp,peerUsername,receiver_channel_name) =>{
+        //console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\n")//OFFER SDP:",sdp,"\n------------------------------")
+        const conn = new RTCPeerConnection(urls)
+        peerConnections[peerConnections] = conn
+        peerConns.push(conn)
+        console.log(peerConns[peerConns.length - 1] === conn)
+        //console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
+        conn.addStream(localStream)
+        conn.onaddstream = (event)=>{
+          //console.log("CONN.ONADDSTREAM- NEW PEER - adding stream")
+          //setRemoteStream(event.stream)
+          console.log(event.stream)
+          //streams[peerUsername] = event.stream
+          setStreams((prev)=>{return {...prev,[peerUsername]: event.stream}})
+        }
+
+        conn.oniceconnectionstatechange = () => {
+          var iceConnectionState = conn.iceConnectionState;
+          console.log(iceConnectionState)
+            if (iceConnectionState === "failed" || iceConnectionState === "disconnected" || iceConnectionState === "closed"){
+                console.log('Deleting peer');
+                //delete mapPeers[peerUsername];
+                if(iceConnectionState != 'closed'){
+                  conn.close();
+                  //streams[peerUsername]=undefined
+                  setStreams((prev) => {return {...prev,[peerUsername]: undefined}})
+                  //setRemoteStream({toURL: ()=>{}})
+                  //setHasRemote(false)
+                }
+            }
+        }
+
+        conn.onicecandidate = (event) => {
+          if(event.candidate){
+            //console.log("New Ice Candidate! Reprinting SDP")// + JSON.stringify(conn.localDescription));
+            return;
+          }
+          //console.log('Gathering finished! Sending answer SDP to ', peerUsername, '.');
+          //console.log('receiverChannelName: ', receiver_channel_name);
+          
+          signal(username,'new-answer', {
+            sdp: conn.localDescription,
+            receiver_channel_name: receiver_channel_name,
+            local_screen_sharing: false,
+            remote_screen_sharing: false,
+        });
+        }
+
+        conn.setRemoteDescription(sdp).then(() => {
+          console.log('Set offer from %s.', peerUsername);
+          return conn.createAnswer();
+      })
+      .then(a => {
+          console.log('Setting local answer for %s.', peerUsername);
+          return conn.setLocalDescription(a);
+      })
+      .then(() => {
+          console.log('Answer created for %s.', peerUsername);
+          //console.log('localDescription: ', conn.localDescription);
+          //console.log('remoteDescription: ', conn.remoteDescription);
+      })
+      .catch(error => {
+          console.log('Error creating answer for %s.', peerUsername);
+          console.log(error);
+      });
+
+
+      }
+    
+      const handleAnswer = (sdp,peerUsername,receiver_channel_name) =>{
+        //console.log("VIDEO --- new answer",peerUsername, " [",receiver_channel_name,"]\n)")//ANSWER SDP:",sdp,"\n------------------------------")
+        peerConnections[peerUsername].setRemoteDescription(sdp)
+      }
+
+
+
+      //console.log("trying to conect to signaling server")
+      ws.current = new WebSocket('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
       ws.current.onopen = (e)=>{
-          console.log("connection opened with signaling server",e)
+          //console.log("connection opened with signaling server",e)
           signal(username,'new-peer',{local_screen_sharing : false})
       }
       ws.current.onmessage = (msg) => {
           let data = JSON.parse(msg.data);
-          console.log(data)
           const action =  data['action']
           const peerUsername = data['peer']
-          console.log('peerUsername: ', peerUsername);
-          console.log('action: ', action)
-          if(peerUsername == username){ return;}
-
           const receiver_channel_name = data['message']['receiver_channel_name'];
-          console.log('receiver_channel_name: ', receiver_channel_name);
+          //console.log('--------- ON MESSAGE ------------')
+          //console.log('peerUsername: ', peerUsername);
+          //console.log('action: ', action)
+          //console.log('receiver_channel_name: ', receiver_channel_name);
+          //console.log('---------------------------------')
+          if(peerUsername == username){ return;}
 
           switch (action){
               case 'new-peer':
+                  //console.log('---------- NEW PEER ------------')
                   handlePeer(peerUsername,receiver_channel_name)
+                  //console.log('--------------------------------')
                   break;
               case 'new-offer':
+                  //console.log('---------- NEW OFFER -----------')
                   handleOffer(data["message"]["sdp"],peerUsername,receiver_channel_name)
+                  //console.log('--------------------------------')
                   break;
               case 'new-answer':
+                  //console.log('---------- NEW ANSWER -----------')
                   handleAnswer(data["message"]["sdp"],peerUsername,receiver_channel_name)
+                  //console.log('--------------------------------')
                   break;
           }
           
@@ -111,95 +295,116 @@ const VideoContainer = () => {
 
       ws.current.onerror = (e) => {
           console.log('Error occured! ', e);
-      }
-
-      let isFront = false;
-      mediaDevices.enumerateDevices().then(sourceInfos => {
-        let videoSourceId;
-        for (let i = 0; i < sourceInfos.length; i++) {
-            const sourceInfo = sourceInfos[i];
-            if (
-            sourceInfo.kind == 'videoinput' &&
-            sourceInfo.facing == (isFront ? 'front' : 'environment')
-            ) {
-                videoSourceId = sourceInfo.deviceId;
-            }
-        }
-        mediaDevices.getUserMedia({
-          audio: true,
-          video: {
-            mandatory: {
-              minWidth: 500, // Provide your own width, height and frame rate here
-              minHeight: 300,
-              minFrameRate: 30,
-            },
-            facingMode: isFront ? 'user' : 'environment',
-            optional: videoSourceId ? [{sourceId: videoSourceId}] : [],
-          },
-        })
-        .then(stream => {
-          // Got stream!
-          setLocalStream(stream);
-          console.log("local stream set ", localStream)
-
-        })
-        .catch(error => {
-          console.error('Error accessing media devices.', error);
-        });
-      }); 
-  }, [])
+      } 
+    }
+  }, [hasLocal])
 
  useEffect(()=>{
-    console.log("REMOTE-STREAM-ADDED")
-    console.log(remoteStream)
-    if (remoteStream instanceof MediaStream)
+    console.log("checking remote")
+    if (Object.keys(streams).length>0){
+      
+      console.log(streams)
+      //console.log("REMOTE-STREAM-ADDED")
+      //console.log(remoteStream)
       setHasRemote(true)
- },[remoteStream])
+    }else{
+      console.log("No peers")
+      setHasRemote(false)
+    }
+ },[streams])
 
-  return (
-    <View>
-            <View style={styles.videoContainer}>
-        <View style={[styles.videos, styles.localVideos]}>
-          <Text>Your Video</Text>
-          <RTCView streamURL={localStream.toURL()} style={styles.localVideo} />
-        </View>
-        <View style={[styles.videos, styles.remoteVideos]}>
-          <Text>Friends Video</Text>
-          {hasRemote ? <RTCView streamURL={remoteStream.toURL()} style={styles.remoteVideo}/> : <Text>Waiting for partner to connect</Text>}
-        </View>
-      </View>
-        </View>
-  )
+ useEffect(()=>{
+  console.log("PEER CONNECTIONS -- LOL",peerConns[0])
+ },[peerConns])
 
-}
+ const renderItem = ({item})=>{
+  console.log("THERE SHOULD BE TEXT NOW",item)
+  console.log(streams)
+  if(streams[item] === undefined) return;
+  return(
+    <View style={[styles.remoteVideoContainer]}>
+      <Text>{item}</Text>
+      <RTCView streamURL={streams[item].toURL()} style={[styles.localVideo,]} objectFit='contain' />
+    </View>
 
-
-
-const Video = ({localStream,remoteStream}) => {
-   
-    
-    return (
-        <View>
-            <View style={styles.videoContainer}>
-        <View style={[styles.videos, styles.localVideos]}>
-          <Text>Your Video</Text>
-          <RTCView streamURL={localStream.toURL()} style={styles.localVideo} />
-        </View>
-        <View style={[styles.videos, styles.remoteVideos]}>
-          <Text>Friends Video</Text>
-          {hasRemote ? <RTCView streamURL={remoteStream.toURL()} style={styles.remoteVideo}/> : <Text>Waiting for partner to connect</Text>}
-        </View>
-      </View>
-        </View>
     )
-}
+ }
 
+
+ return (
+  <View style={{flex:1}}>
+    <View>
+      {hasRemote ? <FlatList
+        data={Object.keys(streams)}
+        extraData={streams}
+        renderItem={renderItem}
+        columnWrapperStyle={{justifyContent: "space-around"}}
+        numColumns={2}
+      
+      />
+       : <Text>Waiting for someone to connect</Text>}
+    </View>
+    <View style={styles.localVideoContainer}>
+        <RTCView streamURL={localStream.toURL()} style={{flex:1}} objectFit='cover' />
+    </View>
+  </View>
+)
+
+ //ANIMATED
+ /*
+  return (
+      <View>
+        <View style={{zIndex:0,elevation:0}}>
+          {hasRemote ? <FlatList
+            data={Object.keys(streams)}
+            extraData={streams}
+            renderItem={renderItem}
+            columnWrapperStyle={{justifyContent: "space-around"}}
+            numColumns={2}
+          
+          />
+           : <Text>Waiting for someone to connect</Text>}
+        </View>
+        <View style={[styles.draggable,{zIndex:1,elevation:1}]}>
+        <Animated.View {...presponder.panHandlers} style={[pan.getLayout(),styles.localVideoContainer]}>
+            <RTCView streamURL={localStream.toURL()} style={{flex:1}} objectFit='cover' />
+        </Animated.View>
+        </View>
+      </View>
+  )*/
+
+}
 
 export default VideoContainer;
 
-
-
 const styles = StyleSheet.create({
+  localVideoContainer: {
+    height:200,
+    width:(220/16)*9,
+    borderColor:'black',
+    borderWidth:1,
+    borderRadius:20,
+    position: 'absolute',
+    backgroundColor:'black',
+    padding:0,
+    overflow:'hidden',
+    bottom:0,
+    right:0,
+  },
+  localVideo : {
+    height:'100%',
+    width:'100%',
+
+  },
+  remoteVideoContainer : {
+      height:200,
+      width:200,
+      backgroundColor: 'red',
+  }
+})
+
+
+const oldStyle = StyleSheet.create({
     root: {
       backgroundColor: '#fff',
       flex: 1,
@@ -215,15 +420,15 @@ const styles = StyleSheet.create({
     },
     videos: {
       width: '100%',
-      flex: 1,
-      position: 'relative',
       overflow: 'hidden',
   
       borderRadius: 6,
     },
     localVideos: {
-      height: 100,
-      marginBottom: 10,
+      height: 150,
+      top: 0,
+      right:0,
+      position: 'absolute',
     },
     remoteVideos: {
       height: 400,

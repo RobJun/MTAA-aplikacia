@@ -1,3 +1,4 @@
+import { API_SERVER } from "./constants"
 
 
 const login_call = async (user_data) => {
@@ -6,7 +7,7 @@ const login_call = async (user_data) => {
     const id = setTimeout(()=>controller.abort(),timeout)
     console.log("api_call_login -- ", user_data)
     try {
-        let data = await fetch("http://10.0.2.2:8000/auth/login/", {
+        let data = await fetch("http://"+API_SERVER+"/auth/login/", {
                 "method": "POST",
                 "headers": {
                 "Content-Type": "application/json"

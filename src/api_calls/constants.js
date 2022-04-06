@@ -1,0 +1,1 @@
+export const API_SERVER = '10.10.37.22:8000'

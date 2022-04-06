@@ -5,7 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { globContext } from '../context/globContext';
 import CallButton from '../components/callButton';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation,getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import VideoContainer from '../screens/video';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -15,25 +15,42 @@ import HomeScreen from '../screens/home';
 import Library from '../screens/library';
 import Clubs from '../screens/clubs';
 
-var token = ""
 
 function SettingsScreen() {
     const {navigate} = useNavigation();
+    const {auth:{user:{token,user_id}}} = useContext(globContext)
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Setting s!</Text>
-        <CallButton icon={"video"} onPress={() =>{navigate('ClubsNav',{screen: 'Video'})}}></CallButton>
+        <CallButton icon={"video"} onPress={() =>{navigate('ClubsNav',{
+              screen: 'Video',
+              params : {
+                username : user_id,
+                token : token,
+                roomID : "13a13c87-b715-4781-8623-48518cf40e7c"
+                }
+              })}}></CallButton>
       </View>
     );
   }
 
 const stack = createStackNavigator()
 
-  const ScreenWithVideo = () => {
+  const ScreenWithVideo = ({navigation,route}) => {
+    React.useLayoutEffect(() => {
+      const routeName = getFocusedRouteNameFromRoute(route);
+      console.log(routeName)
+      if (routeName === "Video"){
+        console.log("should be invisible")
+          navigation.setOptions({tabBarStyle: {display: 'none'}});
+      }else {
+          navigation.setOptions({tabBarStyle: {display: 'flex'}});
+      }
+  }, [navigation, route]);
     return (
       <stack.Navigator>
         <stack.Screen name="Clubs" component={SettingsScreen} />
-        <stack.Screen name="Video" component={VideoContainer} />
+        <stack.Screen name="Video" component={VideoContainer} options={{ unmountOnBlur: true }}/>
       </stack.Navigator>
     )
   }
