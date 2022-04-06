@@ -31,6 +31,7 @@ const BookProfile = () => {
     useEffect(() => {
         fetchInfo()
     }, [])
+    
     const c = 0xffffffff
     return (
         <ScrollView showsVerticalScrollIndicator={false}>

@@ -27,14 +27,14 @@ const Search = () => {
     return (
         <ScrollView>
             <Text style={styles.text}>Clubs</Text>
-            <View>
+            <View style = {{marginLeft: 20}}>
                 <FlatList
                     horizontal
                     scrollEnabled
                     showsHorizontalScrollIndicator={false}
                     data={groups}
                     renderItem={({item})=>{
-                        return (<View>
+                        return (<View style = {{marginRight: 15}}>
                             <Image source={{uri:item.photoPath}} style={styles.image}/>
                             <Text style={styles.name} key={item.id} onPress={ ()=> Profile} >{item.name}</Text>
                         </View>)
@@ -43,14 +43,14 @@ const Search = () => {
                 />
             </View>
             <Text style={styles.text}>Books</Text>
-            <View>
+            <View style = {{marginLeft: 20}}>
                 <FlatList
                     columnWrapperStyle={{justifyContent: "space-around"}}
                     numColumns={3}
                     data={books}
                     renderItem={({item})=>{
-                        return (<View>
-                            <Image source={{uri:item.cover}} style={{width:  120, height: 180, marginBottom: 10}}/>
+                        return (<View style = {{marginRight: 15}}>
+                            <Image source={{uri:item.cover}} style={{width:  120, height: 180, marginBottom: 10, resizeMode: "contain"}}/>
                         </View>)
                     }}
                     keyExtractor={(item)=>item.id}
@@ -66,8 +66,7 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 150 / 2,
         overflow: "hidden",
-        marginLeft: 20,
-        alignItems: "center"
+        alignItems: "center",
       },
     text : {
         display:'flex',
@@ -88,7 +87,6 @@ const styles = StyleSheet.create({
         color: "black",
         textAlign: "center",
         fontWeight: 'bold',
-        marginLeft: 25
     }
 })
 

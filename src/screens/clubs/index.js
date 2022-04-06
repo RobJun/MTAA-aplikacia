@@ -1,6 +1,6 @@
 import React, { useEffect, useState} from "react"
 import {View, Image, Text, StyleSheet, FlatList, ScrollView} from 'react-native'
-import Button from "../../components/button"
+import ButtonNewClub from "./buttonNewClub."
 
 
 function NewClub() {
@@ -23,9 +23,9 @@ const Clubs = () => {
    
     return (
         <ScrollView>
-             <View style={{flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly",}}>
-                 <Text style = {styles.title1}>Your bookclubs</Text>
-                <Button onPress={NewClub} title="Create new club" style = {styles.button}/>
+             <View style={{marginTop: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
+                <Text style = {styles.title1}>Your bookclubs</Text>
+                <ButtonNewClub onPress={NewClub} title="Create new club"/>
             </View>
             <View>
                 <FlatList
@@ -34,10 +34,10 @@ const Clubs = () => {
                     renderItem={({item})=>{
                         return (
                         <View style = {{flexDirection:'row', flex: 1}}>
-                            <View style = {{flexDirection: "row", flex: 1, width: "35%", height: 100, marginLeft:10, marginTop: 20, backgroundColor: "#f17c56", borderTopLeftRadius: 360, borderBottomLeftRadius: 360}}>  
+                            <View style = {{flexDirection: "row", flex: 1, width: "35%", height: 100, marginLeft:15, marginTop: 20, backgroundColor: "#f17c56", borderTopLeftRadius: 360, borderBottomLeftRadius: 360}}>  
                                 <Image source={{uri:item.photoPath}} style={styles.image}/>
                             </View>
-                            <View style = {{width: "65%", height: 100, marginRight: 10, marginTop: 20, backgroundColor: "#f17c56", borderTopRightRadius: 30, borderBottomRightRadius: 30}}>
+                            <View style = {{width: "65%", height: 100, marginRight: 20, marginTop: 20, backgroundColor: "#f17c56", borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
                                 <Text style={styles.title}>{item.name}</Text>
                                 <Text style={styles.text}>Number of members: {item.number_of_members}</Text>
                             </View>
@@ -62,7 +62,7 @@ const Clubs = () => {
     image: {
         width: 100, 
         height: 100, 
-        borderRadius: 360 / 2,
+        borderRadius: 150 / 2,
         overflow: "hidden",
         marginLeft: 5,
         marginBottom: 5,
@@ -75,7 +75,7 @@ const Clubs = () => {
         color: "black",
         marginTop: 15,
         marginRight: 10,
-        marginLeft: 50,
+        marginLeft: 10,
         fontWeight: 'bold',
     },
     title : {
