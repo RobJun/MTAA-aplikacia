@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
         display:'flex',
     
         flexDirection:'row',
-        width: '50%',
-        height: '50%',
+        width: 200,
+        height: 200,
     },
     credit : {
         position:'absolute',

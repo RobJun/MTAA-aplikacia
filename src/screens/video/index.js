@@ -337,7 +337,7 @@ const VideoContainer = ({route,navigation}) => {
     <View style={styles.localVideoContainer}>
         <RTCView streamURL={localStream.toURL()} style={{flex:1}} objectFit='cover' />
     </View>
-    <View style={{width:'22%',position:'absolute',top:'50%'}}>
+    <View style={{width:50,position:'absolute',bottom:0}}>
     <CallButton icon={'phone-hangup'} onPress={()=>{
         navigation.goBack()
     }} color='red'/>
@@ -379,6 +379,7 @@ const styles = StyleSheet.create({
     overflow:'hidden',
     bottom:0,
     right:0,
+    margin:10
   },
   localVideo : {
     height:'100%',
@@ -391,45 +392,3 @@ const styles = StyleSheet.create({
       backgroundColor: 'red',
   }
 })
-
-
-const oldStyle = StyleSheet.create({
-    root: {
-      backgroundColor: '#fff',
-      flex: 1,
-      padding: 20,
-    },
-    inputField: {
-      marginBottom: 10,
-      flexDirection: 'column',
-    },
-    videoContainer: {
-      flex: 1,
-      minHeight: 450,
-    },
-    videos: {
-      width: '100%',
-      overflow: 'hidden',
-  
-      borderRadius: 6,
-    },
-    localVideos: {
-      height: 150,
-      top: 0,
-      right:0,
-      position: 'absolute',
-    },
-    remoteVideos: {
-      height: 400,
-    },
-    localVideo: {
-      backgroundColor: '#f2f2f2',
-      height: '100%',
-      width: '100%',
-    },
-    remoteVideo: {
-      backgroundColor: '#f2f2f2',
-      height: '100%',
-      width: '100%',
-    },
-  });

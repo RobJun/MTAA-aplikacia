@@ -6,7 +6,7 @@ import MainNavigator from './mainNavigator';
 import AuthNavigator from './authNavigator';
 import { globContext } from '../context/globContext';
 import SplashScreen from '../screens/splashscreen';
-import login_call from '../api_calls/login_call';
+import {login_call} from '../api_calls/auth_calls';
 
 
 
