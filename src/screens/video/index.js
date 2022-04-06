@@ -1,5 +1,6 @@
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import React, {useContext,useState,useEffect, useRef} from 'react'
-import { Text, View, StyleSheet,FlatList,PanResponder,Animated } from 'react-native';
+import { Text, View, StyleSheet,FlatList,AppState } from 'react-native';
 import {
     RTCPeerConnection,
     RTCView,
@@ -7,6 +8,7 @@ import {
     mediaDevices,
   } from 'react-native-webrtc';
 import { API_SERVER } from '../../api_calls/constants';
+import CallButton from '../../components/callButton';
 
 const urls = {
   iceServers: [
@@ -26,37 +28,28 @@ const VideoContainer = ({route,navigation}) => {
   console.log(route)
   const {roomID,username,token} = route.params
   const [localStream, setLocalStream] = useState(new MediaStream());
-
-  const [pan,setPan] = useState(new Animated.ValueXY())
-
-
-
-  var ws = useRef(null)
-
   const [hasRemote, setHasRemote] = useState(false)
   const [hasLocal, setHasLocal] = useState(false)
-
   const peerConnections = {}
   const [peerConns,setPeerCons] = useState([])
   const [streams,setStreams] = useState({})
+  const [isFront,setIsFront] = useState(true)
+  var ws = useRef(null)
+  const appstate = useRef(AppState.currentState)
 
-
-  const presponder = PanResponder.create({
-    onStartShouldSetPanResponder : ()=>true,
-    onPanResponderMove : Animated.event([null,{
-      dx : pan.x,
-      dy : pan.y
-    }]),
-    onPanResponderRelease : (e,gesture)=> {
-      pan.flattenOffset()
-    },
-    onPanResponderGrant: (e, gestureState) => {
-      // Set the initial value to the current state
-      pan.setOffset({x: pan.x._value, y: pan.y._value});
-      pan.setValue({x: 0, y: 0});
-
-    }
-  })
+  useEffect(()=>{
+    const subscribe = AppState.addEventListener('change',(nextAppState)=>{
+      if (
+        appstate.current.match(/active/) &&
+        (nextAppState === "inactive" || nextAppState ==  'background')
+      ) {
+        navigation.goBack()
+      }
+    })
+    return () => {
+      subscribe.remove();
+    };
+  },[])
 
   useEffect(
     () => navigation.addListener('blur', () => {
@@ -71,7 +64,6 @@ const VideoContainer = ({route,navigation}) => {
 
 
   useEffect(()=>{
-    let isFront = true;
     mediaDevices.enumerateDevices().then(sourceInfos => {
       let videoSourceId;
       for (let i = 0; i < sourceInfos.length; i++) {
@@ -87,7 +79,7 @@ const VideoContainer = ({route,navigation}) => {
         audio: true,
         video: {
           mandatory: {
-            minWidth: 500, // Provide your own width, height and frame rate here
+            minWidth: 500,
             minHeight: 300,
             minFrameRate: 30,
           },
@@ -98,7 +90,6 @@ const VideoContainer = ({route,navigation}) => {
       .then(stream => {
         // Got stream!
         setLocalStream(stream);
-    
         setHasLocal(true);
         console.log("local stream set ", localStream)
 
@@ -108,7 +99,6 @@ const VideoContainer = ({route,navigation}) => {
       });
     });
   },[])
-
 
   useEffect(() => {
     if(hasLocal){
@@ -313,9 +303,6 @@ const VideoContainer = ({route,navigation}) => {
     }
  },[streams])
 
- useEffect(()=>{
-  console.log("PEER CONNECTIONS -- LOL",peerConns[0])
- },[peerConns])
 
  const renderItem = ({item})=>{
   console.log("THERE SHOULD BE TEXT NOW",item)
@@ -330,6 +317,9 @@ const VideoContainer = ({route,navigation}) => {
     )
  }
 
+
+ const [micOff,setMic] = useState(false) 
+ const [videoOff,setVideoOff] = useState(false)
 
  return (
   <View style={{flex:1}}>
@@ -347,31 +337,30 @@ const VideoContainer = ({route,navigation}) => {
     <View style={styles.localVideoContainer}>
         <RTCView streamURL={localStream.toURL()} style={{flex:1}} objectFit='cover' />
     </View>
+    <View style={{width:'22%',position:'absolute',top:'50%'}}>
+    <CallButton icon={'phone-hangup'} onPress={()=>{
+        navigation.goBack()
+    }} color='red'/>
+    <CallButton icon={micOff ? 'microphone-off' : 'microphone'} onPress={()=>{
+      setMic(prev => !prev)
+      localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled
+      }}/>
+    <CallButton icon={'camera-flip'} onPress={()=>{
+      localStream.getVideoTracks().forEach((track)=>{
+        track._switchCamera()
+      })}
+    }/>
+    <CallButton icon={videoOff ? 'video-off' : 'video'} 
+        onPress={()=>{
+          console.log('here')
+          setVideoOff(prev => !prev)
+          console.log('here')
+          localStream.getVideoTracks()[0].enabled= !localStream.getVideoTracks()[0].enabled
+          console.log(localStream.getVideoTracks())
+        }}/>
+    </View>
   </View>
 )
-
- //ANIMATED
- /*
-  return (
-      <View>
-        <View style={{zIndex:0,elevation:0}}>
-          {hasRemote ? <FlatList
-            data={Object.keys(streams)}
-            extraData={streams}
-            renderItem={renderItem}
-            columnWrapperStyle={{justifyContent: "space-around"}}
-            numColumns={2}
-          
-          />
-           : <Text>Waiting for someone to connect</Text>}
-        </View>
-        <View style={[styles.draggable,{zIndex:1,elevation:1}]}>
-        <Animated.View {...presponder.panHandlers} style={[pan.getLayout(),styles.localVideoContainer]}>
-            <RTCView streamURL={localStream.toURL()} style={{flex:1}} objectFit='cover' />
-        </Animated.View>
-        </View>
-      </View>
-  )*/
 
 }
 

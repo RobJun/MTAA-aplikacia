@@ -2,9 +2,9 @@ import React from 'react';
 import { TouchableOpacity,Text, StyleSheet} from 'react-native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
-const CallButton = ({onPress,icon}) => {
+const CallButton = ({onPress,icon,color = 'grey'}) => {
     return (
-            <TouchableOpacity onPress={onPress} style={styles.button}>
+            <TouchableOpacity onPress={onPress} style={[styles.button,{backgroundColor:color}]}>
                 <MaterialCommunityIcons name={icon} size={30}/>
             </TouchableOpacity>
     );
