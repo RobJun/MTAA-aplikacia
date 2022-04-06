@@ -50,7 +50,7 @@ const stack = createStackNavigator()
     return (
       <stack.Navigator>
         <stack.Screen name="Clubs" component={SettingsScreen} />
-        <stack.Screen name="Video" component={VideoContainer} options={{ unmountOnBlur: true }}/>
+        <stack.Screen name="Video" component={VideoContainer} options={{ unmountOnBlur: true,headerShown:false }}/>
       </stack.Navigator>
     )
   }
