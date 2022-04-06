@@ -11,8 +11,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Profile from '../screens/profile';
 import Search from '../screens/search';
-import BookProfile from '../screens/bookProfile';
 import HomeScreen from '../screens/home';
+import Library from '../screens/library';
+import Clubs from '../screens/clubs';
 
 var token = ""
 
@@ -55,7 +56,7 @@ const stack = createStackNavigator()
                 }} />
           <Tab.Screen 
           name="ClubsNav"
-          component={ScreenWithVideo}  
+          component={Clubs}  
           options={{
             tabBarLabel: "Clubs",
             headerShown:false,
@@ -76,7 +77,7 @@ const stack = createStackNavigator()
           />
            <Tab.Screen 
           name="My library"
-          component={BookProfile} 
+          component={Library} 
           options={{
             tabBarLabel: "Library",
             tabBarIcon: ({color,size}) => (
