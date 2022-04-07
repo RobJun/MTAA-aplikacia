@@ -60,7 +60,7 @@ const HomeScreen = ({ navigation }) => {
                     renderItem={({item})=>{
                         return (<View>
                             <Image source={{uri:item.photoPath}} style={styles.club}/>
-                            <Text style={styles.name} key={item.id} onPress={ ()=> Profile} >{item.name}</Text>
+                            <Text style={styles.name} key={item.id} onPress={ ()=> Profile} >{item.displayName}</Text>
                         </View>)
                     }}
                     keyExtractor={(item)=>item.id}

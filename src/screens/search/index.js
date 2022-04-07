@@ -1,10 +1,11 @@
+import { useNavigation } from "@react-navigation/native"
 import React, { useEffect, useState } from "react"
-import {View, Image, Text, StyleSheet, ImageBackground, ScrollView, Searchbar} from 'react-native'
-import { FlatList } from "react-native-gesture-handler"
+import {View, Image, Text, StyleSheet, ImageBackground, ScrollView, Searchbar, FlatList, TouchableHighlight} from 'react-native'
 
 const Search = () => {
     const [groups, setGroups] = useState([])
     const [books, setBooks] = useState([])
+    const {navigate} = useNavigation()
     
     const fetchGroups = () => {
         fetch("http://10.0.2.2:8000/find/groups/")
@@ -34,10 +35,12 @@ const Search = () => {
                     showsHorizontalScrollIndicator={false}
                     data={groups}
                     renderItem={({item})=>{
-                        return (<View style = {{marginRight: 15}}>
+                        return (<TouchableHighlight onPress={()=>{navigate('ClubsNav', {screen:'Club',params:{screen: 'Club_screen',params:{clubID:item.id}}})}}>
+                        <View style = {{marginRight: 15}}>
                             <Image source={{uri:item.photoPath}} style={styles.image}/>
                             <Text style={styles.name} key={item.id} onPress={ ()=> Profile} >{item.name}</Text>
-                        </View>)
+                        </View>
+                        </TouchableHighlight>)
                     }}
                     keyExtractor={(item)=>item.id}
                 />
@@ -49,7 +52,8 @@ const Search = () => {
                     numColumns={3}
                     data={books}
                     renderItem={({item})=>{
-                        return (<View style = {{marginRight: 15}}>
+                        return (
+                        <View style = {{marginRight: 15}}>
                             <Image source={{uri:item.cover}} style={{width:  120, height: 180, marginBottom: 10, resizeMode: "contain"}}/>
                         </View>)
                     }}

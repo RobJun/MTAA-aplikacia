@@ -14,6 +14,7 @@ import Search from '../screens/search';
 import HomeScreen from '../screens/home';
 import Library from '../screens/library';
 import Clubs from '../screens/clubs';
+import ClubNavigator from './clubNavigator';
 
 
 function SettingsScreen() {
@@ -61,7 +62,7 @@ const stack = createStackNavigator()
   
   export default function MainNavigator() {
     return (
-        <Tab.Navigator initialRouteName="Home" screenOptions={{ showLabel: false }}>
+        <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown:false}}>
           <Tab.Screen 
                 name="Home"
                 component={HomeScreen}
@@ -73,7 +74,7 @@ const stack = createStackNavigator()
                 }} />
           <Tab.Screen 
           name="ClubsNav"
-          component={Clubs}  
+          component={ClubNavigator}  
           options={{
             tabBarLabel: "Clubs",
             headerShown:false,
