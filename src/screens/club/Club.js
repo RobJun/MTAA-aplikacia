@@ -1,11 +1,13 @@
-import React,{useContext,useState,useEffect} from "react";
-import {View,Text,FlatList,Image, StyleSheet,ScrollView} from 'react-native'
+import React,{useContext,useState,useEffect,useCallback} from "react";
+import {View,Text,FlatList,Image, StyleSheet,ScrollView,RefreshControl} from 'react-native'
 import { clubContext } from ".";
 import { API_SERVER } from "../../api_calls/constants";
 import Button from "../../components/button";
 import { globContext } from "../../context/globContext";
 import CallButton from "../../components/callButton";
 import { useNavigation } from '@react-navigation/native';
+import UserList from "./Userlist";
+import ProfileImage from "../../components/profileImage";
 
 
 const ClubScreen = ({navigation,route}) => {
@@ -16,34 +18,64 @@ const ClubScreen = ({navigation,route}) => {
     const [isOwner,setIsOwner] = useState(false)
     const [isPart,setIsPart] = useState(false)
     const {navigate} = useNavigation()
+    const [refreshing, setRefreshing] = useState(false);
+
 
     const fetchClubInfo = () => {
         fetch(`http://${API_SERVER}/group/info/${clubID}/`)
         .then(response => response.json())
-        .then(data => setInfo(data))
+        .then(data => {
+            data.photoPath = data.photoPath +`?time=${new Date().getTime()}`
+            setInfo(data)
+        })
     }
+
+
+    const onRefresh = useCallback(()=>{
+        setRefreshing(true)
+        fetch(`http://${API_SERVER}/group/info/${clubID}/`)
+        .then(response => response.json())
+        .then(data => {
+            data.photoPath = data.photoPath +`?time=${new Date().getTime()}`
+            setInfo(data)
+            setRefreshing(false)
+        })
+    },[])
     
     useEffect(() => {
         fetchClubInfo()
     }, [])
 
     useEffect(()=>{
+        console.log("info changed")
+        var p = false
         info.users.forEach(user => {
             if(user_id === user.id){
+                console.log(user.displayName)
                 setIsPart(true)
+                p = true
                 if(user.owner === true){
                     setIsOwner(true)
                     setOwnerName(user.displayName)
                 }
                 return;
             }
+            if(!p){
+                setIsPart(false)
+            }
         });
+
     },[info])
 
 
     const ownerButton = ()=>{
         console.log('Owner')
-        //open setting screen
+        navigate('ClubsNav',{
+            screen: 'Club',
+            params : {
+                screen : 'Club_settings'
+             }
+            })
     }
 
     const memberButton = async ()=>{
@@ -80,9 +112,14 @@ const ClubScreen = ({navigation,route}) => {
         setInfo(data)
     }
 
-
+    console.log(info.photoPath)
     return (
-        <ScrollView>
+        <ScrollView
+            refreshControl={
+                <RefreshControl  refreshing={refreshing}
+                onRefresh={onRefresh}
+                />
+            }>
             <View style={styles.clubHeader}>
                 {isPart && <CallButton icon={"video"} onPress={() =>{
                     navigate('ClubsNav',{
@@ -97,14 +134,15 @@ const ClubScreen = ({navigation,route}) => {
                      }
                 }
               )}} style={styles.callButton}/>}
-                <Image source={{uri:info.photoPath}} style={styles.clubHeaderImage}/>
+                <ProfileImage source={info.photoPath} size={180}/>
                 <Text style={styles.clubHeaderName}>{info.name}</Text>
-                <Text style={styles.clubHeaderOwner}>{ownerName}</Text>
+                <Text style={styles.clubHeaderOwner}>No. members: {info.count}</Text>
+                <Text style={styles.clubHeaderOwner}>owner: {ownerName}</Text>
             </View>
             <View>
                 <View style={styles.firstSection}>
                     <Text style={styles.header}>About</Text>
-                    <Text style={styles.text}>{info.info ? info.rules : "About not set"}</Text>
+                    <Text style={styles.text}>{info.info ? info.info : "About not set"}</Text>
                     <Text style={styles.header}>Rules</Text>
                     <Text style={styles.text}>{info.rules ? info.rules : "Rules not set"}</Text>
                 </View>
@@ -115,20 +153,7 @@ const ClubScreen = ({navigation,route}) => {
                 <View style={styles.thirdSection}>
                     <Text style={styles.header}>Members</Text>
                     <View style = {{marginRight: 20}}>
-                        <FlatList
-                            horizontal
-                            scrollEnabled
-                            showsHorizontalScrollIndicator={false}
-                            data={info.users}
-                            renderItem={({item})=>{
-                                console.log(item)
-                                return (<View>
-                                    <Image source={{uri:item.photoPath}} style={styles.member}/>
-                                    <Text style={styles.name} key={item.id} onPress={ ()=> {}} >{item.displayName}</Text>
-                                </View>)
-                            }}
-                            keyExtractor={(item)=>item.id}
-                        />
+                        <UserList users={info.users} onSelect={()=>{}} selectArray={[]}/>
                     </View>
                 </View>
                 <View style={styles.fourthSection}>
@@ -164,11 +189,6 @@ const styles = StyleSheet.create({
         alignItems:'center',
         paddingTop:70,
         paddingBottom:20
-    },
-    clubHeaderImage : {
-        width:180,
-        height:180,
-        borderRadius:180/2
     },
     callButton : {
         position: 'absolute',
@@ -217,6 +237,13 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         marginVertical:115,
         fontSize: 20
+    },
+    firstSection : {
+        marginTop:10,
+        marginBottom:25
+    },
+    thirdSection : {
+        marginTop: 20
     }
 })
 

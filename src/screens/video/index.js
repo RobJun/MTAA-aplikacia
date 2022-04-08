@@ -1,4 +1,3 @@
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import React, {useContext,useState,useEffect, useRef} from 'react'
 import { Text, View, StyleSheet,FlatList,AppState } from 'react-native';
 import {
@@ -43,7 +42,9 @@ const VideoContainer = ({route,navigation}) => {
         appstate.current.match(/active/) &&
         (nextAppState === "inactive" || nextAppState ==  'background')
       ) {
-        navigation.goBack()
+        if(ws.current !== null){
+          navigation.goBack()
+        }
       }
     })
     return () => {
@@ -108,9 +109,9 @@ const VideoContainer = ({route,navigation}) => {
           peer : user,
           action : action,
           message : message
-      }
+        }
         ws.current.send(JSON.stringify(msg))
-    }
+      }
     
       const handlePeer = (peerUsername,receiver_channel_name)=> {
         const conn = new RTCPeerConnection(urls)
@@ -337,7 +338,7 @@ const VideoContainer = ({route,navigation}) => {
     <View style={styles.localVideoContainer}>
         <RTCView streamURL={localStream.toURL()} style={{flex:1}} objectFit='cover' />
     </View>
-    <View style={{width:50,position:'absolute',bottom:0}}>
+    <View style={{width:90,position:'absolute',bottom:0}}>
     <CallButton icon={'phone-hangup'} onPress={()=>{
         navigation.goBack()
     }} color='red'/>
