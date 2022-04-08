@@ -1,18 +1,20 @@
-import React, { useEffect, useState, Dimensions } from "react"
+import React, { useEffect, useState, useContext } from "react"
 import {View, Image, Text, StyleSheet, ScrollView} from 'react-native'
 import Button from "../../components/button"
+import { API_SERVER } from "../../api_calls/constants";
+import { globContext } from "../../context/globContext";
 
-function putToLibrary() {
-    console.log("ahoj")
-}
 
 function putToRecommended() {
     console.log("ahoj")
 }
 
-const BookProfile = () => {
+const BookProfile = ({route}) => {
+    const {auth:{user:{token,user_id}}} = useContext(globContext)
+    const bookID = route.params.bookID
+    const [category, setCategory] = useState("Add to Library")
     const [info, setInfo] = useState({
-        genre: {
+        genre: { 
             color: 0xffffff00
         },
         author:[
@@ -23,9 +25,25 @@ const BookProfile = () => {
         description: "text"})
     
     const fetchInfo = () => {
-        fetch("http://10.0.2.2:8000/find/info/9788056622483/")
+        fetch(`http://${API_SERVER}/find/info/${bookID}/`)
         .then(response => response.json())
         .then(data => setInfo(data))
+    }
+
+    const putToLibrary = async (where) => {
+        const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=${where}`,{
+            "method": "PUT",
+            "headers" : {
+            "Authorization" : "Token " + token
+            }
+        })
+        if (response.status === 401 || response.status === 404 || response.status === 406 || response.status === 409){
+            alert('error')
+            return;
+        }
+        const data = await response.json()
+        setInfo(data)
+        setCategory("In" + where)
     }
 
     useEffect(() => {
@@ -54,7 +72,7 @@ const BookProfile = () => {
                 </View>
             </View>
             <View style={{flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly"}}>
-                <Button onPress={putToLibrary} title="Add to Library" color="#841584" accessibilityLabel="Learn more about this purple button" style = {styles.button}/>
+                <Button onPress={() => putToLibrary("wishlist")} title = {category} style = {styles.button}/>
                 <Button onPress={putToRecommended} title="Recommend" color="#841584" accessibilityLabel="Learn more about this purple button" style = {styles.button}/>
             </View>
             <View >

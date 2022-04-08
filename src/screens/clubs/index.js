@@ -1,19 +1,22 @@
 import { useNavigation } from "@react-navigation/native"
-import React, { useEffect, useState} from "react"
-import {View, Image, Text, StyleSheet, FlatList, ScrollView,TouchableHighlight} from 'react-native'
+import React, { useEffect, useState, useContext} from "react"
+import {View, Text, StyleSheet, FlatList, ScrollView,TouchableOpacity} from 'react-native'
 import ButtonNewClub from "./buttonNewClub."
-
+import { API_SERVER } from "../../api_calls/constants";
+import { globContext } from "../../context/globContext";
+import ProfileImage from "../../components/profileImage";
 
 function NewClub() {
     console.log("ahoj")
 }
 
 const Clubs = () => {
+    const {auth:{user:{token,user_id}}} = useContext(globContext)
     const {navigate} = useNavigation()
     const [clubs, setClubs] = useState([])
     
     const fetchClubs = () => {
-        fetch("http://10.0.2.2:8000/user/groups/?q=312b4905-bdbe-4dc3-a4f5-372636d32840")
+        fetch(`http://${API_SERVER}/user/groups/?q=${user_id}`)
         .then(response => response.json())
         .then(data => setClubs(data))
     }
@@ -30,26 +33,27 @@ const Clubs = () => {
                 <ButtonNewClub onPress={NewClub} title="Create new club"/>
             </View>
             <View>
+                {clubs == [] ? <Text>You are not in any bookclub</Text> : 
                 <FlatList
                     scrollEnabled
                     data={clubs}
                     renderItem={({item})=>{
                         console.log(item.id)
                         return (
-                        <TouchableHighlight onPress={()=>{navigate('ClubsNav', {screen:'Club',params:{screen: 'Club_screen',params:{clubID:item.id}}})}}>
+                        <TouchableOpacity onPress={()=>{navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
                             <View style = {{flexDirection:'row', flex: 1}}>
                                 <View style = {{flexDirection: "row", flex: 1, width: "35%", height: 100, marginLeft:15, marginTop: 20, backgroundColor: "#f17c56", borderTopLeftRadius: 360, borderBottomLeftRadius: 360}}>  
-                                    <Image source={{uri:item.photoPath}} style={styles.image}/>
+                                    <ProfileImage size = {100} source={item.photoPath} style={styles.image}/>
                                 </View>
                                 <View style = {{width: "65%", height: 100, marginRight: 20, marginTop: 20, backgroundColor: "#f17c56", borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
                                     <Text style={styles.title}>{item.name}</Text>
                                     <Text style={styles.text}>Number of members: {item.number_of_members}</Text>
                                 </View>
                                 </View>
-                        </TouchableHighlight>)
+                        </TouchableOpacity>)
                     }}
                     keyExtractor={(item)=>item.id}
-                />
+                /> }
             </View>
         </ScrollView>
     )
@@ -65,9 +69,6 @@ const Clubs = () => {
         alignItems: "center"
     },
     image: {
-        width: 100, 
-        height: 100, 
-        borderRadius: 150 / 2,
         overflow: "hidden",
         marginLeft: 5,
         marginBottom: 5,

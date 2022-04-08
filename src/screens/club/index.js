@@ -2,7 +2,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import React,{useContext,useState,useEffect,createContext,useReducer} from "react";
 import VideoContainer from "../video";
 import ClubScreen from "./Club";
-import ClubSettingScreen from "./ClubSettings";
+import ClubSettingScreen from "./clubSettings";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 

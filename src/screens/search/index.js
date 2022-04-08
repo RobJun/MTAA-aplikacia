@@ -1,97 +1,20 @@
-import { useNavigation } from "@react-navigation/native"
-import React, { useEffect, useState } from "react"
-import {View, Image, Text, StyleSheet, ImageBackground, ScrollView, Searchbar, FlatList, TouchableHighlight} from 'react-native'
+import { createStackNavigator } from "@react-navigation/stack";
+import React from "react";
 
-const Search = () => {
-    const [groups, setGroups] = useState([])
-    const [books, setBooks] = useState([])
-    const {navigate} = useNavigation()
-    
-    const fetchGroups = () => {
-        fetch("http://10.0.2.2:8000/find/groups/")
-        .then(response => response.json())
-        .then(data => setGroups(data))
-    }
+import Club from "../club";
+import BookProfile from "../bookProfile";
+import SearchScreen from "./Search";
 
-    const fetchBooks = () => {
-        fetch("http://10.0.2.2:8000/find/books/")
-        .then(response => response.json())
-        .then(data => setBooks(data))
-    }
-    
-    useEffect(() => {
-        fetchGroups(),
-        fetchBooks()
-    }, [], [])
-    
-    //<Searchbar placeholder="Search" value={searchPhrase} onChangeText={setSearchPhrase} onFocus={() => {setClicked(true);}}/>
+const stack = createStackNavigator()
+
+const SearchNavigator = ({navigation, route})=>{
     return (
-        <ScrollView>
-            <Text style={styles.text}>Clubs</Text>
-            <View style = {{marginLeft: 20}}>
-                <FlatList
-                    horizontal
-                    scrollEnabled
-                    showsHorizontalScrollIndicator={false}
-                    data={groups}
-                    renderItem={({item})=>{
-                        return (<TouchableHighlight onPress={()=>{navigate('ClubsNav', {screen:'Club',params:{screen: 'Club_screen',params:{clubID:item.id}}})}}>
-                        <View style = {{marginRight: 15}}>
-                            <Image source={{uri:item.photoPath}} style={styles.image}/>
-                            <Text style={styles.name} key={item.id} onPress={ ()=> Profile} >{item.name}</Text>
-                        </View>
-                        </TouchableHighlight>)
-                    }}
-                    keyExtractor={(item)=>item.id}
-                />
-            </View>
-            <Text style={styles.text}>Books</Text>
-            <View style = {{marginLeft: 20}}>
-                <FlatList
-                    columnWrapperStyle={{justifyContent: "space-around"}}
-                    numColumns={3}
-                    data={books}
-                    renderItem={({item})=>{
-                        return (
-                        <View style = {{marginRight: 15}}>
-                            <Image source={{uri:item.cover}} style={{width:  120, height: 180, marginBottom: 10, resizeMode: "contain"}}/>
-                        </View>)
-                    }}
-                    keyExtractor={(item)=>item.id}
-                />
-            </View>
-        </ScrollView>
-        )
+            <stack.Navigator screenOptions={{headerShown:false}}>
+                <stack.Screen name="Search" component={SearchScreen}/>
+                <stack.Screen name="Book" component={BookProfile}/>
+                <stack.Screen name="Club" component={Club}/>
+            </stack.Navigator>
+            )
 }
 
-const styles = StyleSheet.create({
-    image: {
-        width: 100,
-        height: 100,
-        borderRadius: 150 / 2,
-        overflow: "hidden",
-        alignItems: "center",
-      },
-    text : {
-        display:'flex',
-        flexDirection:'row',
-        fontSize: 30,
-        fontFamily:'serif',
-        color: "black",
-        marginTop: 20,
-        marginLeft: 20,
-        marginBottom: 10,
-        fontWeight: 'bold',
-    },
-    name: {
-        display:'flex',
-        flexDirection:'row',
-        fontSize: 15,
-        fontFamily:'serif',
-        color: "black",
-        textAlign: "center",
-        fontWeight: 'bold',
-    }
-})
-
-export default Search
+export default SearchNavigator;

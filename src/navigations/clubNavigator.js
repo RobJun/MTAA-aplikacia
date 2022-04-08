@@ -1,12 +1,4 @@
 import React, {useContext,useState} from 'react'
-import { Text, View,Image } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import EncryptedStorage from 'react-native-encrypted-storage';
-import { globContext } from '../context/globContext';
-import CallButton from '../components/callButton';
-import { useNavigation,getFocusedRouteNameFromRoute } from '@react-navigation/native';
-import VideoContainer from '../screens/video';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import Clubs from '../screens/clubs';

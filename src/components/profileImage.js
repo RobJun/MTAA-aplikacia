@@ -3,7 +3,7 @@ import {Image,StyleSheet} from 'react-native'
 
 
 
-const ProfileImage = ({size,source,style, local= false}) =>{
+const ProfileImage = ({size, source, style, local= false}) =>{
     if(local) {
         return (<Image 
                 source={{uri:source}}

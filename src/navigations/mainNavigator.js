@@ -10,11 +10,11 @@ import VideoContainer from '../screens/video';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import Profile from '../screens/profile';
-import Search from '../screens/search';
 import HomeScreen from '../screens/home';
-import Library from '../screens/library';
-import Clubs from '../screens/clubs';
 import ClubNavigator from './clubNavigator';
+import LibraryNavigation from '../screens/library';
+import SearchNavigator from '../screens/search';
+import ProfileNavigation from '../screens/profile';
 
 
 function SettingsScreen() {
@@ -64,7 +64,7 @@ const stack = createStackNavigator()
     return (
         <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown:false}}>
           <Tab.Screen 
-                name="Home"
+                name="HomeNav"
                 component={HomeScreen}
                 options={{
                     tabBarLabel:"Home",
@@ -84,8 +84,8 @@ const stack = createStackNavigator()
           }}
           />
            <Tab.Screen 
-          name="Search"
-          component={Search} 
+          name="SearchNav"
+          component={SearchNavigator} 
           options={{
             tabBarLabel: "Search",
             tabBarIcon: ({color,size}) => (
@@ -94,8 +94,8 @@ const stack = createStackNavigator()
           }}
           />
            <Tab.Screen 
-          name="My library"
-          component={Library} 
+          name="LibraryNav"
+          component={LibraryNavigation} 
           options={{
             tabBarLabel: "Library",
             tabBarIcon: ({color,size}) => (
@@ -104,8 +104,8 @@ const stack = createStackNavigator()
           }}
           />
            <Tab.Screen 
-          name="Profile"
-          component={Profile} 
+          name="ProfileNav"
+          component={ProfileNavigation} 
           options={{
             tabBarLabel: "Profile",
             tabBarIcon: ({color,size}) => (
