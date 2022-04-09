@@ -1,5 +1,5 @@
 import React,{useContext,useState,useEffect,useCallback} from "react";
-import {View,Text,FlatList,Image, StyleSheet,ScrollView,Alert} from 'react-native'
+import {View,Text,FlatList,Image, StyleSheet,ScrollView,Alert, TouchableOpacity} from 'react-native'
 import { clubContext } from ".";
 import { API_SERVER } from "../../api_calls/constants";
 import Button from "../../components/button";
@@ -8,9 +8,12 @@ import DocumentPicker, { types } from 'react-native-document-picker';
 import CredentialInput from "../../components/textInput";
 import UserList from "./Userlist";
 import ProfileImage from "../../components/profileImage";
+import SearchBar from "react-native-dynamic-search-bar";
+import BookCover from "../../components/BookCover";
 
 
-const BasicSettings = ({formImage,selectImage,resetImage, onChange,error,form}) =>{
+
+const BasicSettings = ({formImage,selectImage,resetImage, onChange,error,form,title,onPress}) =>{
     const {info, setInfo} = useContext(clubContext)
     console.log(formImage)
     console.log(form)
@@ -24,11 +27,12 @@ const BasicSettings = ({formImage,selectImage,resetImage, onChange,error,form}) 
             <CredentialInput label={'Name'} value={form.name} onChangeText={(value)=>{onChange({name:'name',value})}} error={error.name}/>
             <CredentialInput label={'About'} value={form.info} onChangeText={(value)=>{onChange({name:'info',value})}}/>
             <CredentialInput label={'Rules'} value={form.rules} onChangeText={(value)=>{onChange({name:'rules',value})}}/>
+            <Button title={title} onPress={onPress}></Button>
         </View>
     )
 }
 
-const Clubsettings = ({}) => {
+const MemberSettings = ({}) => {
     const {info, setInfo} = useContext(clubContext)
     const {auth:{user:{token,user_id}}} = useContext(globContext)
     const [removeUserIDs,setRemoveUserIDs] = useState([])
@@ -87,6 +91,94 @@ const Clubsettings = ({}) => {
                         <Text style={styles.removeMembers}>Remove Members</Text>
                         <UserList users={info.users} onSelect={onSelect} selectArray={removeUserIDs}/>
                         <Button title='Remove Members' onPress={removeMembers} style={styles.deleteButton}></Button>
+            </View>)
+}
+
+
+
+const BookSetttings = ({})=> {
+    const {info, setInfo} = useContext(clubContext)
+    const {auth:{user:{token,user_id}}} = useContext(globContext)
+    const [book,setBook] = useState(false)
+    const [search,setSearch] = useState("")
+    const [searchResult,setSearchResult] = useState([])
+    const [searching,setSearching] = useState(false)
+
+    const fetchBooks = async (query) => {
+        setSearching(true)
+        const response = await fetch(`http://${API_SERVER}/find/books/?q=${query}`)
+        setSearchResult(await response.json())
+        setSearching(false)
+    }
+
+    useEffect(()=>{
+        if(search.length < 4 ){
+            console.log('string must be atleast 4 characters')
+            return;
+        }
+        if(searching){
+            console.log('cant search, search on going')
+        }
+        fetchBooks(search)
+
+    },[search])
+
+    const onSelect = (item) => {
+        if(book === false){
+            setBook(item)
+            return
+        }
+        if(book.id === item.id){
+            setBook(false)
+            return
+        }
+        setBook(item)
+    } 
+    const onSubmit=  async ()=>{
+        if(book === false){
+            alert('treba vzbrat knihu')
+            return;
+        }
+        const resposne = await fetch(`http://${API_SERVER}/group/book/${info.id}/?q=${book.id}`, {
+            "method": "PUT",
+            "headers": {
+              "Authorization": `Token ${token}`
+            }
+        })
+        if(resposne.status > 400){
+            alert(`Bad request: ${resposne.status}`)
+            return;
+        }
+        setInfo(await resposne.json())
+        alert('Your book was set')
+
+    }
+    return (<View>
+            <Text style={styles.removeMembers}>Book of the Week</Text>
+            <SearchBar 
+            placeholder="Search here"
+            onPress={()=>{console.log("onPress")}}
+            onChangeText={(text) => {setSearch(text)}}
+            onSearchPress={(text) => console.log('searching: ', text)}/>
+            { (info.book_of_the_week || book) ? <Image source={{uri: book ? book.cover : info.book_of_the_week.cover}} style={styles.bowImage}/> : <Text style={styles.noBook}>No book of the week</Text>}
+            {searchResult.length > 0 ? <FlatList
+                style={{marginVertical:20}}
+                horizontal
+                scrollEnabled
+                showsHorizontalScrollIndicator={false}
+                data={searchResult}
+                extraData={book}
+                renderItem={({item})=>{
+                    const style = book.id == item.id ? {borderColor:'red'} : {}
+                    return ( 
+                    <BookCover 
+                    size={80} 
+                    source={item.cover} 
+                    onPress={()=>{onSelect(item)}} 
+                    style={[{marginHorizontal:10, borderWidth:2},style]}/>) }}
+                keyExtractor={(item)=>item.id}
+            /> : <Text style={[{color:'black'},styles.nobookesearch]}>No books found</Text> }
+            <Button title='save book of the week' onPress={onSubmit}/>
             </View>)
 }
 
@@ -196,9 +288,9 @@ const ClubSettingScreen = ({navigation}) => {
     <View>
         <Text style={styles.header}>Bookclub settings</Text>
     </View>
-    <BasicSettings formImage={formImage} selectImage={imagePicker} resetImage={()=>setFormImage(false)} onChange={onChange} error={errors} form={formS}/>
-    <Button title='Save Chanages' onPress={onSubmit}></Button>
-    <Clubsettings/>
+    <BasicSettings formImage={formImage} selectImage={imagePicker} resetImage={()=>setFormImage(false)} onChange={onChange} error={errors} form={formS} onPress={onSubmit} title={'Save Changes'}/>
+    <BookSetttings/>
+    <MemberSettings/>
     <Button title='Delete BookClub' onPress={()=>{
         Alert.alert(`DELETE ${info.name}`,`Are you sure about deleting ${info.name}?`,[
             {
@@ -265,6 +357,22 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginVertical:15
 
+    },
+    bowImage : {
+        width:150,
+        height:230,
+        alignSelf:'center',
+        marginVertical:20,
+    },
+    noBook : {
+        alignSelf: 'center',
+        marginVertical:115,
+        fontSize: 20
+    },
+    nobookesearch : {
+        alignSelf: 'center',
+        marginVertical:50,
+        fontSize: 20
     }
     
 })

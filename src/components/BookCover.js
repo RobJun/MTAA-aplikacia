@@ -3,7 +3,7 @@ import {Image, TouchableOpacity} from 'react-native'
 
 
 
-const BookCover = ({onPress, size, source, style}) =>{
+const BookCover = ({onPress, size, source, style = {}}) =>{
     return (
         <TouchableOpacity onPress = {onPress}>
             <Image source={{uri:source}} 

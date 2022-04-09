@@ -242,10 +242,10 @@ const VideoContainer = ({route,navigation}) => {
 
 
 
-      //console.log("trying to conect to signaling server")
+      console.log('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
       ws.current = new WebSocket('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
       ws.current.onopen = (e)=>{
-          //console.log("connection opened with signaling server",e)
+          console.log("connection opened with signaling server",e)
           signal(username,'new-peer',{local_screen_sharing : false})
       }
       ws.current.onmessage = (msg) => {
