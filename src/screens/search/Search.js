@@ -46,7 +46,7 @@ const SearchScreen = () => {
                         return (<TouchableOpacity onPress={()=>{navigate('SearchNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
                         <View style = {{marginRight: 15}}>
                             <ProfileImage size = {100} source={item.photoPath} style={styles.image}/>
-                            <Text style={styles.name} key={item.id} onPress={ ()=> Profile} >{item.name}</Text>
+                            <Text style={styles.name} key={item.id} >{item.name}</Text>
                         </View>
                         </TouchableOpacity>)
                     }}

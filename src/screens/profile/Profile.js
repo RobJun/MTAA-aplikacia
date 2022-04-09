@@ -93,7 +93,7 @@ const Profile = () => {
                     />
                 </View>
             </View>
-            <ButtonSettings {()=>{navigate('ProfileNav', {screen: 'Settings', params:{Info:info}})}} title="Settings"/>
+            <ButtonSettings onPress = {()=>{navigate('ProfileNav', {screen: 'Settings', params:{Info:info}})}} title="Settings"/>
         </ScrollView>
      )
 }
