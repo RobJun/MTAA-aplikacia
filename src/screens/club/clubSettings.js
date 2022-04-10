@@ -5,32 +5,12 @@ import { API_SERVER } from "../../api_calls/constants";
 import Button from "../../components/button";
 import { globContext } from "../../context/globContext";
 import DocumentPicker, { types } from 'react-native-document-picker';
-import CredentialInput from "../../components/textInput";
 import UserList from "./Userlist";
-import ProfileImage from "../../components/profileImage";
 import SearchBar from "react-native-dynamic-search-bar";
 import BookCover from "../../components/BookCover";
-
-
-
-const BasicSettings = ({formImage,selectImage,resetImage, onChange,error,form,title,onPress}) =>{
-    const {info, setInfo} = useContext(clubContext)
-    console.log(formImage)
-    console.log(form)
-    return (
-        <View>
-            <View style={styles.clubHeader}>
-                <ProfileImage source={formImage ? formImage.uri : info.photoPath} size={180} local={true}/>
-                <Button onPress={selectImage} title='Change Image'></Button>
-                {formImage && <Button onPress={resetImage} title='Reset Image'/>}
-            </View>
-            <CredentialInput label={'Name'} value={form.name} onChangeText={(value)=>{onChange({name:'name',value})}} error={error.name}/>
-            <CredentialInput label={'About'} value={form.info} onChangeText={(value)=>{onChange({name:'info',value})}}/>
-            <CredentialInput label={'Rules'} value={form.rules} onChangeText={(value)=>{onChange({name:'rules',value})}}/>
-            <Button title={title} onPress={onPress}></Button>
-        </View>
-    )
-}
+import BasicSettings from "../../forms/ClubBasicSettings";
+import { fetchGroups,fetchInfo } from "../../api_calls/user_calls";
+import { compressImage } from "../../utils/imageCompression";
 
 const MemberSettings = ({}) => {
     const {info, setInfo} = useContext(clubContext)
@@ -186,7 +166,7 @@ const BookSetttings = ({})=> {
 const ClubSettingScreen = ({navigation}) => {
     const [formS,setFormS] = useState({})
     const [errors,setErrors] = useState({ username : false});
-    const {auth:{user:{token,user_id}}} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setUser,setGroups} = useContext(globContext)
     const {info, setInfo} = useContext(clubContext)
     const [formImage,setFormImage] = useState(false)
     const REQUIRED = 'Required field'
@@ -237,8 +217,11 @@ const ClubSettingScreen = ({navigation}) => {
             alert("couldn't delete club")
             return
         }
+        fetchGroups(user_id,setGroups)
+        fetchInfo(user_id,setUser)
         console.log(navigation)
         navigation.getParent()?.goBack()
+        
     }
 
     const onSubmit = async () => {
@@ -259,7 +242,8 @@ const ClubSettingScreen = ({navigation}) => {
             }
         }   
         if(formImage)
-            form.append("photo", formImage);
+            form.append("photo", await compressImage(formImage));
+            //form.append("photo",formImage)
         console.log('here')
         const response = await fetch(`http://${API_SERVER}/group/modify/${info.id}/`,{
             "method": "PUT",
@@ -282,6 +266,8 @@ const ClubSettingScreen = ({navigation}) => {
         console.log(body)
         body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
         setInfo(body)
+        fetchGroups(user_id,setGroups)
+        fetchInfo(user_id,setUser)
         alert("Changes made")
     }
 
@@ -289,7 +275,16 @@ const ClubSettingScreen = ({navigation}) => {
     <View>
         <Text style={styles.header}>Bookclub settings</Text>
     </View>
-    <BasicSettings formImage={formImage} selectImage={imagePicker} resetImage={()=>setFormImage(false)} onChange={onChange} error={errors} form={formS} onPress={onSubmit} title={'Save Changes'}/>
+    <BasicSettings 
+        formImage={formImage}
+        selectImage={imagePicker} 
+        defaultImage={info.photoPath}
+        resetImage={()=>setFormImage(false)} 
+        onChange={onChange}
+        error={errors} 
+        form={formS} 
+        onPress={onSubmit} 
+        title={'Save Changes'}/>
     <BookSetttings/>
     <MemberSettings/>
     <Button title='Delete BookClub' onPress={()=>{

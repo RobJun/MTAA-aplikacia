@@ -26,7 +26,7 @@ const HomeScreen = () => {
                         data={reading}
                         renderItem={({item})=>{
                             return (<View>
-                                <BookCover onPress = {()=>{navigate('HomeNav', {screen:'Book', params:{bookID:item.id}})}} 
+                                <BookCover onPress = {()=>{navigate('LibraryNav', {screen:'Book', params:{bookID:item.id}})}} 
                                 source = {item.cover_path} size =  {120} style = {{marginLeft: 20}}/>   
                                 </View>)
                         }}
@@ -43,10 +43,10 @@ const HomeScreen = () => {
                         data={groups}
                         renderItem={({item})=> {
                             return (
-                                <TouchableOpacity onPress={()=>{navigate('HomeNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
-                                <View>
+                                <TouchableOpacity onPress={()=>{navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
+                                <View style = {{marginLeft: 10, alignItems: "center"}}>
                                     <ProfileImage size = {100} source={item.photoPath} style={styles.club}/>
-                                    <Text style={styles.name} key={item.id}>{item.name}</Text>
+                                    <Text style={styles.name} key={item.id}>{item.name.length > 8 ? `${item.name.substring(0,6)}...` : item.name}</Text>
                                 </View>
                                 </TouchableOpacity>)}}
                         keyExtractor={(item)=>item.id}
@@ -88,7 +88,7 @@ const HomeScreen = () => {
         color: "black",
         textAlign: "center",
         fontWeight: 'bold',
-        marginLeft: 25,
+        marginLeft:20,
         marginBottom: 20
     }
 })

@@ -21,6 +21,9 @@ const ClubScreen = ({navigation,route}) => {
     const [refreshing, setRefreshing] = useState(false);
 
 
+    console.log(route)
+
+
     const fetchClubInfo = () => {
         fetch(`http://${API_SERVER}/group/info/${clubID}/`)
         .then(response => response.json())

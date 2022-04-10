@@ -5,19 +5,15 @@ import ButtonNewClub from "./buttonNewClub."
 import { globContext } from "../../context/globContext";
 import ProfileImage from "../../components/profileImage";
 
-function NewClub() {
-    console.log("ahoj")
-}
-
 const Clubs = () => {
-    const {auth:{user:{token,user_id}},groups} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups,setGroups} = useContext(globContext)
     const {navigate} = useNavigation()
    
     return (
-        <View>
+        <ScrollView>
              <View style={{marginTop: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
                 <Text style = {styles.title1}>My bookclubs</Text>
-                <ButtonNewClub onPress={NewClub} title="Create new club"/>
+                <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="Create new club"/>
             </View>
             <View>
                 {groups == [] ? <Text>You are not in any bookclub</Text> : 
@@ -42,7 +38,7 @@ const Clubs = () => {
                     keyExtractor={(item)=>item.id}
                 /> }
             </View>
-        </View>
+        </ScrollView>
     )
  }
 
@@ -57,7 +53,7 @@ const Clubs = () => {
     },
     image: {
         overflow: "hidden",
-        marginLeft: 5,
+        marginLeft: 0,
         marginBottom: 5,
         borderWidth: 1,
         borderColor: "#f17c56"

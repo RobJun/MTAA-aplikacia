@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Clubs from '../screens/clubs';
 import Club from '../screens/club';
+import NewClubForm from '../screens/newClub';
 
 const stack = createStackNavigator()
 const ClubNavigator = () => {
@@ -10,6 +11,7 @@ const ClubNavigator = () => {
         <stack.Navigator screenOptions={{headerShown:false}}>
             <stack.Screen name="Clubs" component={Clubs}/>
             <stack.Screen name="Club" component={Club}/>
+            <stack.Screen name="Create_Club" component={NewClubForm}/>
         </stack.Navigator>
     )
 }

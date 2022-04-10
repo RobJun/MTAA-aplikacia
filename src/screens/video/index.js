@@ -12,11 +12,11 @@ import CallButton from '../../components/callButton';
 const urls = {
   iceServers: [
     {
-      urls: 'stun:stun.l.google.com:19302',  
+      urls: 'stun:iphone-stun.strato-iphone.de:3478',  
     }, {
-      urls: 'stun:stun1.l.google.com:19302',    
+      urls: 'stun:stun.1und1.de:3478',    
     }, {
-      urls: 'stun:stun2.l.google.com:19302',    
+      urls: 'stun:stun.develz.org:3478',    
     }
   ],
 }
@@ -114,7 +114,7 @@ const VideoContainer = ({route,navigation}) => {
       }
     
       const handlePeer = (peerUsername,receiver_channel_name)=> {
-        const conn = new RTCPeerConnection(urls)
+        const conn = new RTCPeerConnection(null)
         peerConnections[peerUsername] = conn
         peerConns.push(conn)
         //console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
@@ -168,7 +168,7 @@ const VideoContainer = ({route,navigation}) => {
     
       const handleOffer = (sdp,peerUsername,receiver_channel_name) =>{
         //console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\n")//OFFER SDP:",sdp,"\n------------------------------")
-        const conn = new RTCPeerConnection(urls)
+        const conn = new RTCPeerConnection(null)
         peerConnections[peerConnections] = conn
         peerConns.push(conn)
         console.log(peerConns[peerConns.length - 1] === conn)
@@ -243,7 +243,7 @@ const VideoContainer = ({route,navigation}) => {
 
 
       console.log('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
-      ws.current = new WebSocket('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
+      ws.current = new WebSocket('ws://'+API_SERVER+':8000/video/'+roomID+'/?q='+token)
       ws.current.onopen = (e)=>{
           console.log("connection opened with signaling server",e)
           signal(username,'new-peer',{local_screen_sharing : false})
@@ -253,28 +253,28 @@ const VideoContainer = ({route,navigation}) => {
           const action =  data['action']
           const peerUsername = data['peer']
           const receiver_channel_name = data['message']['receiver_channel_name'];
-          //console.log('--------- ON MESSAGE ------------')
-          //console.log('peerUsername: ', peerUsername);
-          //console.log('action: ', action)
-          //console.log('receiver_channel_name: ', receiver_channel_name);
-          //console.log('---------------------------------')
+          console.log('--------- ON MESSAGE ------------')
+          console.log('peerUsername: ', peerUsername);
+          console.log('action: ', action)
+          console.log('receiver_channel_name: ', receiver_channel_name);
+          console.log('---------------------------------')
           if(peerUsername == username){ return;}
 
           switch (action){
               case 'new-peer':
-                  //console.log('---------- NEW PEER ------------')
+                  console.log('---------- NEW PEER ------------')
                   handlePeer(peerUsername,receiver_channel_name)
-                  //console.log('--------------------------------')
+                  console.log('--------------------------------')
                   break;
               case 'new-offer':
-                  //console.log('---------- NEW OFFER -----------')
+                  console.log('---------- NEW OFFER -----------')
                   handleOffer(data["message"]["sdp"],peerUsername,receiver_channel_name)
-                  //console.log('--------------------------------')
+                  console.log('--------------------------------')
                   break;
               case 'new-answer':
-                  //console.log('---------- NEW ANSWER -----------')
+                  console.log('---------- NEW ANSWER -----------')
                   handleAnswer(data["message"]["sdp"],peerUsername,receiver_channel_name)
-                  //console.log('--------------------------------')
+                  console.log('--------------------------------')
                   break;
           }
           
