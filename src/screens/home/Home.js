@@ -7,32 +7,9 @@ import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
 
 const HomeScreen = () => {
-    const {auth:{user:{token,user_id}}} = useContext(globContext)
-    const [groups, setGroups] = useState([])
-    const [books, setBooks] = useState([])
+    const {auth:{user:{token,user_id}},groups,library:{reading}} = useContext(globContext)
     const {navigate} = useNavigation();
-    
-    const fetchGroups = () => {
-        fetch(`http://${API_SERVER}/user/groups/?q=${user_id}`)
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(element => {
-                element.photoPath = element.photoPath +`?time=${new Date().getTime()}`
-            });
-            setGroups(data)
-        })
-    }
 
-    const fetchBooks = () => {
-        fetch(`http://${API_SERVER}/user/books/reading/?q=${user_id}`)
-        .then(response => response.json())
-        .then(data => setBooks(data))
-    }
-    
-    useEffect(() => {
-        fetchBooks(),
-        fetchGroups()
-    }, [], [])
 
     return (
         <ScrollView>
@@ -41,12 +18,12 @@ const HomeScreen = () => {
             </View>
             <Text style = {styles.text}>You're currently reading...</Text>
             <View style = {{marginRight: 20}}>
-                { books.length == 0 ? <Text style = {[styles.name, {fontWeight: "normal"}]}>You are not reading anything right now</Text> : 
+                { reading.length == 0 ? <Text style = {[styles.name, {fontWeight: "normal"}]}>You are not reading anything right now</Text> : 
                     <FlatList
                         horizontal
                         scrollEnabled
                         showsHorizontalScrollIndicator={false}
-                        data={books}
+                        data={reading}
                         renderItem={({item})=>{
                             return (<View>
                                 <BookCover onPress = {()=>{navigate('HomeNav', {screen:'Book', params:{bookID:item.id}})}} 
@@ -58,7 +35,7 @@ const HomeScreen = () => {
             </View>
             <Text style = {styles.text}>Your bookclubs</Text>
             <View style = {{marginRight: 20}}>
-                { groups.length == 0 ? <Text>You are not in any bookclub</Text> : 
+                { groups.length == 0 ? <Text style = {[styles.name, {fontWeight: "normal"}]}>You are not in any bookclub</Text> : 
                     <FlatList
                         horizontal
                         scrollEnabled

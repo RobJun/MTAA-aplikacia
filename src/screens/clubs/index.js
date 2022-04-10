@@ -1,8 +1,7 @@
 import { useNavigation } from "@react-navigation/native"
-import React, { useEffect, useState, useContext} from "react"
+import React, {useContext} from "react"
 import {View, Text, StyleSheet, FlatList, ScrollView,TouchableOpacity} from 'react-native'
 import ButtonNewClub from "./buttonNewClub."
-import { API_SERVER } from "../../api_calls/constants";
 import { globContext } from "../../context/globContext";
 import ProfileImage from "../../components/profileImage";
 
@@ -11,32 +10,20 @@ function NewClub() {
 }
 
 const Clubs = () => {
-    const {auth:{user:{token,user_id}}} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups} = useContext(globContext)
     const {navigate} = useNavigation()
-    const [clubs, setClubs] = useState([])
-    
-    const fetchClubs = () => {
-        fetch(`http://${API_SERVER}/user/groups/?q=${user_id}`)
-        .then(response => response.json())
-        .then(data => setClubs(data))
-    }
-    
-    useEffect(() => {
-        fetchClubs()
-    }, [])
-
    
     return (
-        <ScrollView>
+        <View>
              <View style={{marginTop: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
-                <Text style = {styles.title1}>Your bookclubs</Text>
+                <Text style = {styles.title1}>My bookclubs</Text>
                 <ButtonNewClub onPress={NewClub} title="Create new club"/>
             </View>
             <View>
-                {clubs == [] ? <Text>You are not in any bookclub</Text> : 
+                {groups == [] ? <Text>You are not in any bookclub</Text> : 
                 <FlatList
                     scrollEnabled
-                    data={clubs}
+                    data={groups}
                     renderItem={({item})=>{
                         console.log(item.id)
                         return (
@@ -55,7 +42,7 @@ const Clubs = () => {
                     keyExtractor={(item)=>item.id}
                 /> }
             </View>
-        </ScrollView>
+        </View>
     )
  }
 
@@ -90,7 +77,7 @@ const Clubs = () => {
         color: "black",
         marginTop: 15,
         marginRight: 10,
-        marginLeft: 5,
+        marginLeft: 15,
         marginBottom: 10,
         fontWeight: 'bold',
     },
@@ -99,7 +86,7 @@ const Clubs = () => {
         fontFamily:'serif',
         color: "black",
         textAlign: "left",
-        marginLeft: 5,
+        marginLeft: 15,
         marginRight: 10,
         marginBottom: 10,
     }

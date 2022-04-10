@@ -1,7 +1,8 @@
-import React from "react"
+import React from 'react';
 import { TouchableOpacity,Text, StyleSheet} from 'react-native'
 
-const ButtonLibrary = (props) => {
+
+const RecommendedButton = (props) => {
     return (
             <TouchableOpacity onPress={props.onPress} style={[styles.button, {backgroundColor: props.color}]}>
                 <Text style={styles.buttonText}>{props.title}</Text>
@@ -11,18 +12,16 @@ const ButtonLibrary = (props) => {
 
 const styles = StyleSheet.create({
     button: {
-        backgroundColor: "grey",
-        alignItems:'center',
-        marginHorizontal: 20,
-        marginTop: 20,
-        paddingVertical: 5,
+        alignItems: 'center',
+        margin: 10,
+        paddingVertical: 12,
         borderRadius:10,
         paddingLeft: 20,
         paddingRight: 20,
-        borderRadius: 40
     },
     buttonText: {
         fontSize: 20,
+        color: 'black'
     }
 })
-export default ButtonLibrary;
+export default RecommendedButton;

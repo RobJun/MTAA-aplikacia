@@ -1,56 +1,121 @@
 import React, { useEffect, useState, useContext } from "react"
 import {View, Image, Text, StyleSheet, ScrollView} from 'react-native'
-import Button from "../../components/button"
 import { API_SERVER } from "../../api_calls/constants";
 import { globContext } from "../../context/globContext";
+import DropDownPicker  from 'react-native-dropdown-picker'
+import RecommendedButton from "./RecommendedButton";
+import { fetchBooks } from "../../api_calls/user_calls";
 
-
-function putToRecommended() {
-    console.log("ahoj")
-}
 
 const BookProfile = ({route}) => {
-    const {auth:{user:{token,user_id}}} = useContext(globContext)
+    console.log("dasdsad")
+    const {auth:{user:{token,user_id}},user,library, setUser,setLibrary} = useContext(globContext)
     const bookID = route.params.bookID
-    const [category, setCategory] = useState("Add to Library")
+    const [textRecommendButton, setTextRecommendButton] = useState("Recommend")
     const [info, setInfo] = useState({
-        genre: { 
-            color: 0xffffff00
-        },
-        author:[
-            {
-                name: "Text",
-            },
-        ],
+        genre: {color: 0xffffff00},
+        author:[{name: "Text",},],
         description: "text"})
-    
-    const fetchInfo = () => {
-        fetch(`http://${API_SERVER}/find/info/${bookID}/`)
-        .then(response => response.json())
-        .then(data => setInfo(data))
-    }
 
-    const putToLibrary = async (where) => {
-        const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=${where}`,{
-            "method": "PUT",
-            "headers" : {
-            "Authorization" : "Token " + token
-            }
-        })
-        if (response.status === 401 || response.status === 404 || response.status === 406 || response.status === 409){
-            alert('error')
-            return;
+    const fetchInfo = async () => {
+        const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
+        if(response.status > 400) {
+            alert("Error: ",response.status)
+            return
         }
         const data = await response.json()
         setInfo(data)
-        setCategory("In" + where)
+        if(user.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
+        if(library.wishlist.find(x=> x.id === data.id) !== undefined) setValue('wishlist')
+        else if (library.reading.find(x=> x.id === data.id) !== undefined) setValue('reading')
+        else if (library.completed.find(x=> x.id === data.id) !== undefined) setValue("completed")
     }
 
     useEffect(() => {
         fetchInfo()
     }, [])
     
-    const c = 0xffffffff
+    
+    const putToLibrary = async (where) => {
+        console.log("hah")
+        const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=${where}`, {
+            "method": "PUT",
+            "headers" : { "Authorization" : "Token " + token }
+        })
+        if (response.status === 401 || response.status === 404 || response.status === 406){
+            alert('error')
+            return;
+        }
+        if(response.status == 409) return;
+
+        const data = await response.json()
+        setUser(data)
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+        console.log(library)
+    }
+
+    const deleteFromLibrary = async (where) => {
+        const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/`,{
+            "method": "DELETE",
+            "headers" : { "Authorization" : "Token " + token }
+        })
+        if (response.status === 401 || response.status === 404){
+            alert('error3')
+            return;
+        }
+        if(response.status == 409) return;
+
+        const data = await response.json()
+        setUser(data)
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+    }
+
+    const putToRecommended = async () => {
+        if (textRecommendButton === "Recommended") {
+            const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=unrecommend`,{
+                            "method": "PUT",
+                            "headers" : { "Authorization" : "Token " + token}
+            })
+            if (response.status === 401 || response.status === 404 || response.status === 406){
+                alert('error4')
+                return;
+            }
+            if(response.status == 409) return;
+
+            const data = await response.json()
+            setUser(data)
+            setTextRecommendButton("Recommend")
+        } else {
+            const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=recommend`,{
+                            "method": "PUT",
+                            "headers" : { "Authorization" : "Token " + token}
+            })
+            if (response.status === 401 || response.status === 404 || response.status === 406){
+                alert('error5')
+                return;
+            }
+            if(response.status == 409) return;
+
+            const data = await response.json()
+            setUser(data)
+            setTextRecommendButton("Recommended")
+        }
+    }
+
+
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState(null);
+    const [items, setItems] = useState([
+      {label: 'Wishlist', value: 'wishlist'},
+      {label: 'Reading', value: 'reading'},
+      {label: 'Completed', value:'completed'},
+      {label: 'Remove', value:'remove', disabled: true}
+    ]);
+
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
             <View style={{backgroundColor: `rgb(${((info.genre.color & 0xff000000)>>24)& 0xff},${(info.genre.color & 0x00ff0000)>>16},${(info.genre.color & 0x0000ff00)>>8})`, alignItems:"center"}}>
@@ -71,13 +136,42 @@ const BookProfile = ({route}) => {
                     </View>
                 </View>
             </View>
-            <View style={{flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly"}}>
-                <Button onPress={() => putToLibrary("wishlist")} title = {category} style = {styles.button}/>
-                <Button onPress={putToRecommended} title="Recommend" color="#841584" accessibilityLabel="Learn more about this purple button" style = {styles.button}/>
+            <View style={{flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly", marginLeft: 5, marginRight: 5}}>
+                <DropDownPicker
+                    open={open}
+                    value={value}
+                    items={items}
+                    setOpen={setOpen}
+                    setValue={setValue}
+                    setItems={setItems}
+                    containerStyle={{width:'40%'}}
+                    placeholderStyle={{fontSize: 17}}
+                    placeholder={'Add to Library'}
+                    listParentLabelStyle={{fontSize: 17}}
+                    dropDownContainerStyle={{backgroundColor: 'white',zIndex: 1000, elevation: 1000}}
+                    onChangeValue={(item)=>{
+                        console.log(item)
+                        if(item === null || item ==='remove'){
+                            setValue(null)
+                            setItems(prev=>{
+                                const d = prev.pop()
+                                prev.push({...d,disabled:true})
+                                return prev })
+                            if(item === 'remove') deleteFromLibrary()
+                        } else {
+                            putToLibrary(item)
+                            
+                            setItems(prev=>{
+                                const d = prev.pop()
+                                prev.push({...d,disabled:false})
+                                return prev
+                            })
+                        }}}
+                    />
+                <RecommendedButton onPress={putToRecommended} title= {textRecommendButton} color = {`rgb(${((info.genre.color & 0xff000000)>>24)& 0xff},${(info.genre.color & 0x00ff0000)>>16},${(info.genre.color & 0x0000ff00)>>8})`}/> 
             </View>
             <View >
-
-                <Text style = {{fontSize: 20, fontWeight: "bold", marginTop: 10, marginLeft: 10, color: "black"}}>About</Text>
+                <Text style = {{fontSize: 20, fontWeight: "bold", marginTop: 10, marginLeft: 10, marginRight: 20, marginLeft: 20, color: "black"}}>About</Text>
                 <Text style = {styles.text}>{info.description}</Text>
             </View>
         </ScrollView>
@@ -125,7 +219,9 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         lineHeight: 25,
         margin: 10,
-        marginBottom: 30
+        marginBottom: 30,
+        marginRight: 20, 
+        marginLeft: 20
     },
     title: {
         display:'flex',

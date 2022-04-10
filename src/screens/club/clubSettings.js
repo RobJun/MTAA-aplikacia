@@ -118,6 +118,7 @@ const BookSetttings = ({})=> {
         }
         if(searching){
             console.log('cant search, search on going')
+            return;
         }
         fetchBooks(search)
 

@@ -4,13 +4,15 @@ import ButtonSettings from "./button"
 import ProfileImage from "../../components/profileImage"
 import { useNavigation } from '@react-navigation/native';
 import Button from "../../components/button";
+import { globContext } from "../../context/globContext";
 
-const Settings = (route) => {
-    const Info = route.params.info
+const Settings = () => {
+    const {auth:{user:{token,user_id}}} = useContext(globContext)
+    
     return (
             <View>
                 <View style={styles.clubHeader}>
-                    <ProfileImage source={formImage ? formImage.uri : Info.photoPath} size={180} local={true}/>
+                    <ProfileImage source={formImage ? formImage.uri : user.photoPath} size={180} local={true}/>
                     <Button onPress={selectImage} title='Change Image'></Button>
                     {formImage && <Button onPress={resetImage} title='Reset Image'/>}
                 </View>

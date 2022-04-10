@@ -1,76 +1,115 @@
 import React, { useEffect, useState } from "react"
-import {View, Text, StyleSheet, ScrollView, Searchbar, FlatList, TouchableOpacity} from 'react-native'
+import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { API_SERVER } from "../../api_calls/constants";
 import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
+import SearchBar from "react-native-dynamic-search-bar";
+import ButtonSettings from "../profile/button";
 
 const SearchScreen = () => {
     const [groups, setGroups] = useState([])
     const [books, setBooks] = useState([])
     const {navigate} = useNavigation()
-    
-    const fetchGroups = () => {
-        fetch(`http://${API_SERVER}/find/groups/`)
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(element => {
-                element.photoPath = element.photoPath +`?time=${new Date().getTime()}`
-            });
-            setGroups(data)
-        })
+    const [search,setSearch] = useState("")
+    const [searching,setSearching] = useState(false)
+
+    const fetchBooks = async (query) => {
+        const response = await fetch(`http://${API_SERVER}/find/books/?q=${query}`)
+        setBooks(await response.json())
     }
 
-    const fetchBooks = () => {
-        fetch(`http://${API_SERVER}/find/books/`)
-        .then(response => response.json())
-        .then(data => setBooks(data))
+    const fetchGroups = async (query) => {
+        const response = await fetch(`http://${API_SERVER}/find/groups/?q=${query}`)
+        const data = await response.json()
+        data.forEach(element => {
+            element.photoPath = element.photoPath +`?time=${new Date().getTime()}`
+        });
+        setGroups(data)
+        
     }
+
+    useEffect(()=>{
+        if(search.length < 4 ){
+            console.log('string must be atleast 4 characters')
+            return;
+        }
+        if(searching){
+            console.log('cant search, search on going')
+            return;
+        }
+        setSearching(true)
+        fetchBooks(search)
+        fetchGroups(search)
+        setSearching(false)
+    },[search])
     
     useEffect(() => {
-        fetchGroups(),
-        fetchBooks()
+        fetchGroups(''),
+        fetchBooks('')
     }, [], [])
-    
-    //<Searchbar placeholder="Search" value={searchPhrase} onChangeText={setSearchPhrase} onFocus={() => {setClicked(true);}}/>
+
     return (
-        <ScrollView>
-            <Text style={styles.text}>Clubs</Text>
-            <View style = {{marginLeft: 20}}>
-                <FlatList
-                    horizontal
-                    scrollEnabled
-                    showsHorizontalScrollIndicator={false}
-                    data={groups}
-                    renderItem={({item})=>{
-                        return (<TouchableOpacity onPress={()=>{navigate('SearchNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
-                        <View style = {{marginRight: 15}}>
-                            <ProfileImage size = {100} source={item.photoPath} style={styles.image}/>
-                            <Text style={styles.name} key={item.id} >{item.name}</Text>
-                        </View>
-                        </TouchableOpacity>)
-                    }}
-                    keyExtractor={(item)=>item.id}
-                />
+        <View>
+        <View>
+            <SearchBar 
+                placeholder="Search book, author, group..."
+                onPress={()=>{console.log("onPress")}}
+                onChangeText={(text) => {setSearch(text)}}
+                onSearchPress={(text) => console.log('searching: ', text)}
+                onClearPress={()=>{
+                    fetchGroups('')
+                    fetchBooks('')
+                }}
+                fontSize = {16}
+                style = {{width: "95%", marginTop: 15, height: 50, borderRadius: 20}}
+            />
+        </View>
+        <ScrollView style = {{marginBottom: 70}}>
+            <Text style={styles.text}>Bookclubs</Text>
+                <View style = {{marginLeft: 20}}>
+                {groups.length === 0 ?
+                    (<View><Text style = {[styles.name, {fontWeight: "normal"}]}>No results</Text> 
+                    <ButtonSettings onPress = {()=>{navigate()}} title="Create new bookclub"/></View>) : 
+                    <FlatList
+                        horizontal
+                        scrollEnabled
+                        showsHorizontalScrollIndicator={false}
+                        data={groups}
+                        renderItem={({item})=>{
+                            return (<TouchableOpacity onPress={()=>{navigate('SearchNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
+                            <View style = {{marginRight: 15}}>
+                                <ProfileImage size = {100} source={item.photoPath} style={styles.image}/>
+                                <Text style={styles.name} key={item.id} >{item.name}</Text>
+                            </View>
+                            </TouchableOpacity>)
+                        }}
+                        keyExtractor={(item)=>item.id}
+                    />
+                }
             </View>
             <Text style={styles.text}>Books</Text>
             <View style = {{marginLeft: 20}}>
-                <FlatList
-                    columnWrapperStyle={{justifyContent: "space-around"}}
-                    numColumns={3}
-                    data={books}
-                    renderItem={({item})=>{ return (
-                        <View style = {{marginRight: 15}}>
-                            <BookCover onPress = {()=>{navigate('SearchNav', {screen: 'Book', params:{bookID:item.id}})}} 
-                                source = {item.cover} size =  {120} style = {{marginBottom: 10}}/>   
-                        </View>
-                    ) 
-                    }}
-                    keyExtractor={(item)=>item.id}
-                />
+                {books.length === 0 ?
+                    <Text style = {[styles.name, {fontWeight: "normal"}]}>No results</Text> : 
+                    <FlatList
+                        columnWrapperStyle={{justifyContent: "space-around"}}
+                        numColumns={3}
+                        data={books}
+                        renderItem={({item})=>{ return (
+                            <View style = {{marginRight: 15}}>
+                                <BookCover onPress = {()=>{navigate('SearchNav', {screen: 'Book', params:{bookID:item.id}})}} 
+                                    source = {item.cover} size =  {120} style = {{marginBottom: 10}}/>   
+                            </View>
+                        ) 
+                        }}
+                        keyExtractor={(item)=>item.id}
+                    />
+                }
             </View>
         </ScrollView>
-        )
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({

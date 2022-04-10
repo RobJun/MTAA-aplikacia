@@ -1,37 +1,22 @@
-import React, { useEffect, useContext, useState} from "react"
+import React, {useContext, useState} from "react"
 import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity} from 'react-native'
 import ButtonLibrary from "./button"
-import { API_SERVER } from "../../api_calls/constants";
 import { globContext } from "../../context/globContext";
 import { useNavigation } from '@react-navigation/native';
 
 const Library = () => {
     const {navigate} = useNavigation()
-    const [books, setBooks] = useState([])
-    const {auth:{user:{token,user_id}}} = useContext(globContext)
+    const {auth:{user:{token,user_id}},library} = useContext(globContext)
     const [wishlistColor, setWishlistColor] = useState("grey")
     const [readingColor, setReadingColor] = useState("#f17c56") 
     const [completedColor, setCompletedColor] = useState("grey")  
     const [bgColor, setBColor] = useState("#f17c56") 
+    const [which,setWhich] = useState('reading')
 
-    const fetchBooks = () => {
-        fetch(`http://${API_SERVER}/user/books/reading/?q=${user_id}`)
-        .then(response => response.json())
-        .then(data => setBooks(data))
-    }
     
-    useEffect(() => {
-        fetchBooks()
-    }, [])
-    
-    const changeLibrary = async (which, color1, color2, color3) => {
-        const response = await fetch(`http://${API_SERVER}/user/books/${which}/?q=${user_id}`)
-        if (response.status ===404 || response.status === 406){
-            alert('error')
-            return;
-        }
-        const data = await response.json()
-        setBooks(data)
+    const changeLibrary = (which, color1, color2, color3) => {
+        console.log(library)
+        setWhich(which)
         setWishlistColor(color1)
         setReadingColor(color2)
         setCompletedColor(color3)
@@ -49,10 +34,11 @@ const Library = () => {
                 <ButtonLibrary onPress={()=>{changeLibrary("completed", "grey", "grey", "#ee6f68")}} title="Completed" color ={completedColor}/>
             </View>
             <View>
-                {books.length == 0 ? <Text style = {[styles.text, {marginTop: 20}]}>You don't have any book in this category</Text> : 
+                {library[which].length == 0 ? <Text style = {[styles.text, {marginTop: 20}]}>You don't have any book in this category</Text> : 
                     <FlatList
                         scrollEnabled
-                        data={books}
+                        data={library[which]}
+                        extraData={library}
                         renderItem={({item})=>{
                             return ( 
                             <TouchableOpacity onPress={()=>{navigate('LibraryNav', {screen:'Book', params:{bookID:item.id}})}}>

@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
         marginBottom: 20
     },
     clubHeader : {
-        backgroundColor: '#f17c56',
+        backgroundColor: '#ee6f68',
         alignItems:'center',
         paddingTop:70,
         paddingBottom:20
