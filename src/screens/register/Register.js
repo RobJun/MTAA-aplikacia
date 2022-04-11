@@ -17,9 +17,9 @@ const Register = ({onSubmit,onChange,form,error,navigation}) => {
                 <Image source={require('../../../assets/logo_tr.png')} style={{width:170,height:170}} o></Image>
             </View>
             <ScrollView style={{maxHeight:'80%'}}>
-                <CredentialInput label={'Username'} onChangeText={(value)=>{onChange({name:'name',value})}}  error={error.name} />
-                <CredentialInput label={'Password'} password={true}  onChangeText={(value)=>onChange({name:'password',value})}  error={error.password}/>
-                <CredentialInput label={'Repeat Password'}password={true}  onChangeText={(value)=> {onChange({name:'repassword',value})}} error={error.repassword}/>
+                <CredentialInput label={'Username'} multi = {false} onChangeText={(value)=>{onChange({name:'name',value})}}  error={error.name} />
+                <CredentialInput label={'Password'} multi = {false} password={true}  onChangeText={(value)=>onChange({name:'password',value})}  error={error.password}/>
+                <CredentialInput label={'Repeat Password'} multi = {false} password={true}  onChangeText={(value)=> {onChange({name:'repassword',value})}} error={error.repassword}/>
                 <Button title="Sign in" onPress={auth.loading ? () => {console.log('loading button disabled')} : ()=>{onSubmit()}}/>
             </ScrollView>
         </View>

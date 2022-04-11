@@ -19,8 +19,8 @@ const Login = ({onSubmit,onChange,form,error}) => {
             <View  style={{justifyContent:'center',alignItems:'center'}}>
                 <Image source={require('../../../assets/logo_tr.png')} style={{width:170,height:170}} o></Image>
             </View>
-            <CredentialInput label={'Username'} onChangeText={(value) =>{onChange({name:'name',value})}} error={error.name} />
-            <CredentialInput label={'Password'} password={true}  onChangeText={(value) =>{onChange({name:'password',value})}} error={error.password}/>
+            <CredentialInput label={'Username'} multi = {false} placeholder = {"Enter username"} onChangeText={(value) =>{onChange({name:'name',value})}} error={error.name} />
+            <CredentialInput label={'Password'} multi = {false} placeholder = {"Enter password"} password={true}  onChangeText={(value) =>{onChange({name:'password',value})}} error={error.password}/>
             <Button title="Sign in" onPress={auth.loading ? ()=> {console.log("er")} : ()=>  {onSubmit()}}/>
             <View style={{ backgroundColor : "black", height : 1, borderWidth:2}} />
             <Button title="Registracia" onPress={()=> {navigate('Register')}}/>

@@ -8,7 +8,6 @@ import { fetchBooks } from "../../api_calls/user_calls";
 
 
 const BookProfile = ({route}) => {
-    console.log("dasdsad")
     const {auth:{user:{token,user_id}},user,library, setUser,setLibrary} = useContext(globContext)
     const bookID = route.params.bookID
     const [textRecommendButton, setTextRecommendButton] = useState("Recommend")
@@ -19,8 +18,8 @@ const BookProfile = ({route}) => {
 
     const fetchInfo = async () => {
         const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
-        if(response.status > 400) {
-            alert("Error: ",response.status)
+        if(response.status === 404) {
+            alert("404 Book not found")
             return
         }
         const data = await response.json()
@@ -37,13 +36,14 @@ const BookProfile = ({route}) => {
     
     
     const putToLibrary = async (where) => {
-        console.log("hah")
         const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=${where}`, {
             "method": "PUT",
             "headers" : { "Authorization" : "Token " + token }
         })
-        if (response.status === 401 || response.status === 404 || response.status === 406){
-            alert('error')
+        if (response.status === 401 || response.status === 404 || response.status === 406) {
+            if(response.status === 401) alert('401 Neutorizovaný používateľ')
+            else if(response.status === 404) alert('404 Neexistujúca kniha')
+            else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
             return;
         }
         if(response.status == 409) return;
@@ -53,7 +53,6 @@ const BookProfile = ({route}) => {
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
-        console.log(library)
     }
 
     const deleteFromLibrary = async (where) => {
@@ -61,9 +60,9 @@ const BookProfile = ({route}) => {
             "method": "DELETE",
             "headers" : { "Authorization" : "Token " + token }
         })
-        if (response.status === 401 || response.status === 404){
-            alert('error3')
-            return;
+        if (response.status === 401 || response.status === 404) {
+            if(response.status === 401) alert('401 Neutorizovaný používateľ')
+            else if(response.status === 404) alert('404 Neexistujúca kniha')
         }
         if(response.status == 409) return;
 
@@ -80,8 +79,10 @@ const BookProfile = ({route}) => {
                             "method": "PUT",
                             "headers" : { "Authorization" : "Token " + token}
             })
-            if (response.status === 401 || response.status === 404 || response.status === 406){
-                alert('error4')
+            if (response.status === 401 || response.status === 404 || response.status === 406) {
+                if(response.status === 401) alert('401 Neutorizovaný používateľ')
+                else if(response.status === 404) alert('404 Neexistujúca kniha')
+                else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
                 return;
             }
             if(response.status == 409) return;
@@ -94,8 +95,10 @@ const BookProfile = ({route}) => {
                             "method": "PUT",
                             "headers" : { "Authorization" : "Token " + token}
             })
-            if (response.status === 401 || response.status === 404 || response.status === 406){
-                alert('error5')
+            if (response.status === 401 || response.status === 404 || response.status === 406) {
+                if(response.status === 401) alert('401 Neutorizovaný používateľ')
+                else if(response.status === 404) alert('404 Neexistujúca kniha')
+                else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
                 return;
             }
             if(response.status == 409) return;
@@ -123,20 +126,20 @@ const BookProfile = ({route}) => {
                 <Text style = {styles.title}> {info.author[0].name} : {info.title}</Text>
                 <View style={{flexDirection:'row'}}>
                     <View style = {styles.border}>
-                        <Text style={styles.infoTop}>Rating</Text>
-                        <Text style = {styles.infoBott}>{info.rating}</Text>
+                        <Text style={[styles.info, {marginTop: 10, fontWeight: "500"}]}>Rating</Text>
+                        <Text style = {[styles.info, {marginBottom: 10}]}>{info.rating}</Text>
                     </View>
                     <View style = {styles.border}>
-                        <Text style={styles.infoTop}>Genre</Text>
-                        <Text style = {styles.infoBott}>{info.genre.name}</Text>
+                        <Text style={[styles.info, {marginTop: 10, fontWeight: "500"}]}>Genre</Text>
+                        <Text style = {[styles.info, {marginBottom: 10}]}>{info.genre.name}</Text>
                     </View>
                     <View style = {styles.border}>
-                        <Text style={styles.infoTop}>Pages</Text>
-                        <Text style = {styles.infoBott}>{info.pages}</Text>
+                        <Text style={[styles.info, {marginTop: 10, fontWeight: "500"}]}>Pages</Text>
+                        <Text style = {[styles.info, {marginBottom: 10}]}>{info.pages}</Text>
                     </View>
                 </View>
             </View>
-            <View style={{flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly", marginLeft: 5, marginRight: 5}}>
+            <View style={{flexDirection:'row',  flex: 1, alignItems:"center", justifyContent: "space-evenly", marginLeft: 5, marginRight: 5}}>
                 <DropDownPicker
                     open={open}
                     value={value}
@@ -150,7 +153,6 @@ const BookProfile = ({route}) => {
                     listParentLabelStyle={{fontSize: 17}}
                     dropDownContainerStyle={{backgroundColor: 'white',zIndex: 1000, elevation: 1000}}
                     onChangeValue={(item)=>{
-                        console.log(item)
                         if(item === null || item ==='remove'){
                             setValue(null)
                             setItems(prev=>{
@@ -187,22 +189,12 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginRight: 10
     },
-    infoTop: {
+    info: {
         fontSize: 20,
         color: "black",
         marginLeft: 20,
         marginRight: 20,
-        marginTop: 10,
         textAlign: "center",
-        fontWeight: "500"
-    },
-    infoBott: {
-        fontSize: 20,
-        color: "black",
-        marginLeft: 20,
-        marginRight: 20,
-        marginBottom: 10,
-        textAlign: "center"
     },
     image: {
         width:  240, 

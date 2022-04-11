@@ -10,7 +10,6 @@ const Profile = () => {
     const {navigate} = useNavigation()
     const {auth:{user:{token,user_id}},user,setUser} = useContext(globContext)
     
-
     return (
         <ScrollView>
             <View style={{backgroundColor: "#c6d7b9", flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly"}}>

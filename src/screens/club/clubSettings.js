@@ -12,6 +12,7 @@ import BasicSettings from "../../forms/ClubBasicSettings";
 import { fetchGroups,fetchInfo } from "../../api_calls/user_calls";
 import { compressImage } from "../../utils/imageCompression";
 
+
 const MemberSettings = ({}) => {
     const {info, setInfo} = useContext(clubContext)
     const {auth:{user:{token,user_id}}} = useContext(globContext)
@@ -159,7 +160,7 @@ const BookSetttings = ({})=> {
                     style={[{marginHorizontal:10, borderWidth:2},style]}/>) }}
                 keyExtractor={(item)=>item.id}
             /> : <Text style={[{color:'black'},styles.nobookesearch]}>No books found</Text> }
-            <Button title='save book of the week' onPress={onSubmit}/>
+            <Button title='Save book of the week' onPress={onSubmit} style = {{backgroundColor: "#5e8d5a", paddingVertical: 15}}/>
             </View>)
 }
 
@@ -180,7 +181,6 @@ const ClubSettingScreen = ({navigation}) => {
         } else {
             setErrors({...errors, [name] : REQUIRED})
         }
-
     }
 
     useEffect(()=>{
@@ -272,7 +272,7 @@ const ClubSettingScreen = ({navigation}) => {
     }
 
     return (<ScrollView>
-    <View>
+    <View style = {{backgroundColor: "#ee6f68"}}>
         <Text style={styles.header}>Bookclub settings</Text>
     </View>
     <BasicSettings 
@@ -308,12 +308,11 @@ const ClubSettingScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
     header : {
-        marginLeft: 10,
-        marginTop:20,
-        fontSize:30,
+        fontSize: 20,
         fontFamily:'serif',
-        color: 'black',
-        fontWeight: '600'
+        color: "black",
+        margin: 20,
+        fontWeight: 'bold',
     },
     member : {
         width: 70,
@@ -333,7 +332,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginLeft: 25,
         marginBottom: 20
-    },clubHeaderImage : {
+    },
+    clubHeaderImage : {
         width:180,
         height:180,
         borderRadius:180/2
@@ -344,15 +344,16 @@ const styles = StyleSheet.create({
         paddingBottom:20
     },
     deleteButton : {
-        backgroundColor : 'red'
+        backgroundColor : "#ee6f68",
+        paddingVertical: 15, 
     },
     removeMembers : {
         color: 'black',
         fontFamily: 'serif',
         fontSize:20,
-        fontWeight: '600',
-        marginVertical:15
-
+        fontWeight: "700",
+        marginVertical:15, 
+        marginLeft: 20,
     },
     bowImage : {
         width:150,

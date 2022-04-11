@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native"
 import React, {useContext} from "react"
-import {View, Text, StyleSheet, FlatList, ScrollView,TouchableOpacity} from 'react-native'
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView} from 'react-native'
 import ButtonNewClub from "./buttonNewClub."
 import { globContext } from "../../context/globContext";
 import ProfileImage from "../../components/profileImage";
@@ -21,7 +21,6 @@ const Clubs = () => {
                     scrollEnabled
                     data={groups}
                     renderItem={({item})=>{
-                        console.log(item.id)
                         return (
                         <TouchableOpacity onPress={()=>{navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
                             <View style = {{flexDirection:'row', flex: 1}}>

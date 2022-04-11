@@ -15,7 +15,6 @@ const Library = () => {
 
     
     const changeLibrary = (which, color1, color2, color3) => {
-        console.log(library)
         setWhich(which)
         setWishlistColor(color1)
         setReadingColor(color2)
@@ -23,7 +22,6 @@ const Library = () => {
         if (which === "wishlist") setBColor(color1)
         if (which === "reading") setBColor(color2)
         if (which === "completed") setBColor(color3)
-
     }
 
     return (
@@ -48,7 +46,7 @@ const Library = () => {
                                     </View>
                                     <View style = {{width: "60%", height: 210, marginRight: 20, marginTop: 20, backgroundColor: bgColor, borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
                                         <Text style={styles.title}>{item.title}</Text>
-                                        <Text style={styles.text}>{item.description.substring(0,181)}...</Text>
+                                        <Text style={styles.text}>{item.description.substring(0,150)}...</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>)

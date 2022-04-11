@@ -4,7 +4,7 @@ import { TouchableOpacity,Text, StyleSheet} from 'react-native'
 
 const RecommendedButton = (props) => {
     return (
-            <TouchableOpacity onPress={props.onPress} style={[styles.button, {backgroundColor: props.color}]}>
+            <TouchableOpacity onPress={props.onPress} style={styles.button}>
                 <Text style={styles.buttonText}>{props.title}</Text>
             </TouchableOpacity>
     );
@@ -18,9 +18,12 @@ const styles = StyleSheet.create({
         borderRadius:10,
         paddingLeft: 20,
         paddingRight: 20,
+        backgroundColor: "white",
+        borderColor: "black",
+        borderWidth: 1, 
     },
     buttonText: {
-        fontSize: 20,
+        fontSize: 18,
         color: 'black'
     }
 })

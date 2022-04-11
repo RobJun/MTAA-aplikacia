@@ -139,8 +139,10 @@ const ClubScreen = ({navigation,route}) => {
               )}} style={styles.callButton}/>}
                 <ProfileImage source={info.photoPath} size={180}/>
                 <Text style={styles.clubHeaderName}>{info.name}</Text>
-                <Text style={styles.clubHeaderOwner}>No. members: {info.count}</Text>
-                <Text style={styles.clubHeaderOwner}>owner: {ownerName}</Text>
+                <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10}}>
+                    <Text style={styles.clubHeaderOwner}>No. members: {info.count}</Text>
+                    <Text style={styles.clubHeaderOwner}>Owner: {ownerName}</Text>
+                </View>
             </View>
             <View>
                 <View style={styles.firstSection}>
@@ -160,7 +162,7 @@ const ClubScreen = ({navigation,route}) => {
                     </View>
                 </View>
                 <View style={styles.fourthSection}>
-                    <Button onPress={isPart ? (isOwner ? ownerButton : memberButton) : otherButton} title={isPart ? (isOwner ? 'settings' : 'Leave club') : 'Join Club'}/>
+                    <Button onPress={isPart ? (isOwner ? ownerButton : memberButton) : otherButton} title={isPart ? (isOwner ? 'Settings' : 'Leave club') : 'Join Club'} style = {{backgroundColor: "#ee6f68", paddingVertical: 15}}/>
                 </View>
             </View>
         </ScrollView>
@@ -208,10 +210,12 @@ const styles = StyleSheet.create({
     },
     clubHeaderOwner : {
         paddingVertical: 10,
-        fontSize: 15,
+        fontSize: 17,
         fontWeight:'500',
         color:'black',
-        fontFamily: 'serif'
+        fontFamily: 'serif',
+        marginRight: 20,
+        marginLeft: 20
     },
     header : {
         color: 'black',

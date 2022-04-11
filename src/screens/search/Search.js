@@ -25,8 +25,7 @@ const SearchScreen = () => {
         data.forEach(element => {
             element.photoPath = element.photoPath +`?time=${new Date().getTime()}`
         });
-        setGroups(data)
-        
+        setGroups(data) 
     }
 
     useEffect(()=>{
@@ -54,9 +53,7 @@ const SearchScreen = () => {
         <View>
             <SearchBar 
                 placeholder="Search book, author, group..."
-                onPress={()=>{console.log("onPress")}}
                 onChangeText={(text) => {setSearch(text)}}
-                onSearchPress={(text) => console.log('searching: ', text)}
                 onClearPress={()=>{
                     fetchGroups('')
                     fetchBooks('')
