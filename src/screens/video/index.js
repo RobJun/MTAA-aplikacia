@@ -13,12 +13,23 @@ import { globContext } from '../../context/globContext';
 const urls = {
   iceServers: [
     {
-      urls: 'stun:iphone-stun.strato-iphone.de:3478',  
-    }, {
-      urls: 'stun:stun.1und1.de:3478',    
-    }, {
-      urls: 'stun:stun.develz.org:3478',    
-    }
+      urls: "stun:openrelay.metered.ca:80",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443?transport=tcp",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
   ],
 }
 
@@ -67,6 +78,7 @@ const VideoContainer = ({route,navigation}) => {
       peerConns.forEach(e=>{
         e.close()
       })
+      setPeerCons([])
       //conn.close()
       ws.current.close()
     }),
@@ -126,13 +138,13 @@ const VideoContainer = ({route,navigation}) => {
         const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerUsername] = conn
         peerConns.push(conn)
-        //console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
-        //connections.push({user: peerUsername,conn:conn})
-        //console.log("VIDEO --- new peer -- ",peerUsername, " [",receiver_channel_name,"]")
+        console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
+        connections.push({user: peerUsername,conn:conn})
+        console.log("VIDEO --- new peer -- ",peerUsername, " [",receiver_channel_name,"]")
         conn.addStream(localStream)
          
         conn.onaddstream =(event)=>{
-          //console.log("CONN.ONADDSTREAM- NEW PEER - adding stream")
+          console.log("CONN.ONADDSTREAM- NEW PEER - adding stream")
           //streams[peerUsername] = event.stream
           setStreams((prev)=>{return {...prev,[peerUsername]: event.stream}})
         }
@@ -154,11 +166,11 @@ const VideoContainer = ({route,navigation}) => {
 
         conn.onicecandidate = (event) => {
           if(event.candidate){
-            //console.log("New Ice Candidate! Reprinting SDP")// + JSON.stringify(conn.localDescription));
+            console.log("New Ice Candidate! Reprinting SDP")// + JSON.stringify(conn.localDescription));
             return;
           }
-          //console.log('Gathering finished! Sending offer SDP to ', peerUsername, '.');
-          //console.log('receiverChannelName: ', receiver_channel_name);
+          console.log('Gathering finished! Sending offer SDP to ', peerUsername, '.');
+          console.log('receiverChannelName: ', receiver_channel_name);
 
           signal(username,'new-offer', {
             sdp: conn.localDescription,
@@ -176,15 +188,15 @@ const VideoContainer = ({route,navigation}) => {
       }
     
       const handleOffer = (sdp,peerUsername,receiver_channel_name) =>{
-        //console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\n")//OFFER SDP:",sdp,"\n------------------------------")
+        console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\n")//OFFER SDP:",sdp,"\n------------------------------")
         const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerConnections] = conn
         peerConns.push(conn)
         console.log(peerConns[peerConns.length - 1] === conn)
-        //console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
+        console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
         conn.addStream(localStream)
         conn.onaddstream = (event)=>{
-          //console.log("CONN.ONADDSTREAM- NEW PEER - adding stream")
+          console.log("CONN.ONADDSTREAM- NEW PEER - adding stream")
           //setRemoteStream(event.stream)
           console.log(event.stream)
           //streams[peerUsername] = event.stream
@@ -209,11 +221,11 @@ const VideoContainer = ({route,navigation}) => {
 
         conn.onicecandidate = (event) => {
           if(event.candidate){
-            //console.log("New Ice Candidate! Reprinting SDP")// + JSON.stringify(conn.localDescription));
+            console.log("New Ice Candidate! Reprinting SDP" + JSON.stringify(conn.localDescription));
             return;
           }
-          //console.log('Gathering finished! Sending answer SDP to ', peerUsername, '.');
-          //console.log('receiverChannelName: ', receiver_channel_name);
+          console.log('Gathering finished! Sending answer SDP to ', peerUsername, '.');
+          console.log('receiverChannelName: ', receiver_channel_name);
           
           signal(username,'new-answer', {
             sdp: conn.localDescription,
@@ -233,8 +245,8 @@ const VideoContainer = ({route,navigation}) => {
       })
       .then(() => {
           console.log('Answer created for %s.', peerUsername);
-          //console.log('localDescription: ', conn.localDescription);
-          //console.log('remoteDescription: ', conn.remoteDescription);
+          console.log('localDescription: ', conn.localDescription);
+          console.log('remoteDescription: ', conn.remoteDescription);
       })
       .catch(error => {
           console.log('Error creating answer for %s.', peerUsername);
@@ -245,7 +257,7 @@ const VideoContainer = ({route,navigation}) => {
       }
     
       const handleAnswer = (sdp,peerUsername,receiver_channel_name) =>{
-        //console.log("VIDEO --- new answer",peerUsername, " [",receiver_channel_name,"]\n)")//ANSWER SDP:",sdp,"\n------------------------------")
+        console.log("VIDEO --- new answer",peerUsername, " [",receiver_channel_name,"]\n)")//ANSWER SDP:",sdp,"\n------------------------------")
         peerConnections[peerUsername].setRemoteDescription(sdp)
       }
 
@@ -304,7 +316,7 @@ const VideoContainer = ({route,navigation}) => {
     if (Object.keys(streams).length>0){
       
       console.log(streams)
-      //console.log("REMOTE-STREAM-ADDED")
+      console.log("REMOTE-STREAM-ADDED")
       //console.log(remoteStream)
       setHasRemote(true)
     }else{

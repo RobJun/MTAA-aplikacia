@@ -6,7 +6,7 @@ export const globContext = createContext({});
 const GlobProvider = ({children}) => {
     //pridavat globalne stavy
     const [auth, setAuth] = useReducer(authReducer,initAuthState)
-    const [stun,setStun] = useState(false)
+    const [stun,setStun] = useState(true)
     const [user,setUser] = useState({
         id: "string",
         displayName: "string",
