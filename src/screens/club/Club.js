@@ -8,20 +8,19 @@ import CallButton from "../../components/callButton";
 import { useNavigation } from '@react-navigation/native';
 import UserList from "./Userlist";
 import ProfileImage from "../../components/profileImage";
+import BookCover from "../../components/BookCover";
+import { fetchGroups, fetchInfo } from "../../api_calls/user_calls";
 
 
 const ClubScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
-    const {auth:{user:{token,user_id}}} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setGroups,setUser,user,stun} = useContext(globContext)
     const {info, setInfo} = useContext(clubContext)
     const [ownerName,setOwnerName] = useState('')
     const [isOwner,setIsOwner] = useState(false)
     const [isPart,setIsPart] = useState(false)
     const {navigate} = useNavigation()
     const [refreshing, setRefreshing] = useState(false);
-
-
-    console.log(route)
 
 
     const fetchClubInfo = () => {
@@ -53,32 +52,29 @@ const ClubScreen = ({navigation,route}) => {
         console.log("info changed")
         var p = false
         info.users.forEach(user => {
+            if(user.owner === true){
+                setOwnerName(user.displayName)
+            }
             if(user_id === user.id){
                 console.log(user.displayName)
                 setIsPart(true)
                 p = true
                 if(user.owner === true){
                     setIsOwner(true)
-                    setOwnerName(user.displayName)
                 }
                 return;
             }
-            if(!p){
-                setIsPart(false)
-            }
         });
+        if(!p){
+            setIsPart(false)
+        }
 
     },[info])
 
 
     const ownerButton = ()=>{
         console.log('Owner')
-        navigate('ClubsNav',{
-            screen: 'Club',
-            params : {
-                screen : 'Club_settings'
-             }
-            })
+        navigation.navigate('Club_settings')
     }
 
     const memberButton = async ()=>{
@@ -95,6 +91,8 @@ const ClubScreen = ({navigation,route}) => {
         }
         const data = await response.json()
         setInfo(data)
+        fetchGroups(user_id,setGroups)
+        fetchInfo(user_id,setUser)
     }
 
     const otherButton = async ()=>{
@@ -113,6 +111,8 @@ const ClubScreen = ({navigation,route}) => {
         }
         const data = await response.json()
         setInfo(data)
+        fetchGroups(user_id,setGroups)
+        fetchInfo(user_id,setUser)
     }
 
     console.log(info.photoPath)
@@ -125,18 +125,12 @@ const ClubScreen = ({navigation,route}) => {
             }>
             <View style={styles.clubHeader}>
                 {isPart && <CallButton icon={"video"} onPress={() =>{
-                    navigate('ClubsNav',{
-                    screen: 'Club',
-                    params : {
-                        screen : 'Club_video',
-                        params:{
-                            username : user_id,
+                    navigation.navigate('Club_video',{
+                            username : user.displayName,
                             token : token,
-                            roomID : clubID
-                        }
-                     }
-                }
-              )}} style={styles.callButton}/>}
+                            roomID : clubID,
+                            stun : stun
+                        })}} style={styles.callButton}/>}
                 <ProfileImage source={info.photoPath} size={180}/>
                 <Text style={styles.clubHeaderName}>{info.name}</Text>
                 <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10}}>
@@ -153,12 +147,16 @@ const ClubScreen = ({navigation,route}) => {
                 </View>
                 <View style={styles.secondSection}>
                     <Text style={styles.header}>Book of the week</Text>
-                    { info.book_of_the_week ? <Image source={{uri:info.book_of_the_week.cover}} style={styles.bowImage}/> : <Text style={styles.noBook}>No book of the week</Text>}
+                    { info.book_of_the_week ? <BookCover 
+                                source={info.book_of_the_week.cover}
+                                style={styles.bowImage}
+                                onPress={()=>{ navigation.navigate('Club_Book',{bookID: info.book_of_the_week.id})}}/> 
+                                : <Text style={styles.noBook}>No book of the week</Text>}
                 </View>
                 <View style={styles.thirdSection}>
                     <Text style={styles.header}>Members</Text>
                     <View style = {{marginRight: 20}}>
-                        <UserList users={info.users} onSelect={()=>{}} selectArray={[]}/>
+                        <UserList users={info.users} onSelect={(item)=>{navigation.navigate('Club_Member',{user_id:item.id})}} selectArray={[]}/>
                     </View>
                 </View>
                 <View style={styles.fourthSection}>

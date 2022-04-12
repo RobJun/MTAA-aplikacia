@@ -4,6 +4,8 @@ import VideoContainer from "../video";
 import ClubScreen from "./Club";
 import ClubSettingScreen from "./clubSettings";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
+import BookProfile from "../bookProfile";
+import Profile from "../profile/Profile";
 
 
 export const clubContext = createContext({});
@@ -44,8 +46,13 @@ const Club = ({navigation,route})=>{
                     <stack.Screen
                         name="Club_video"
                         component={VideoContainer}
-                        options={{ unmountOnBlur: true}}
-                    />
+                        options={{ unmountOnBlur: true}}/>
+                    <stack.Screen 
+                        name="Club_Book"
+                        component={BookProfile}/>
+                    <stack.Screen
+                        name="Club_Member"
+                        component={Profile}/>
                 </stack.Navigator>
             </ClubContext>)
 }

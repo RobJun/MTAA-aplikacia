@@ -6,7 +6,7 @@ import { API_SERVER } from "../../api_calls/constants";
 import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
     const {auth:{user:{token,user_id}},groups,library:{reading}} = useContext(globContext)
     const {navigate} = useNavigation();
 
@@ -43,7 +43,7 @@ const HomeScreen = () => {
                         data={groups}
                         renderItem={({item})=> {
                             return (
-                                <TouchableOpacity onPress={()=>{navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
+                                <TouchableOpacity onPress={()=>{navigation.navigate('Club',{screen: 'Club_screen', params:{clubID:item.id}})}}>
                                 <View style = {{marginLeft: 10, alignItems: "center"}}>
                                     <ProfileImage size = {100} source={item.photoPath} style={styles.club}/>
                                     <Text style={styles.name} key={item.id}>{item.name.length > 8 ? `${item.name.substring(0,6)}...` : item.name}</Text>

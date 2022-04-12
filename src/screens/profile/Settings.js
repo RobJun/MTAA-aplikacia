@@ -8,7 +8,7 @@ import CredentialInput from "../../components/textInput";
 import { API_SERVER } from "../../api_calls/constants";
 import { compressImage } from "../../utils/imageCompression";
 
-const Settings = () => {
+const Settings = ({navigation}) => {
     const {auth:{user:{token, user_id}},user,setUser} = useContext(globContext)
     const [formImage,setFormImage] = useState(false)
     const [form, setForm] = useState({})
@@ -18,10 +18,18 @@ const Settings = () => {
     
     const onChange = ({name,value}) => {
         console.log(value)
+        if(name === 'displayName') {
+            if (value?.length > 20) {
+                setErrors({...errors, [name] : "max 20 characters"})
+                return;
+            }else {
+                setErrors({...errors, [name] : null})
+            }
+        }
         if(name === "bio"){
            if (value?.length > 80) {
-            setErrors({...errors, [name] : "max 80 characters"})
-            return
+                setErrors({...errors, [name] : "max 80 characters"})
+                return;
             }else{
                 setErrors({...errors, [name] : null})
             }
@@ -67,16 +75,29 @@ const Settings = () => {
                 })
                 return;
             }
+            console.log(form.displayName)
+            if(!form.displayName.match(/^[a-zA-Z0-9!@#$%^&*]\w{1,20}$/)) {
+                setErrors((prev)=>{
+                    return {...prev, displayName : 'Name contains illegal characters (legal: a-zA-Z0-9!@#$%^&*)'}
+                })
+                return;
+            }else {
+                setErrors((prev)=>{
+                    return {...prev, displayName : null}
+                })
+            }
     
             const formb = new FormData();
             for (const [key, value] of Object.entries(form)) {
                 if(value !== user[key]){
-                    formb.append(key,value)
+                    if(value === undefined)
+                        formb.append(key,'')
+                    else formb.append(key,value)
                 }
             }   
             if(formImage)
                 formb.append("photo", await compressImage(formImage));
-                
+            if(formb['_parts'].length === 0) return
             const response = await fetch(`http://${API_SERVER}/user/modify/`,{
                 "method": "PUT",
                 "headers" : {
@@ -95,10 +116,10 @@ const Settings = () => {
             const body = await response.json()
             body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
             setUser(body)
-            alert("Changes saved")
+            navigation.goBack()
     }
     
-    return (
+        return (
             <ScrollView>
                 <Text style = {styles.title}>Profile Settings</Text>
                 <View style = {{marginLeft: 20, marginRight: 20, alignItems: "center"}}>
@@ -107,7 +128,7 @@ const Settings = () => {
                     {formImage && <ButtonSettings onPress={()=>setFormImage(false)} title='Reset profile picture'/>}
                 </View>
                 <View style = {{marginLeft: 20, marginRight: 20}}>
-                    <CredentialInput label={'Display name'} multi = {false} placeholder = {"Enter display name"} value={form.displayName} onChangeText={(value)=>{onChange({name:'displayName',value})}} error={errors.displayName}/>
+                    <CredentialInput label={'Display name'} multi = {false} placeholder = {"Enter display name, max 20 characters"} value={form.displayName} onChangeText={(value)=>{onChange({name:'displayName',value})}} error={errors.displayName}/>
                     <CredentialInput label={'Bio'} multi = {true} height = {200} placeholder = {"Enter bio, max 100 characters"} value={form.bio} onChangeText={(value)=>{onChange({name:'bio',value})}} error={errors.bio}/>
                     <Text style = {{textAlign: "right" ,color: "black", marginRight: 30, marginBottom: 10}}>{countBio}/80</Text>
                 </View>

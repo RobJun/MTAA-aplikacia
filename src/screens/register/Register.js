@@ -11,18 +11,18 @@ const Register = ({onSubmit,onChange,form,error,navigation}) => {
         Alert.alert(auth.error, auth.error, [{text: "OK",onPress: () => {setAuth({type: "CLEAR"})}}])
     }
     return (
-        <View style={{marginTop:'10%'}}>
+        <ScrollView style={{marginTop:'10%'}}>
             {auth.loading && <ActivityIndicator size='large'/>}
             <View  style={{justifyContent:'center',alignItems:'center'}}>
                 <Image source={require('../../../assets/logo_tr.png')} style={{width:170,height:170}} o></Image>
             </View>
-            <ScrollView style={{maxHeight:'80%'}}>
-                <CredentialInput label={'Username'} multi = {false} onChangeText={(value)=>{onChange({name:'name',value})}}  error={error.name} />
-                <CredentialInput label={'Password'} multi = {false} password={true}  onChangeText={(value)=>onChange({name:'password',value})}  error={error.password}/>
-                <CredentialInput label={'Repeat Password'} multi = {false} password={true}  onChangeText={(value)=> {onChange({name:'repassword',value})}} error={error.repassword}/>
+            <View style={{maxHeight:'80%'}}>
+                <CredentialInput label={'Username'} placeholder = {"Enter display name, max 20 characters"}  multi = {false} onChangeText={(value)=>{onChange({name:'name',value})}}  error={error.name} />
+                <CredentialInput label={'Password'} placeholder= {"Enter password, min 8 char"} multi = {false} password={true}  onChangeText={(value)=>onChange({name:'password',value})}  error={error.password}/>
+                <CredentialInput label={'Repeat Password'} placeholder= {"Repeat password"} multi = {false} password={true}  onChangeText={(value)=> {onChange({name:'repassword',value})}} error={error.repassword}/>
                 <Button title="Sign in" onPress={auth.loading ? () => {console.log('loading button disabled')} : ()=>{onSubmit()}}/>
-            </ScrollView>
-        </View>
+            </View>
+        </ScrollView>
     )
 }
 

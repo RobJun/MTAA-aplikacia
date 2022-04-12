@@ -4,6 +4,8 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { globContext } from '../../context/globContext'
 import {register_call} from '../../api_calls/auth_calls'
 import Register from './Register';
+import SelectDropdown from 'react-native-select-dropdown';
+import { API_SERVER } from '../../api_calls/constants';
 
 const RegisterValidator = ({navigation}) => {
     const [form,setForm] = useState({});
@@ -12,12 +14,26 @@ const RegisterValidator = ({navigation}) => {
     const auth = useContext(globContext)
 
     const onChange = ({name,value}) => {
+        if(name === 'name') {
+            if (value?.length > 20) {
+                setErrors({...errors, [name] : "max 20 characters"})
+                return;
+            }else {
+                setErrors({...errors, [name] : null})
+            }
+        }
         setForm({...form, [name] : value});
 
         if(value !== '') {
             setErrors({...errors, [name] : null})
         } else {
             setErrors({...errors, [name] : REQUIRED})
+        }
+
+        if(name === 'name') {
+            if(value.length < 5) {
+                setErrors({...errors,[name]:'name must be atleast 5 characters long'})
+            }
         }
 
         if(name.includes('password')){
@@ -31,21 +47,51 @@ const RegisterValidator = ({navigation}) => {
     //validacia zadanych dat
     const onSubmit = () => {
         console.log(form)
+        var error = false
         if(!form.name){
             setErrors((prev)=>{
                 return {...prev, name : REQUIRED}
             })
+            error = true
         }
         if(!form.password){
             setErrors((prev)=>{
                 return {...prev, password : REQUIRED}
             })
+            error = true
         }
         if(!form.repassword){
             setErrors((prev)=>{
                 return {...prev, repassword : REQUIRED}
             })
+            error = true
         }
+
+        if(form.name.length < 5) {return;}
+
+        if(!form.name.match(/^[a-zA-Z0-9!@#$%^&*]\w{5,20}$/)){
+            setErrors((prev)=>{
+                return {...prev, name : 'name contain illegal characters (legal: a-z A-Z 0-9 !@#$%^&* )'}
+            })
+            error = true
+        }
+        else {
+            setErrors((prev)=>{
+                return {...prev, name : null}
+            })
+        }
+
+        if(!form.password.match(/^[a-zA-Z0-9!@#$%^&*]\w{8,}$/)){
+            setErrors((prev)=>{
+                return {...prev, password : 'password contain illegal characters (legal: a-z A-Z 0-9 !@#$%^&* )'}
+            })
+            error = true
+        }
+
+        if(error){
+            return;
+        }
+
 
         if (form.password === form.repassword){
             
@@ -62,7 +108,7 @@ const RegisterValidator = ({navigation}) => {
                 }else {
                     try {
                         EncryptedStorage.setItem( "user_info", JSON.stringify(form));
-                        auth.setAuth({type: "LOGIN", payload : response.body})
+                        auth.setAuth({type: "LOGIN", payload : {user_id : response.body.id, token : response.body.token}})
                     } catch (error) {
                         auth.setAuth({type: "ERROR",payload:"cant store token"})
                     }

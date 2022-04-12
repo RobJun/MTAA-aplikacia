@@ -17,7 +17,13 @@ const MemberSettings = ({}) => {
     const {info, setInfo} = useContext(clubContext)
     const {auth:{user:{token,user_id}}} = useContext(globContext)
     const [removeUserIDs,setRemoveUserIDs] = useState([])
+    const [search,setSearch] = useState('')
 
+
+    const [filtred,setFiltred] = useState([])
+    useEffect(()=>{
+        setFiltred(info.users.filter(user=>{ return user.displayName.toLowerCase().includes(search)}))
+    },[search])
     const removeMembers = async () => {
         var newInfo = undefined
         var refetchData = false
@@ -70,7 +76,12 @@ const MemberSettings = ({}) => {
 
     return (<View style = {{marginHorizontal: 10}}>
                         <Text style={styles.removeMembers}>Remove Members</Text>
-                        <UserList users={info.users} onSelect={onSelect} selectArray={removeUserIDs}/>
+                        <SearchBar 
+                            placeholder="Search here"
+                            onPress={()=>{console.log("onPress")}}
+                            onChangeText={(text) => {setSearch(text)}}
+                            onSearchPress={(text) => console.log('searching: ', text)}/>
+                        <UserList users={filtred} onSelect={onSelect} selectArray={removeUserIDs}/>
                         <Button title='Remove Members' onPress={removeMembers} style={styles.deleteButton}></Button>
             </View>)
 }
@@ -174,12 +185,23 @@ const ClubSettingScreen = ({navigation}) => {
 
 
     const onChange = ({name,value}) => {
+        if(name === 'name'){
+            if (value?.length > 32) {
+                setErrors({...errors, [name] : "max 80 characters"})
+                return;
+                }else{
+                    setErrors({...errors, [name] : null})
+                }
+        }
         setFormS(prev => {return {...prev, [name] : value}});
 
-        if(name === 'name' && value !== '') {
-            setErrors({...errors, [name] : null})
-        } else {
-            setErrors({...errors, [name] : REQUIRED})
+        if(name === 'name'){
+            if (value !== '') {
+                setErrors({...errors, [name] : null})
+            } else {
+                setErrors({...errors, [name] : REQUIRED})
+            }
+
         }
     }
 
@@ -233,6 +255,17 @@ const ClubSettingScreen = ({navigation}) => {
             return;
         }
 
+        if(!formS.name.match(/^[a-zA-Z0-9!@#$%^&*]\w{7,14}$/)) {
+            setErrors((prev)=>{
+                return {...prev, name : 'Name contains illegal characters (legal: a-zA-Z0-9!@#$%^&*)'}
+            })
+            return;
+        }else {
+            setErrors((prev)=>{
+                return {...prev, name : null}
+            })
+        }
+
 
         const form = new FormData();
         
@@ -244,7 +277,7 @@ const ClubSettingScreen = ({navigation}) => {
         if(formImage)
             form.append("photo", await compressImage(formImage));
             //form.append("photo",formImage)
-        console.log('here')
+        if(formb['_parts'].length === 0) return
         const response = await fetch(`http://${API_SERVER}/group/modify/${info.id}/`,{
             "method": "PUT",
             "headers" : {

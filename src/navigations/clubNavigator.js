@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Clubs from '../screens/clubs';
 import Club from '../screens/club';
 import NewClubForm from '../screens/newClub';
+import BookProfile from '../screens/bookProfile';
 
 const stack = createStackNavigator()
 const ClubNavigator = () => {

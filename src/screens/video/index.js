@@ -8,6 +8,7 @@ import {
   } from 'react-native-webrtc';
 import { API_SERVER } from '../../api_calls/constants';
 import CallButton from '../../components/callButton';
+import { globContext } from '../../context/globContext';
 
 const urls = {
   iceServers: [
@@ -25,7 +26,8 @@ const urls = {
 
 const VideoContainer = ({route,navigation}) => {
   console.log(route)
-  const {roomID,username,token} = route.params
+  const {setVisible} = useContext(globContext)
+  const {roomID,username,token,stun} = route.params
   const [localStream, setLocalStream] = useState(new MediaStream());
   const [hasRemote, setHasRemote] = useState(false)
   const [hasLocal, setHasLocal] = useState(false)
@@ -35,6 +37,13 @@ const VideoContainer = ({route,navigation}) => {
   const [isFront,setIsFront] = useState(true)
   var ws = useRef(null)
   const appstate = useRef(AppState.currentState)
+
+
+  React.useLayoutEffect(() => {
+    console.log(navigation)
+    setVisible(false)
+    return () => { setVisible(true)}
+  }, []);
 
   useEffect(()=>{
     const subscribe = AppState.addEventListener('change',(nextAppState)=>{
@@ -114,7 +123,7 @@ const VideoContainer = ({route,navigation}) => {
       }
     
       const handlePeer = (peerUsername,receiver_channel_name)=> {
-        const conn = new RTCPeerConnection(null)
+        const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerUsername] = conn
         peerConns.push(conn)
         //console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
@@ -168,7 +177,7 @@ const VideoContainer = ({route,navigation}) => {
     
       const handleOffer = (sdp,peerUsername,receiver_channel_name) =>{
         //console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\n")//OFFER SDP:",sdp,"\n------------------------------")
-        const conn = new RTCPeerConnection(null)
+        const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerConnections] = conn
         peerConns.push(conn)
         console.log(peerConns[peerConns.length - 1] === conn)
@@ -243,7 +252,7 @@ const VideoContainer = ({route,navigation}) => {
 
 
       console.log('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
-      ws.current = new WebSocket('ws://'+API_SERVER+':8000/video/'+roomID+'/?q='+token)
+      ws.current = new WebSocket('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
       ws.current.onopen = (e)=>{
           console.log("connection opened with signaling server",e)
           signal(username,'new-peer',{local_screen_sharing : false})

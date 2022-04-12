@@ -15,7 +15,7 @@ import {fetchBooks, fetchGroups, fetchInfo } from '../api_calls/user_calls';
   
   export default function MainNavigator() {
     
-    const {auth:{user:{token,user_id}},setUser,setLibrary,setGroups} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setUser,setLibrary,setGroups,visible} = useContext(globContext)
 
     
     useEffect(() => {
@@ -28,7 +28,7 @@ import {fetchBooks, fetchGroups, fetchInfo } from '../api_calls/user_calls';
 
 
     return (
-        <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown:false}} tabBarOptions={{showLabel: false, activeTintColor: '#5e8d5a'}}>
+        <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown:false, tabBarStyle : {display: (visible ? 'flex' : 'none')}}} tabBarOptions={{showLabel: false, activeTintColor: '#5e8d5a'}}>
           <Tab.Screen 
                 name="HomeNav"
                 component={HomeScreen}
