@@ -137,7 +137,7 @@ const VideoContainer = ({route,navigation}) => {
       const handlePeer = (peerUsername,receiver_channel_name)=> {
         const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerUsername] = conn
-        peerConns.push(conn)
+        setPeerCons(prev=>{return prev.push(conn)})
         console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
         connections.push({user: peerUsername,conn:conn})
         console.log("VIDEO --- new peer -- ",peerUsername, " [",receiver_channel_name,"]")
@@ -191,7 +191,7 @@ const VideoContainer = ({route,navigation}) => {
         console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\n")//OFFER SDP:",sdp,"\n------------------------------")
         const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerConnections] = conn
-        peerConns.push(conn)
+        setPeerCons(prev=>{return prev.push(conn)})
         console.log(peerConns[peerConns.length - 1] === conn)
         console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
         conn.addStream(localStream)
