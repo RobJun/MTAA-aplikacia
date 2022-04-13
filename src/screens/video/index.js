@@ -71,14 +71,15 @@ const VideoContainer = ({route,navigation}) => {
       subscribe.remove();
     };
   },[])
-
   useEffect(
     () => navigation.addListener('blur', () => {
       console.log("BLUR -- PEER CONS -- ",peerConns)
-      peerConns.forEach(e=>{
-        e.close()
+      setPeerCons(prev => {
+        prev.forEach(e=>{
+          e.close()
+        })
+        return []
       })
-      setPeerCons([])
       //conn.close()
       ws.current.close()
     }),
@@ -137,9 +138,11 @@ const VideoContainer = ({route,navigation}) => {
       const handlePeer = (peerUsername,receiver_channel_name)=> {
         const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerUsername] = conn
-        setPeerCons(prev=>{return prev.push(conn)})
+        setPeerCons(prev=>{
+          console.log(prev)
+          return [...prev, conn]
+        })
         console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
-        connections.push({user: peerUsername,conn:conn})
         console.log("VIDEO --- new peer -- ",peerUsername, " [",receiver_channel_name,"]")
         conn.addStream(localStream)
          
@@ -191,7 +194,10 @@ const VideoContainer = ({route,navigation}) => {
         console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\n")//OFFER SDP:",sdp,"\n------------------------------")
         const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerConnections] = conn
-        setPeerCons(prev=>{return prev.push(conn)})
+        setPeerCons(prev=>{
+          console.log(prev)
+          return [...prev, conn]
+        })
         console.log(peerConns[peerConns.length - 1] === conn)
         console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
         conn.addStream(localStream)
