@@ -15,15 +15,16 @@ import {fetchBooks, fetchGroups, fetchInfo } from '../api_calls/user_calls';
   
   export default function MainNavigator() {
     
-    const {auth:{user:{token,user_id}},setUser,setLibrary,setGroups,visible} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setUser,setLibrary,setGroups,visible,setLoading} = useContext(globContext)
 
     
-    useEffect(() => {
-        fetchInfo(user_id,setUser)
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
-        fetchGroups(user_id,setGroups)
+    useEffect(async() => {
+        await fetchInfo(user_id,setUser)
+        await fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
+        await fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
+        await fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+        await fetchGroups(user_id,setGroups)
+        setLoading(false)
     }, [])
 
 

@@ -67,9 +67,9 @@ const RegisterValidator = ({navigation}) => {
             error = true
         }
 
-        if(form.name.length < 5) {return;}
+        if(form.name.length < 5 || form.password.length < 8) {return;}
 
-        if(!form.name.match(/^[a-zA-Z0-9!@#$%^&*]\w{5,20}$/)){
+        if(!form.name.match(/^[a-zA-Z0-9!@#$%^&]*$/)){
             setErrors((prev)=>{
                 return {...prev, name : 'name contain illegal characters (legal: a-z A-Z 0-9 !@#$%^&* )'}
             })
@@ -81,7 +81,7 @@ const RegisterValidator = ({navigation}) => {
             })
         }
 
-        if(!form.password.match(/^[a-zA-Z0-9!@#$%^&*]\w{8,}$/)){
+        if(!form.password.match(/^[a-zA-Z0-9!@#$%^&*]*$/)){
             setErrors((prev)=>{
                 return {...prev, password : 'password contain illegal characters (legal: a-z A-Z 0-9 !@#$%^&* )'}
             })
@@ -95,7 +95,7 @@ const RegisterValidator = ({navigation}) => {
 
         if (form.password === form.repassword){
             
-            if(form.name && form.password && form.password.length >= 8){
+            if(form.name && form.password){
                 auth.setAuth({type: "LOADING"})
                 register_call(form).then(response => {
                 console.log("auth_login_screen_success")

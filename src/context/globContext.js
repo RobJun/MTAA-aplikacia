@@ -27,7 +27,16 @@ const GlobProvider = ({children}) => {
 
     const [visible,setVisible] = useState(true)
 
-    return <globContext.Provider value={{auth,setAuth,user,setUser,groups,setGroups,library,setLibrary,stun,setStun,visible,setVisible}}>{children}</globContext.Provider>
+
+    const [loading,setLoading] = useState(true)
+
+    return <globContext.Provider value={{auth,setAuth,
+                                        user,setUser,
+                                        groups,setGroups,
+                                        library,setLibrary,
+                                        stun,setStun,
+                                        visible,setVisible,
+                                        loading,setLoading}}>{children}</globContext.Provider>
 }
 
 export default GlobProvider;

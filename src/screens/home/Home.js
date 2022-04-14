@@ -1,13 +1,14 @@
-import React, { useCallback, useState, useContext} from "react"
-import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, RefreshControl} from 'react-native'
+import React, { useEffect, useState, useContext,useCallback} from "react"
+import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity,Animated, RefreshControl} from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { globContext } from "../../context/globContext";
 import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
 import { fetchBooks, fetchGroups } from "../../api_calls/user_calls";
+import { LoadingList,HorizontalBookList } from "../../components/onLoading";
 
 const HomeScreen = ({navigation}) => {
-    const {auth:{user:{token,user_id}},groups,setGroups, library:{reading}, setLibrary} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups,library:{reading},loading,setLibrary} = useContext(globContext)
     const {navigate} = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
 
@@ -17,6 +18,19 @@ const HomeScreen = ({navigation}) => {
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
         setRefreshing(false)
     },[])
+    const pos = new Animated.Value(0)
+    useEffect(()=>{
+        Animated.loop(
+        Animated.timing(pos,{
+            toValue: 1000,
+            duration: 3000,
+            useNativeDriver: false
+        }),{iterations:-1}).start()
+    },[])
+    const position = pos.interpolate({
+        inputRange: [0,500,1000],
+        outputRange:[0,2.,0]
+    })
 
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
@@ -25,7 +39,8 @@ const HomeScreen = ({navigation}) => {
             </View>
             <Text style = {styles.text}>You're currently reading...</Text>
             <View style = {{marginRight: 20}}>
-                { reading.length == 0 ? <Text style = {[styles.name, {fontWeight: "normal"}]}>You are not reading anything right now</Text> : 
+                {loading ? <HorizontalBookList position={position} size={120} bookStyle={{marginLeft: 20}}/> : 
+                     reading.length == 0 ? <Text style = {[styles.name, {fontWeight: "normal"}]}>You are not reading anything right now</Text> : 
                     <FlatList
                         horizontal
                         scrollEnabled
@@ -33,7 +48,7 @@ const HomeScreen = ({navigation}) => {
                         data={reading}
                         renderItem={({item})=>{
                             return (<View>
-                                <BookCover onPress = {()=>{navigate('LibraryNav', {screen:'Book', params:{bookID:item.id}})}} 
+                                <BookCover onPress = {()=>{navigation.navigate('Book',{bookID:item.id})}} 
                                 source = {item.cover_path} size =  {120} style = {{marginLeft: 20}}/>   
                                 </View>)
                         }}
@@ -42,7 +57,13 @@ const HomeScreen = ({navigation}) => {
             </View>
             <Text style = {styles.text}>Your bookclubs</Text>
             <View style = {{marginRight: 20}}>
-                { groups.length == 0 ? <Text style = {[styles.name, {fontWeight: "normal"}]}>You are not in any bookclub</Text> : 
+                {loading ? <LoadingList 
+                        position={position}
+                        size={100} 
+                        viewStyle={{marginLeft: 10, alignItems: "center"}}
+                        photoStyle={styles.club}
+                        textStyle={styles.name} /> : (
+                 groups.length == 0 ? <Text style = {[styles.name, {fontWeight: "normal"}]}>You are not in any bookclub</Text> : 
                     <FlatList
                         horizontal
                         scrollEnabled
@@ -57,7 +78,7 @@ const HomeScreen = ({navigation}) => {
                                 </View>
                                 </TouchableOpacity>)}}
                         keyExtractor={(item)=>item.id}
-                    /> 
+                    /> )
                 }
             </View>
         </ScrollView>

@@ -61,7 +61,7 @@ export const LoadingText = ({style, lines=1, width,height=20, randomlength = fal
             position={position} 
             colors={LOADING_COLORS}
             style={[style,styles.textL,{height:height,width:randomlength ? `${length}%` : width}]}>
-                 <Text style={[style, styles.text]}>{randomlength ? randString(length) : '_______'}</Text>
+                 <Text style={[style, styles.text,{fontSize:height}]}>{randomlength ? randString(length) : '_______'}</Text>
         </AnimetedGradient>)
                 }) }
         </View>)
@@ -97,27 +97,22 @@ export const HorizontalBookList = ({position,viewStyle,size,bookStyle})=>{
 }
 
 
-export const VerticalBookList = ({position,viewStyle,size,bookStyle})=>{
+export const VerticalBookList = ({position,viewStyle,size,bookStyle,bgcolor})=>{
     return <FlatList
     scrollEnabled
-    data={library[which]}
-    extraData={library}
+    data={Array.from({length : 1})}
     renderItem={({item})=>{
         return ( 
-        <TouchableOpacity onPress={()=>{navigate('LibraryNav', {screen:'Book', params:{bookID:item.id}})}}>
             <View style = {{flexDirection:'row', flex: 1}}>
-                <View style = {{flexDirection: "row", flex: 1, width: "40%", height: 210, marginLeft:10, marginTop: 20}}>    
-                    <LoadingBookCover  position={position} size={210}/>
+                <View style = {{ width: "35%", height: 210, marginLeft:10, marginTop: 20}}>    
+                    <LoadingBookCover  position={position} style={ {width: '100%', height: 210}}/>
                 </View>
-                <View style = {{width: "60%", height: 210, marginRight: 20, marginTop: 20, backgroundColor: bgColor, borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
-                    <Text style={styles.title}>{item.title}</Text>
-                    <Text style={styles.text}>{item.description.substring(0,150)}...</Text>
+                <View style = {{width: "58%", height: 210, marginRight: 20, marginTop: 20, backgroundColor: bgcolor, borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
+                    <LoadingText style={styles.text}  height={40} position={position}/>
+                    <LoadingText style={styles.text2}  lines={4} position={position} randomlength={true}/>
                 </View>
             </View>
-        </TouchableOpacity>)
-    }}
-    keyExtractor={(item)=>item.id}
-    />
+        )}}/>
 }
 
 
@@ -140,6 +135,20 @@ export const VerticalClubList = ({bookStyle,viewStyle,position,size})=>{
         </View>)
     }}
     />
+}
+
+export const BookSearchList = ({position,coverStyle={},size})=>{
+    return (<FlatList
+        columnWrapperStyle={{justifyContent: "space-around"}}
+        numColumns={3}
+        data={[1,2,3]}
+        renderItem={({item})=>{ 
+            return (
+            <View style = {{marginRight: 15}}>
+                <LoadingBookCover  position={position} size={size} style={coverStyle}/>   
+            </View>
+        ) }}
+    />)
 }
 
 

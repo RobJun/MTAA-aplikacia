@@ -1,18 +1,19 @@
 import React, { useEffect, useState} from "react"
-import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
+import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity,Animated} from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { API_SERVER } from "../../api_calls/constants";
 import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
 import SearchBar from "react-native-dynamic-search-bar";
 import ButtonSettings from "../profile/button";
+import { BookSearchList, LoadingList } from "../../components/onLoading";
 
 const SearchScreen = () => {
     const [groups, setGroups] = useState([])
     const [books, setBooks] = useState([])
     const {navigate} = useNavigation()
     const [search,setSearch] = useState("")
-    const [searching,setSearching] = useState(false)
+    const [searching,setSearching] = useState(true)
 
     const fetchBooks = async (query) => {
         const response = await fetch(`http://${API_SERVER}/find/books/?q=${query}`)
@@ -28,6 +29,13 @@ const SearchScreen = () => {
         setGroups(data) 
     }
 
+    const fet = async (query) => {
+        setSearching(true)
+        await fetchBooks(query)
+        await fetchGroups(query)
+        setSearching(false)
+    }
+
     useEffect(()=>{
         if(search.length < 4 ){
             console.log('string must be atleast 4 characters')
@@ -37,16 +45,27 @@ const SearchScreen = () => {
             console.log('cant search, search on going')
             return;
         }
-        setSearching(true)
-        fetchBooks(search)
-        fetchGroups(search)
-        setSearching(false)
+        fet(search)
     },[search])
     
     useEffect(() => {
-        fetchGroups(''),
-        fetchBooks('')
+        fet('')
     }, [], [])
+
+    const pos = new Animated.Value(0)
+    useEffect(()=>{
+        Animated.loop(
+        Animated.timing(pos,{
+            toValue: 1000,
+            duration: 3000,
+            useNativeDriver: false
+        }),{iterations:-1}).start()
+    },[])
+    const position = pos.interpolate({
+        inputRange: [0,500,1000],
+        outputRange:[0,2.,0]
+    })
+
 
     return (
         <View>
@@ -65,9 +84,10 @@ const SearchScreen = () => {
         <ScrollView style = {{marginBottom: 70}}>
             <Text style={styles.text}>Bookclubs</Text>
                 <View style = {{marginLeft: 20}}>
-                {groups.length === 0 ?
+                {searching ? <LoadingList position={position} size={100} photoStyle={styles.image} viewStyle={{marginRight: 15}} textStyle={styles.name}/> :
+                groups.length === 0 ?
                     (<View><Text style = {[styles.name, {fontWeight: "normal"}]}>No results</Text> 
-                    <ButtonSettings onPress = {()=>{navigate()}} title="Create new bookclub"/></View>) : 
+                    <ButtonSettings onPress = {()=>{navigate('ClubsNav',{screen: 'Create_Club',params:{clubName : search.substring(0,20)}})}} title="Create new bookclub"/></View>) : 
                     <FlatList
                         horizontal
                         scrollEnabled
@@ -87,7 +107,8 @@ const SearchScreen = () => {
             </View>
             <Text style={styles.text}>Books</Text>
             <View style = {{marginLeft: 20}}>
-                {books.length === 0 ?
+                {searching ? <BookSearchList position={position} coverStyle={{marginBottom: 10}} size={120}/> :
+                books.length === 0 ?
                     <Text style = {[styles.name, {fontWeight: "normal"}]}>No results</Text> : 
                     <FlatList
                         columnWrapperStyle={{justifyContent: "space-around"}}
@@ -96,7 +117,7 @@ const SearchScreen = () => {
                         renderItem={({item})=>{ return (
                             <View style = {{marginRight: 15}}>
                                 <BookCover onPress = {()=>{navigate('SearchNav', {screen: 'Book', params:{bookID:item.id}})}} 
-                                    source = {item.cover} size =  {120} style = {{marginBottom: 10}}/>   
+                                    source={item.cover} size={120} style = {{marginBottom: 10}}/>   
                             </View>
                         ) 
                         }}

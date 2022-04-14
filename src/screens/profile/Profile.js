@@ -1,62 +1,94 @@
 import React, {useContext,useState,useEffect, useCallback} from "react"
-import {View, Text,StyleSheet, ScrollView, FlatList, TouchableOpacity, RefreshControl} from 'react-native'
+import {View, Text,StyleSheet, ScrollView, FlatList, TouchableOpacity, RefreshControl,Animated} from 'react-native'
 import ButtonSettings from "./button"
 import ProfileImage from "../../components/profileImage"
 import BookCover from "../../components/BookCover"
 import { useNavigation } from '@react-navigation/native';
 import { globContext } from "../../context/globContext";
 import { fetchInfo } from "../../api_calls/user_calls"
+import { HorizontalBookList, LoadingList, LoadingProfilePhoto, LoadingText } from "../../components/onLoading"
 
 const Profile = ({route}) => {
     const {navigate} = useNavigation()
-    const {auth:{user:{token,user_id}},user,setUser} = useContext(globContext)
+    const {auth:{user:{token,user_id}},user,setUser,loading} = useContext(globContext)
     const [openedUser,setOpenedUser] = useState(undefined)
     const [refreshing, setRefreshing] = useState(false);
-
+    const [loadingUser,setLoadingUser] = useState(true)
+    
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
         fetchInfo(user_id, setUser)
         setRefreshing(false)
     },[])
-    
+    const fet = async ()=> {
+            await fetchInfo(route.params.user_id,setOpenedUser)
+            console.log('here')
+            setLoadingUser(false)
+    }
     useEffect(()=>{
+        
         if(route.params?.user_id){
             if(route.params.user_id == user_id) return;
-            fetchInfo(route.params.user_id,setOpenedUser)
+            fet()
         }
     },[])
 
     const workUser = openedUser ? openedUser : user
+    const load = route.params?.user_id !== undefined && route.params.user_id !== user_id ? loadingUser: loading
+
+    
+    const pos = new Animated.Value(0)
+    useEffect(()=>{
+        Animated.loop(
+        Animated.timing(pos,{
+            toValue: 1000,
+            duration: 3000,
+            useNativeDriver: false
+        }),{iterations:-1}).start()
+    },[])
+    const position = pos.interpolate({
+        inputRange: [0,500,1000],
+        outputRange:[0,2.,0]
+    })
+    
     
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style={{backgroundColor: "#c6d7b9", flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly"}}>
                 <View style = {{width:"40%", height: 130, marginLeft: 20, marginTop: 20, marginBottom: 20}}>
-                    <ProfileImage size = {130} source={workUser.photoPath} style={styles.image}/>
+                    {load ? <LoadingProfilePhoto size={130} position={position}/>:<ProfileImage size = {130} source={workUser.photoPath} style={styles.image}/>}
                 </View>
                 <View style = {{width:"60%", marginRight: 20, marginTop: 20, marginBottom: 20, height: 130}}>
-                    <Text style = {styles.title}>{workUser.displayName}</Text>
-                    <Text style = {styles.text}>{workUser.bio}</Text>
+                    {load ? <LoadingText height={40} position={position} style={styles.title}/> : <Text style = {styles.title}>{workUser.displayName}</Text>}
+                    {load ? <LoadingText lines={2} position={position} containerStyle={styles.text} randomlength={true} style={{margin:0}}/> : <Text style = {styles.text}>{workUser.bio}</Text>}
                 </View>
             </View>
             <View style={{backgroundColor: "#c6d7b9", flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly"}}>
                     <View style = {styles.border}>
                         <Text style={styles.infoTop}>Wishlist</Text>
-                        <Text style = {styles.infoBott}>{workUser.wishlist}</Text>
+                        {loading ? 
+                        <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={33}position={position}/>:
+                        <Text style = {styles.infoBott}>{workUser.wishlist}</Text>}
                     </View>
                     <View style = {styles.border}>
                         <Text style={styles.infoTop}>Reading</Text>
+                        {loading ? 
+                        <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={33} position={position}/>:
                         <Text style = {styles.infoBott}>{workUser.currently_reading}</Text>
+                    }
                     </View>
                     <View style = {styles.border}>
                         <Text style={styles.infoTop}>Completed</Text>
-                        <Text style = {styles.infoBott}>{workUser.completed}</Text>
+                        {loading ? 
+                        <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={33} position={position}/>:
+                        <Text style = {styles.infoBott}>{workUser.completed}</Text>}
                     </View>
             </View>
             <View style={{marginLeft: 20, marginRight: 20}}>
                 <Text style={styles.title}>Bookclubs</Text>
-                {workUser.clubs.length == 0 ? <Text style = {styles.name}>You are not in any bookclub</Text> : 
+                {workUser.clubs.length == 0 ? <Text style = {styles.name}>{openedUser ? `${workUser.displayName} is` :"You are"} not in any bookclub</Text> : 
                 <View>
+                    {load ? <LoadingList position={position} size={100} textStyle={styles.name} photoStyle={styles.club} viewStyle={{marginRight: 15}}/> : 
                     <FlatList
                         horizontal
                         scrollEnabled
@@ -71,13 +103,14 @@ const Profile = ({route}) => {
                             </TouchableOpacity>)
                         }}
                         keyExtractor={(item)=>item.id}
-                    />
+                    />}
                 </View>
                 }
             </View>
             <View style={{marginLeft: 20, marginRight: 20, marginBottom: 20}}>
                 <Text style={styles.title}>Recommended books</Text>
-                {workUser.recommended_books.length == 0 ? <Text style = {styles.name}>You don't have any recommended books</Text> : 
+                {load ? <HorizontalBookList position={position} size={130} viewStyle={{marginRight: 15}} bookStyle={{marginLeft: 10}}/> :
+                workUser.recommended_books.length == 0 ? <Text style = {styles.name}>{openedUser ? `${workUser.displayName} doesn't` :"You don't"} have any recommended books</Text> : 
                     <View>
                         <FlatList
                             horizontal
@@ -96,7 +129,7 @@ const Profile = ({route}) => {
                     </View>
                 }
             </View>
-            {!openedUser &&
+            {!load && !openedUser &&
             <ButtonSettings onPress = {()=>{navigate('ProfileNav', {screen: 'Settings'})}} title="Settings"/>}
         </ScrollView>
      )

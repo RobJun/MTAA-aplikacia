@@ -1,22 +1,25 @@
 import React, { useEffect, useState, useContext } from "react"
-import {View, Image, Text, StyleSheet, ScrollView} from 'react-native'
+import {View, Image, Text, StyleSheet, ScrollView,Animated} from 'react-native'
 import { API_SERVER } from "../../api_calls/constants";
 import { globContext } from "../../context/globContext";
 import DropDownPicker  from 'react-native-dropdown-picker'
 import RecommendedButton from "./RecommendedButton";
 import { fetchBooks } from "../../api_calls/user_calls";
+import {LoadingBookCover, LoadingText} from '../../components/onLoading'
 
 
 const BookProfile = ({route}) => {
-    const {auth:{user:{token,user_id}},user,library, setUser,setLibrary} = useContext(globContext)
+    const {auth:{user:{token,user_id}},user,library, setUser,setLibrary,setAuth} = useContext(globContext)
     const bookID = route.params.bookID
     const [textRecommendButton, setTextRecommendButton] = useState("Recommend")
+    const [loading,setLoading] = useState(true)
     const [info, setInfo] = useState({
-        genre: {color: 0xffffff00},
+        genre: {color: 0x808080ff},
         author:[{name: "Text",},],
         description: "text"})
 
     const fetchInfo = async () => {
+        try { 
         const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
         if(response.status === 404) {
             alert("404 Book not found")
@@ -28,20 +31,25 @@ const BookProfile = ({route}) => {
         if(library.wishlist.find(x=> x.id === data.id) !== undefined) setValue('wishlist')
         else if (library.reading.find(x=> x.id === data.id) !== undefined) setValue('reading')
         else if (library.completed.find(x=> x.id === data.id) !== undefined) setValue("completed")
+        setLoading(false)
+        }catch (err) {
+            alert(`${err} -- check your internet connection\n\nLogging out`)
+            setAuth({type:"LOGOUT"})
+        } 
+
+        //setLoading(false)
     }
 
-    useEffect(() => {
-        fetchInfo()
-    }, [])
     
     
     const putToLibrary = async (where) => {
+        try { 
         const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=${where}`, {
             "method": "PUT",
             "headers" : { "Authorization" : "Token " + token }
         })
         if (response.status === 401 || response.status === 404 || response.status === 406) {
-            if(response.status === 401) alert('401 Neutorizovaný používateľ')
+            if(response.status === 401) throw '401 Neutorizovaný používateľ'
             else if(response.status === 404) alert('404 Neexistujúca kniha')
             else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
             return;
@@ -53,15 +61,20 @@ const BookProfile = ({route}) => {
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+        }catch (err) {
+            alert(`${err}\n\nLogging out`)
+            setAuth({type:"LOGOUT"})
+        } 
     }
 
     const deleteFromLibrary = async (where) => {
+        try { 
         const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/`,{
             "method": "DELETE",
             "headers" : { "Authorization" : "Token " + token }
         })
         if (response.status === 401 || response.status === 404) {
-            if(response.status === 401) alert('401 Neutorizovaný používateľ')
+            if(response.status === 401)  throw ('401 Neutorizovaný používateľ')
             else if(response.status === 404) alert('404 Neexistujúca kniha')
         }
         if(response.status == 409) return;
@@ -71,16 +84,21 @@ const BookProfile = ({route}) => {
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+        }catch (err) {
+            alert(`${err}\n\nLogging out`)
+            setAuth({type:"LOGOUT"})
+        } 
     }
 
     const putToRecommended = async () => {
         if (textRecommendButton === "Recommended") {
+            try { 
             const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=unrecommend`,{
                             "method": "PUT",
                             "headers" : { "Authorization" : "Token " + token}
             })
             if (response.status === 401 || response.status === 404 || response.status === 406) {
-                if(response.status === 401) alert('401 Neutorizovaný používateľ')
+                if(response.status === 401) throw('401 Neutorizovaný používateľ')
                 else if(response.status === 404) alert('404 Neexistujúca kniha')
                 else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
                 return;
@@ -90,13 +108,18 @@ const BookProfile = ({route}) => {
             const data = await response.json()
             setUser(data)
             setTextRecommendButton("Recommend")
+            }catch (err) {
+                alert(`${err}\n\nLogging out`)
+                setAuth({type:"LOGOUT"})
+            } 
         } else {
+            try { 
             const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=recommend`,{
                             "method": "PUT",
                             "headers" : { "Authorization" : "Token " + token}
             })
             if (response.status === 401 || response.status === 404 || response.status === 406) {
-                if(response.status === 401) alert('401 Neutorizovaný používateľ')
+                if(response.status === 401) throw('401 Neutorizovaný používateľ')
                 else if(response.status === 404) alert('404 Neexistujúca kniha')
                 else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
                 return;
@@ -106,6 +129,10 @@ const BookProfile = ({route}) => {
             const data = await response.json()
             setUser(data)
             setTextRecommendButton("Recommended")
+            }catch (err) {
+                alert(`${err}\n\nLogging out`)
+                setAuth({type:"LOGOUT"})
+            } 
         }
     }
 
@@ -119,27 +146,53 @@ const BookProfile = ({route}) => {
       {label: 'Remove', value:'remove', disabled: true}
     ]);
 
+    
+    const pos = new Animated.Value(0)
+    useEffect(()=>{
+        Animated.loop(
+        Animated.timing(pos,{
+            toValue: 1000,
+            duration: 3000,
+            useNativeDriver: false
+        }),{iterations:-1}).start()
+        fetchInfo()
+    },[])
+    const position = pos.interpolate({
+        inputRange: [0,500,1000],
+        outputRange:[0,2.,0]
+    })
+
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
             <View style={{backgroundColor: `rgb(${((info.genre.color & 0xff000000)>>24)& 0xff},${(info.genre.color & 0x00ff0000)>>16},${(info.genre.color & 0x0000ff00)>>8})`, alignItems:"center"}}>
-                <Image source={{uri:info.cover}} style={ styles.image}/>
-                <Text style = {styles.title}> {info.author[0].name} : {info.title}</Text>
+                {loading ? (<View style={{alignItems:"center"}}>
+                                <LoadingBookCover style={ styles.image} size={220} position={position}/>
+                                <LoadingText position={position} height={40} width={150} containerStyle={{marginBottom: 20}}/>
+                            </View>) :
+                            (<View style={{alignItems:"center"}}>
+                                <Image source={{uri:info.cover}} style={ styles.image}/>
+                                <Text style = {styles.title}> {info.author[0].name} : {info.title}</Text>
+                            </View>) }
                 <View style={{flexDirection:'row'}}>
                     <View style = {styles.border}>
                         <Text style={[styles.info, {marginTop: 10, fontWeight: "500"}]}>Rating</Text>
-                        <Text style = {[styles.info, {marginBottom: 10}]}>{info.rating}</Text>
+                        {loading ? <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={20} position={position}/>:<Text style = {[styles.info, ]}>{info.rating}</Text>}
                     </View>
                     <View style = {styles.border}>
                         <Text style={[styles.info, {marginTop: 10, fontWeight: "500"}]}>Genre</Text>
-                        <Text style = {[styles.info, {marginBottom: 10}]}>{info.genre.name}</Text>
+                        {loading ? <LoadingText style={{flex: 0, alignSelf:'center'}} width={'50%'} height={20} position={position}/>:<Text style = {[styles.info,]}>{info.genre.name}</Text> }
                     </View>
                     <View style = {styles.border}>
                         <Text style={[styles.info, {marginTop: 10, fontWeight: "500"}]}>Pages</Text>
-                        <Text style = {[styles.info, {marginBottom: 10}]}>{info.pages}</Text>
+                        {loading ? <LoadingText style={{flex: 0, alignSelf:'center'}} width={'50%'} height={20} position={position}/>:<Text style = {[styles.info, ]}>{info.pages}</Text> }
                     </View>
                 </View>
             </View>
-            <View style={{flexDirection:'row',  flex: 1, alignItems:"center", justifyContent: "space-evenly", marginLeft: 5, marginRight: 5}}>
+            {loading ? ( <View style={{flexDirection:'row',  flex: 1, alignItems:"center", justifyContent: "space-evenly", marginLeft: 5, marginRight: 5, marginTop:20}}>
+                    <LoadingText height={60}  containerStyle={{width:'40%'}} position={position}/>
+                    <LoadingText height={60}  containerStyle={{width:'40%'}} position={position}/>
+                        </View>): (
+                <View style={{flexDirection:'row',  flex: 1, alignItems:"center", justifyContent: "space-evenly", marginLeft: 5, marginRight: 5, marginTop:20}}>
                 <DropDownPicker
                     open={open}
                     value={value}
@@ -171,10 +224,10 @@ const BookProfile = ({route}) => {
                         }}}
                     />
                 <RecommendedButton onPress={putToRecommended} title= {textRecommendButton} color = {`rgb(${((info.genre.color & 0xff000000)>>24)& 0xff},${(info.genre.color & 0x00ff0000)>>16},${(info.genre.color & 0x0000ff00)>>8})`}/> 
-            </View>
+                </View>)}
             <View >
                 <Text style = {{fontSize: 20, fontWeight: "bold", marginTop: 10, marginLeft: 10, marginRight: 20, marginLeft: 20, color: "black"}}>About</Text>
-                <Text style = {styles.text}>{info.description}</Text>
+                {loading ? <LoadingText lines={7} style={styles.text} position={position} containerStyle={{marginTop:10,marginBottom:30}} randomlength={true}/> : <Text style = {styles.text}>{info.description}</Text> } 
             </View>
         </ScrollView>
     )
@@ -187,7 +240,8 @@ const styles = StyleSheet.create({
         borderTopWidth: 2,
         marginBottom: 30,
         marginLeft: 10,
-        marginRight: 10
+        marginRight: 10,
+        paddingBottom:10
     },
     info: {
         fontSize: 20,
@@ -221,11 +275,22 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontFamily:'serif',
         color: "black",
-        marginBottom: 20,
         fontWeight: 'bold',
         textAlign: "center",
         marginLeft: 10,
-        marginRight: 10
+        marginRight: 10,
+        marginBottom: 20,
+    },
+    button: {
+        alignItems: 'center',
+        margin: 10,
+        paddingVertical: 12,
+        borderRadius:10,
+        paddingLeft: 20,
+        paddingRight: 20,
+        backgroundColor: "white",
+        borderColor: "black",
+        borderWidth: 1, 
     },
 })
 

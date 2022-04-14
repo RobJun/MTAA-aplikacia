@@ -1,11 +1,12 @@
 import React, {useContext,useState,useEffect, useRef} from 'react'
-import { Text, View, StyleSheet,FlatList,AppState } from 'react-native';
+import { Text, View, StyleSheet,FlatList,AppState, Dimensions } from 'react-native';
 import {
     RTCPeerConnection,
     RTCView,
     MediaStream,
     mediaDevices,
   } from 'react-native-webrtc';
+import InCallManager from 'react-native-incall-manager';
 import { API_SERVER } from '../../api_calls/constants';
 import CallButton from '../../components/callButton';
 import { globContext } from '../../context/globContext';
@@ -46,6 +47,8 @@ const VideoContainer = ({route,navigation}) => {
   const [peerConns,setPeerCons] = useState([])
   const [streams,setStreams] = useState({})
   const [isFront,setIsFront] = useState(true)
+  const [connectedUsers,setConnectedUsers] = useState(0)
+  
   var ws = useRef(null)
   const appstate = useRef(AppState.currentState)
 
@@ -82,8 +85,9 @@ const VideoContainer = ({route,navigation}) => {
       })
       //conn.close()
       ws.current.close()
-      })
-    ,[])
+      InCallManager.stop()
+    }),
+    [navigation])
 
 
   useEffect(()=>{
@@ -142,6 +146,7 @@ const VideoContainer = ({route,navigation}) => {
           console.log(prev)
           return [...prev, conn]
         })
+        setConnectedUsers(prev=>{return prev+1})
         console.log("PEEER CONNECTIONS : ", peerConnections, "length: ", Object.keys(peerConnections).length)
         console.log("VIDEO --- new peer -- ",peerUsername, " [",receiver_channel_name,"]")
         conn.addStream(localStream)
@@ -159,6 +164,7 @@ const VideoContainer = ({route,navigation}) => {
                 //delete mapPeers[peerUsername];
                 if(iceConnectionState != 'closed'){
                    conn.close();
+                   setConnectedUsers(prev=>{return prev-1})
                    //streams[peerUsername] = undefined
                    setStreams((prev) => {return {...prev,[peerUsername]: undefined}})
                   //setRemoteStream({toURL: ()=>{}})
@@ -194,6 +200,7 @@ const VideoContainer = ({route,navigation}) => {
         console.log("VIDEO --- new offer -- ",peerUsername, " [",receiver_channel_name,"]\n")//OFFER SDP:",sdp,"\n------------------------------")
         const conn = new RTCPeerConnection(stun ? urls : null)
         peerConnections[peerConnections] = conn
+        setConnectedUsers(prev=>{return prev+1})
         setPeerCons(prev=>{
           console.log(prev)
           return [...prev, conn]
@@ -218,6 +225,7 @@ const VideoContainer = ({route,navigation}) => {
                 if(iceConnectionState != 'closed'){
                   conn.close();
                   //streams[peerUsername]=undefined
+                  setConnectedUsers(prev=>{return prev-1})
                   setStreams((prev) => {return {...prev,[peerUsername]: undefined}})
                   //setRemoteStream({toURL: ()=>{}})
                   //setHasRemote(false)
@@ -274,6 +282,7 @@ const VideoContainer = ({route,navigation}) => {
       ws.current.onopen = (e)=>{
           console.log("connection opened with signaling server",e)
           signal(username,'new-peer',{local_screen_sharing : false})
+          InCallManager.start({media : 'video'})
       }
       ws.current.onmessage = (msg) => {
           let data = JSON.parse(msg.data);
@@ -319,17 +328,17 @@ const VideoContainer = ({route,navigation}) => {
 
  useEffect(()=>{
     console.log("checking remote")
-    if (Object.keys(streams).length>0){
+    if (connectedUsers>0){
       
       //console.log(streams)
       //console.log("REMOTE-STREAM-ADDED")
       //console.log(remoteStream)
       setHasRemote(true)
     }else{
-      //console.log("No peers")
+      console.log("No peers")
       setHasRemote(false)
     }
- },[streams])
+ },[connectedUsers])
 
  useEffect(()=>{
   console.log("setting peerCons to: ")
@@ -343,8 +352,8 @@ const VideoContainer = ({route,navigation}) => {
   if(streams[item] === undefined) return;
   return(
     <View style={[styles.remoteVideoContainer]}>
-      <Text>{item}</Text>
       <RTCView streamURL={streams[item].toURL()} style={[styles.localVideo,]} objectFit='contain' />
+      <Text style={styles.remoteName}>{item}</Text>
     </View>
 
     )
@@ -355,9 +364,10 @@ const VideoContainer = ({route,navigation}) => {
  const [videoOff,setVideoOff] = useState(false)
 
  return (
-  <View style={{flex:1}}>
+  <View style={{flex:1,backgroundColor:'black'}}>
     <View>
       {hasRemote ? <FlatList
+        scrollEnabled={true}
         data={Object.keys(streams)}
         extraData={streams}
         renderItem={renderItem}
@@ -365,7 +375,7 @@ const VideoContainer = ({route,navigation}) => {
         numColumns={2}
       
       />
-       : <Text>Waiting for someone to connect</Text>}
+       : <Text style={{color:'white', alignSelf:'center'}}>Waiting for someone to connect</Text>}
     </View>
     <View style={styles.localVideoContainer}>
         <RTCView streamURL={localStream.toURL()} style={{flex:1}} objectFit='cover' />
@@ -385,11 +395,8 @@ const VideoContainer = ({route,navigation}) => {
     }/>
     <CallButton icon={videoOff ? 'video-off' : 'video'} 
         onPress={()=>{
-          console.log('here')
           setVideoOff(prev => !prev)
-          console.log('here')
           localStream.getVideoTracks()[0].enabled= !localStream.getVideoTracks()[0].enabled
-          console.log(localStream.getVideoTracks())
         }}/>
     </View>
   </View>
@@ -422,6 +429,16 @@ const styles = StyleSheet.create({
   remoteVideoContainer : {
       height:200,
       width:200,
-      backgroundColor: 'red',
+      backgroundColor: 'black',
+  },
+  remoteVideo: {
+
+  },
+  remoteName : {
+    color:'white',
+    backgroundColor:'black',
+    position:'absolute',
+    bottom:0,
+    left:0
   }
 })

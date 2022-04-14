@@ -1,5 +1,5 @@
 import React,{useContext,useState,useEffect,useCallback} from "react";
-import {View,Text,FlatList,Image, StyleSheet,ScrollView,Alert, TouchableOpacity} from 'react-native'
+import {View,Text,FlatList,Image, StyleSheet,ScrollView,Alert, ActivityIndicator} from 'react-native'
 import { clubContext } from ".";
 import { API_SERVER } from "../../api_calls/constants";
 import Button from "../../components/button";
@@ -178,16 +178,17 @@ const BookSetttings = ({})=> {
 const ClubSettingScreen = ({navigation}) => {
     const [formS,setFormS] = useState({})
     const [errors,setErrors] = useState({ username : false});
-    const {auth:{user:{token,user_id}},setUser,setGroups} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setUser,setGroups,setAuth} = useContext(globContext)
     const {info, setInfo} = useContext(clubContext)
     const [formImage,setFormImage] = useState(false)
     const REQUIRED = 'Required field'
+    const [submiting,setSubmiting] = useState(false)
 
 
     const onChange = ({name,value}) => {
         if(name === 'name'){
-            if (value?.length > 32) {
-                setErrors({...errors, [name] : "max 80 characters"})
+            if (value?.length > 20) {
+                setErrors({...errors, [name] : "max 20 characters"})
                 return;
                 }else{
                     setErrors({...errors, [name] : null})
@@ -254,8 +255,14 @@ const ClubSettingScreen = ({navigation}) => {
             })
             return;
         }
+        if(formS.name > 20) {
+            setErrors((prev)=>{
+                return {...prev, name : 'max 20 characters'}
+            })
+            return;
+        }
 
-        if(!formS.name.match(/^[a-zA-Z0-9!@#$%^&*]\w{7,14}$/)) {
+        if(!formS.name.match(/^[a-zA-Z0-9!@#$%^&*]*$/)) {
             setErrors((prev)=>{
                 return {...prev, name : 'Name contains illegal characters (legal: a-zA-Z0-9!@#$%^&*)'}
             })
@@ -266,7 +273,8 @@ const ClubSettingScreen = ({navigation}) => {
             })
         }
 
-
+        setSubmiting(true)
+        
         const form = new FormData();
         
         for (const [key, value] of Object.entries(formS)) {
@@ -277,7 +285,8 @@ const ClubSettingScreen = ({navigation}) => {
         if(formImage)
             form.append("photo", await compressImage(formImage));
             //form.append("photo",formImage)
-        if(formb['_parts'].length === 0) return
+        if(form['_parts'].length === 0) return
+        try{
         const response = await fetch(`http://${API_SERVER}/group/modify/${info.id}/`,{
             "method": "PUT",
             "headers" : {
@@ -287,12 +296,18 @@ const ClubSettingScreen = ({navigation}) => {
             body: form
         })
 
+        if(response.status === 401){
+            throw '401 neautorizovany pouzivatel'
+        }
+
         if(response.status === 409){
             alert("Name already in use")
+            setSubmiting(false)
             return;
         }
         if (response.status === 406){
             alert("Not right name")
+            setSubmiting(false)
             return;
         }
         const body = await response.json()
@@ -301,13 +316,20 @@ const ClubSettingScreen = ({navigation}) => {
         setInfo(body)
         fetchGroups(user_id,setGroups)
         fetchInfo(user_id,setUser)
+        setSubmiting(false)
         alert("Changes made")
+        }catch(err){
+            alert('Error'- err)
+            setAuth({type:"LOGOUT"})
+        }
+
     }
 
     return (<ScrollView>
     <View style = {{backgroundColor: "#ee6f68"}}>
         <Text style={styles.header}>Bookclub settings</Text>
     </View>
+    {submiting && <ActivityIndicator visible={true} size='large'/>}
     <BasicSettings 
         formImage={formImage}
         selectImage={imagePicker} 
@@ -316,7 +338,7 @@ const ClubSettingScreen = ({navigation}) => {
         onChange={onChange}
         error={errors} 
         form={formS} 
-        onPress={onSubmit} 
+        onPress={submiting ? ()=>{} : onSubmit} 
         title={'Save Changes'}/>
     <BookSetttings/>
     <MemberSettings/>

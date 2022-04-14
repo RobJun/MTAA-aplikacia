@@ -1,5 +1,5 @@
 import React,{useContext,useState,useEffect,useCallback} from "react";
-import {View,Text,FlatList,Image, StyleSheet,ScrollView,RefreshControl} from 'react-native'
+import {View,Text,FlatList,Image, StyleSheet,ScrollView,RefreshControl,Animated} from 'react-native'
 import { clubContext } from ".";
 import { API_SERVER } from "../../api_calls/constants";
 import Button from "../../components/button";
@@ -10,38 +10,53 @@ import UserList from "./Userlist";
 import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
 import { fetchGroups, fetchInfo } from "../../api_calls/user_calls";
+import { LoadingBookCover, LoadingList, LoadingProfilePhoto,LoadingText } from "../../components/onLoading";
 
 
 const ClubScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
-    const {auth:{user:{token,user_id}},setGroups,setUser,user,stun} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setGroups,setUser,user,stun,setAuth} = useContext(globContext)
     const {info, setInfo} = useContext(clubContext)
     const [ownerName,setOwnerName] = useState('')
     const [isOwner,setIsOwner] = useState(false)
     const [isPart,setIsPart] = useState(false)
     const {navigate} = useNavigation()
     const [refreshing, setRefreshing] = useState(false);
+    const [loading,setLoading] = useState(true)
 
 
-    const fetchClubInfo = () => {
-        fetch(`http://${API_SERVER}/group/info/${clubID}/`)
-        .then(response => response.json())
-        .then(data => {
+    const fetchClubInfo = async () => {
+        try {
+            const response = await fetch(`http://${API_SERVER}/group/info/${clubID}/`)
+            if(response.status > 400 ) { 
+                alert(`Error - ${response.status}`)
+                return;
+            }
+            const data = await response.json()
             data.photoPath = data.photoPath +`?time=${new Date().getTime()}`
             setInfo(data)
-        })
+            setLoading(false)
+        } catch(err){
+            alert('Connection error')
+        }
     }
 
 
-    const onRefresh = useCallback(()=>{
+    const onRefresh = useCallback( async()=>{
         setRefreshing(true)
-        fetch(`http://${API_SERVER}/group/info/${clubID}/`)
-        .then(response => response.json())
-        .then(data => {
-            data.photoPath = data.photoPath +`?time=${new Date().getTime()}`
-            setInfo(data)
-            setRefreshing(false)
-        })
+        try {
+        const response = await fetch(`http://${API_SERVER}/group/info/${clubID}/`)
+        if(response.status > 400 ) { 
+            alert(`Error - ${response.status}`)
+            return;
+        }
+        const data = await response.json()
+        data.photoPath = data.photoPath +`?time=${new Date().getTime()}`
+        setInfo(data)
+        setRefreshing(false)
+        } catch(err){
+            alert('Connection error')
+        }
     },[])
     
     useEffect(() => {
@@ -79,13 +94,15 @@ const ClubScreen = ({navigation,route}) => {
 
     const memberButton = async ()=>{
         console.log('member')
+        try {
         const response = await fetch(`http://${API_SERVER}/group/leave/${clubID}/`,{
             "method": "DELETE",
             "headers" : {
             "Authorization": `Token ${token}`
             }
         })
-        if (response.status === 401 || response.status ===404 || response.status === 409){
+        if (response.status === 401) throw '401 neautorizovany pouzivatel'
+        if ( response.status ===404 || response.status === 409){
             alert('error')
             return;
         }
@@ -93,29 +110,53 @@ const ClubScreen = ({navigation,route}) => {
         setInfo(data)
         fetchGroups(user_id,setGroups)
         fetchInfo(user_id,setUser)
+        }catch(err) {
+            alert(`${err}\n\nLogging out`)
+            setAuth({type:"LOGOUT"})
+        }
     }
 
     const otherButton = async ()=>{
-        console.log('other')
-        console.log(token)
-        console.log(`Token ${token}`)
+        try {
         const response = await fetch(`http://${API_SERVER}/group/join/${clubID}/`,{
             "method": "PUT",
             "headers" : {
             "Authorization" : "Token " + token
             }
         })
-        if (response.status === 401 || response.status ===404 || response.status === 409){
-            alert('error')
+        if (response.status === 401) throw '401 neautorizovany pouzivatel'
+        if ( response.status ===404 || response.status === 409){
+            alert(`Error - ${response.status}`)
             return;
         }
         const data = await response.json()
         setInfo(data)
         fetchGroups(user_id,setGroups)
         fetchInfo(user_id,setUser)
+    }catch(err) {
+        alert(`${err}\n\nLogging out`)
+        setAuth({type:"LOGOUT"})
+    }
     }
 
     console.log(info.photoPath)
+
+
+    const pos = new Animated.Value(0)
+    useEffect(()=>{
+        Animated.loop(
+        Animated.timing(pos,{
+            toValue: 1000,
+            duration: 3000,
+            useNativeDriver: false
+        }),{iterations:-1}).start()
+    },[])
+    const position = pos.interpolate({
+        inputRange: [0,500,1000],
+        outputRange:[0,2.,0]
+    })
+
+
     return (
         <ScrollView
             refreshControl={
@@ -131,23 +172,30 @@ const ClubScreen = ({navigation,route}) => {
                             roomID : clubID,
                             stun : stun
                         })}} style={styles.callButton}/>}
-                <ProfileImage source={info.photoPath} size={180}/>
-                <Text style={styles.clubHeaderName}>{info.name}</Text>
+                {loading ? <LoadingProfilePhoto size={180} position={position} /> : 
+                    <ProfileImage source={info.photoPath} size={180}/> }
+                {loading ? <LoadingText width={200} height={40} style={styles.clubHeaderName} lines={1}  position={position}/> :
+                        <Text style={styles.clubHeaderName}>{info.name}</Text> } 
                 <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10}}>
-                    <Text style={styles.clubHeaderOwner}>No. members: {info.count}</Text>
-                    <Text style={styles.clubHeaderOwner}>Owner: {ownerName}</Text>
+                    {loading ? <LoadingText style={styles.clubHeaderOwner} lines={1}  position={position}/> :
+                    <Text style={styles.clubHeaderOwner}>No. members: {info.count}</Text> }
+                    {loading ? <LoadingText  style={styles.clubHeaderOwner} lines={1}  position={position}/> :
+                    <Text style={styles.clubHeaderOwner}>Owner: {ownerName}</Text> }
                 </View>
             </View>
             <View>
                 <View style={styles.firstSection}>
                     <Text style={styles.header}>About</Text>
-                    <Text style={styles.text}>{info.info ? info.info : "About not set"}</Text>
+                    {loading ? <LoadingText  style={styles.text} lines={5} randomlength={true}  position={position}/> :
+                    <Text style={styles.text}>{info.info ? info.info : "About not set"}</Text>}
                     <Text style={styles.header}>Rules</Text>
-                    <Text style={styles.text}>{info.rules ? info.rules : "Rules not set"}</Text>
+                    {loading ? <LoadingText  style={styles.text} lines={5}  position={position} randomlength={true}/> :
+                    <Text style={styles.text}>{info.rules ? info.rules : "Rules not set"}</Text> }
                 </View>
                 <View style={styles.secondSection}>
                     <Text style={styles.header}>Book of the week</Text>
-                    { info.book_of_the_week ? <BookCover 
+                    
+                    { loading ? <LoadingBookCover size={150} style={styles.bowImage}  position={position}/> :info.book_of_the_week ? <BookCover 
                                 source={info.book_of_the_week.cover}
                                 style={styles.bowImage}
                                 onPress={()=>{ navigation.navigate('Club_Book',{bookID: info.book_of_the_week.id})}}/> 
@@ -156,12 +204,14 @@ const ClubScreen = ({navigation,route}) => {
                 <View style={styles.thirdSection}>
                     <Text style={styles.header}>Members</Text>
                     <View style = {{marginRight: 20}}>
-                        <UserList users={info.users} onSelect={(item)=>{navigation.navigate('Club_Member',{user_id:item.id})}} selectArray={[]}/>
+                    { loading ? <LoadingList  position={position}/> :
+                        <UserList users={info.users} onSelect={(item)=>{navigation.navigate('Club_Member',{user_id:item.id})}} selectArray={[]}/>}
                     </View>
                 </View>
                 <View style={styles.fourthSection}>
+                    {!loading && 
                     <Button onPress={isPart ? (isOwner ? ownerButton : memberButton) : otherButton} title={isPart ? (isOwner ? 'Settings' : 'Leave club') : 'Join Club'} style = {{backgroundColor: "#ee6f68", paddingVertical: 15}}/>
-                </View>
+                    }</View>
             </View>
         </ScrollView>
     )
@@ -200,14 +250,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF00'
     },
     clubHeaderName : {
-        paddingVertical: 10,
+        marginVertical: 10,
         fontSize: 30,
         fontWeight:'900',
         color:'black',
         fontFamily: 'serif'
     },
     clubHeaderOwner : {
-        paddingVertical: 10,
+        marginVertical: 10,
         fontSize: 17,
         fontWeight:'500',
         color:'black',

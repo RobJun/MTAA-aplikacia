@@ -1,13 +1,15 @@
 import { useNavigation } from "@react-navigation/native"
-import React, {useContext, useCallback, useState} from "react"
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, RefreshControl} from 'react-native'
+import React, {useContext,useEffect,useState, useCallback} from "react"
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Animated, RefreshControl} from 'react-native'
 import ButtonNewClub from "./buttonNewClub."
 import { globContext } from "../../context/globContext";
 import ProfileImage from "../../components/profileImage";
+import { VerticalClubList } from "../../components/onLoading";
+import Fontisto from  'react-native-vector-icons/Fontisto'
 import { fetchGroups } from "../../api_calls/user_calls";
 
 const Clubs = () => {
-    const {auth:{user:{token,user_id}},groups,setGroups} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups,setGroups,loading} = useContext(globContext)
     const {navigate} = useNavigation()
     const [refreshing, setRefreshing] = useState(false);
 
@@ -17,6 +19,22 @@ const Clubs = () => {
         setRefreshing(false)
     },[])
    
+
+    const pos = new Animated.Value(0)
+    useEffect(()=>{
+        Animated.loop(
+        Animated.timing(pos,{
+            toValue: 1000,
+            duration: 3000,
+            useNativeDriver: false
+        }),{iterations:-1}).start()
+    },[])
+    const position = pos.interpolate({
+        inputRange: [0,500,1000],
+        outputRange:[0,2.,0]
+    })
+    console.log(groups)
+
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
              <View style={{marginTop: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
@@ -24,7 +42,11 @@ const Clubs = () => {
                 <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="Create new club"/>
             </View>
             <View>
-                {groups == [] ? <Text>You are not in any bookclub</Text> : 
+                {loading ? <VerticalClubList position={position} size={100}/> : (
+                groups.length ===0 ? (<View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                    <Text style={{marginTop:'20%',fontSize :15}}>You are not in any bookclub</Text>
+                    <Fontisto name='frowning' style={{fontSize: 150,marginVertical:'10%'}}/>
+                    </View>): 
                 <FlatList
                     scrollEnabled
                     data={groups}
@@ -43,7 +65,7 @@ const Clubs = () => {
                         </TouchableOpacity>)
                     }}
                     keyExtractor={(item)=>item.id}
-                /> }
+                />) }
             </View>
         </ScrollView>
     )

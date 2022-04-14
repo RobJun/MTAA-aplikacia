@@ -1,5 +1,5 @@
-import React, {useContext, useState, useCallback} from "react"
-import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity,RefreshControl} from 'react-native'
+import React, {useContext, useState, useCallback,useEffect} from "react"
+import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity,RefreshControl,Animated} from 'react-native'
 import ButtonLibrary from "./button"
 import { globContext } from "../../context/globContext";
 import { useNavigation } from '@react-navigation/native';
@@ -34,6 +34,21 @@ const Library = () => {
         if (which === "completed") setBColor(color3)
     }
 
+    const pos = new Animated.Value(0)
+    useEffect(()=>{
+        Animated.loop(
+        Animated.timing(pos,{
+            toValue: 1000,
+            duration: 3000,
+            useNativeDriver: false
+        }),{iterations:-1}).start()
+    },[])
+    const position = pos.interpolate({
+        inputRange: [0,500,1000],
+        outputRange:[0,2.,0]
+    })
+    
+
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
              <View style={{flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly", marginLeft: 20, marginRight: 20}}>
@@ -42,7 +57,7 @@ const Library = () => {
                 <ButtonLibrary onPress={()=>{changeLibrary("completed", "grey", "grey", "#ee6f68")}} title="Completed" color ={completedColor}/>
             </View>
             <View>
-                {loading ?  <VerticalBookList /> : 
+                {loading ? <VerticalBookList position={position} bgcolor={bgColor}/> :
                 library[which].length == 0 ? <Text style = {[styles.text, {marginTop: 20}]}>You don't have any book in this category</Text> : 
                     <FlatList
                         scrollEnabled
@@ -52,10 +67,10 @@ const Library = () => {
                             return ( 
                             <TouchableOpacity onPress={()=>{navigate('LibraryNav', {screen:'Book', params:{bookID:item.id}})}}>
                                 <View style = {{flexDirection:'row', flex: 1}}>
-                                    <View style = {{flexDirection: "row", flex: 1, width: "40%", height: 210, marginLeft:10, marginTop: 20}}>    
+                                    <View style = {{ width: "35%", height: 210, marginLeft:10, marginTop: 20}}>    
                                         <Image source={{uri:item.cover_path}} style={styles.image}/>
                                     </View>
-                                    <View style = {{width: "60%", height: 210, marginRight: 20, marginTop: 20, backgroundColor: bgColor, borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
+                                    <View style = {{width: "58%", height: 210, marginRight: 20, marginTop: 20, backgroundColor: bgColor, borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
                                         <Text style={styles.title}>{item.title}</Text>
                                         <Text style={styles.text}>{item.description.substring(0,150)}...</Text>
                                     </View>
@@ -63,8 +78,7 @@ const Library = () => {
                             </TouchableOpacity>)
                         }}
                         keyExtractor={(item)=>item.id}
-                        />
-                }
+                        />}
             </View>
         </ScrollView>
     )
