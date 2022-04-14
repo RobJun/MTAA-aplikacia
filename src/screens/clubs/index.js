@@ -1,16 +1,24 @@
 import { useNavigation } from "@react-navigation/native"
-import React, {useContext} from "react"
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView} from 'react-native'
+import React, {useContext, useCallback, useState} from "react"
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, RefreshControl} from 'react-native'
 import ButtonNewClub from "./buttonNewClub."
 import { globContext } from "../../context/globContext";
 import ProfileImage from "../../components/profileImage";
+import { fetchGroups } from "../../api_calls/user_calls";
 
 const Clubs = () => {
     const {auth:{user:{token,user_id}},groups,setGroups} = useContext(globContext)
     const {navigate} = useNavigation()
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(()=>{
+        setRefreshing(true)
+        fetchGroups(user_id, setGroups)
+        setRefreshing(false)
+    },[])
    
     return (
-        <ScrollView>
+        <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
              <View style={{marginTop: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
                 <Text style = {styles.title1}>My bookclubs</Text>
                 <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="Create new club"/>

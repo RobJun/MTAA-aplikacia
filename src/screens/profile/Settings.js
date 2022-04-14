@@ -41,6 +41,10 @@ const Settings = ({navigation}) => {
         setForm(prev => {return {...prev, [name] : value}});
 
         if(name === 'displayName') {
+            if (value?.length > 20) {
+                setErrors({...errors, [name] : "max 20 characters"})
+                return
+            }
             if( value !== '') {
                 setErrors({...errors, [name] : null})
             } else {
