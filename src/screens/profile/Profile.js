@@ -1,5 +1,5 @@
-import React, {useContext,useState,useEffect} from "react"
-import {View, Text,StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
+import React, {useContext,useState,useEffect, useCallback} from "react"
+import {View, Text,StyleSheet, ScrollView, FlatList, TouchableOpacity, RefreshControl} from 'react-native'
 import ButtonSettings from "./button"
 import ProfileImage from "../../components/profileImage"
 import BookCover from "../../components/BookCover"
@@ -11,6 +11,14 @@ const Profile = ({route}) => {
     const {navigate} = useNavigation()
     const {auth:{user:{token,user_id}},user,setUser} = useContext(globContext)
     const [openedUser,setOpenedUser] = useState(undefined)
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(()=>{
+        setRefreshing(true)
+        fetchInfo(user_id, setUser)
+        setRefreshing(false)
+    },[])
+    
     useEffect(()=>{
         if(route.params?.user_id){
             if(route.params.user_id == user_id) return;
@@ -21,7 +29,7 @@ const Profile = ({route}) => {
     const workUser = openedUser ? openedUser : user
     
     return (
-        <ScrollView>
+        <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style={{backgroundColor: "#c6d7b9", flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly"}}>
                 <View style = {{width:"40%", height: 130, marginLeft: 20, marginTop: 20, marginBottom: 20}}>
                     <ProfileImage size = {130} source={workUser.photoPath} style={styles.image}/>

@@ -1,18 +1,25 @@
-import React, { useEffect, useState, useContext} from "react"
-import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity} from 'react-native'
+import React, { useCallback, useState, useContext} from "react"
+import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, RefreshControl} from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { globContext } from "../../context/globContext";
-import { API_SERVER } from "../../api_calls/constants";
 import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
+import { fetchBooks, fetchGroups } from "../../api_calls/user_calls";
 
 const HomeScreen = ({navigation}) => {
-    const {auth:{user:{token,user_id}},groups,library:{reading}} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups,setGroups, library:{reading}, setLibrary} = useContext(globContext)
     const {navigate} = useNavigation();
+    const [refreshing, setRefreshing] = useState(false);
 
+    const onRefresh = useCallback(()=>{
+        setRefreshing(true)
+        fetchGroups(user_id, setGroups)
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
+        setRefreshing(false)
+    },[])
 
     return (
-        <ScrollView>
+        <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style = {{height: 260}}>
                 <Image source={require('../../../assets/home.jpg')} style={styles.image}></Image>
             </View>

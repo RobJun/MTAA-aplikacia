@@ -82,8 +82,8 @@ const VideoContainer = ({route,navigation}) => {
       })
       //conn.close()
       ws.current.close()
-    }),
-    [navigation])
+      })
+    ,[])
 
 
   useEffect(()=>{
@@ -211,7 +211,7 @@ const VideoContainer = ({route,navigation}) => {
 
         conn.oniceconnectionstatechange = () => {
           var iceConnectionState = conn.iceConnectionState;
-          console.log(iceConnectionState)
+          //console.log(iceConnectionState)
             if (iceConnectionState === "failed" || iceConnectionState === "disconnected" || iceConnectionState === "closed"){
                 console.log('Deleting peer');
                 //delete mapPeers[peerUsername];
@@ -227,7 +227,7 @@ const VideoContainer = ({route,navigation}) => {
 
         conn.onicecandidate = (event) => {
           if(event.candidate){
-            console.log("New Ice Candidate! Reprinting SDP" + JSON.stringify(conn.localDescription));
+            //console.log("New Ice Candidate! Reprinting SDP" + JSON.stringify(conn.localDescription));
             return;
           }
           console.log('Gathering finished! Sending answer SDP to ', peerUsername, '.');
@@ -269,7 +269,7 @@ const VideoContainer = ({route,navigation}) => {
 
 
 
-      console.log('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
+      console.log('ws://'+API_SERVER+':8000/video/'+roomID+'/?q='+token)
       ws.current = new WebSocket('ws://'+API_SERVER+'/video/'+roomID+'/?q='+token)
       ws.current.onopen = (e)=>{
           console.log("connection opened with signaling server",e)
@@ -321,15 +321,20 @@ const VideoContainer = ({route,navigation}) => {
     console.log("checking remote")
     if (Object.keys(streams).length>0){
       
-      console.log(streams)
-      console.log("REMOTE-STREAM-ADDED")
+      //console.log(streams)
+      //console.log("REMOTE-STREAM-ADDED")
       //console.log(remoteStream)
       setHasRemote(true)
     }else{
-      console.log("No peers")
+      //console.log("No peers")
       setHasRemote(false)
     }
  },[streams])
+
+ useEffect(()=>{
+  console.log("setting peerCons to: ")
+  console.log("peerCons:",peerConns)
+ },[peerConns])
 
 
  const renderItem = ({item})=>{

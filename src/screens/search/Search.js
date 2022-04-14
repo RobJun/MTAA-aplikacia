@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState} from "react"
 import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { API_SERVER } from "../../api_calls/constants";

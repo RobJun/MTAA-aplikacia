@@ -1,18 +1,28 @@
-import React, {useContext, useState} from "react"
-import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity} from 'react-native'
+import React, {useContext, useState, useCallback} from "react"
+import {View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity,RefreshControl} from 'react-native'
 import ButtonLibrary from "./button"
 import { globContext } from "../../context/globContext";
 import { useNavigation } from '@react-navigation/native';
+import { fetchBooks } from "../../api_calls/user_calls";
+import { VerticalBookList } from "../../components/onLoading";
 
 const Library = () => {
     const {navigate} = useNavigation()
-    const {auth:{user:{token,user_id}},library} = useContext(globContext)
+    const {auth:{user:{token,user_id}},library, setLibrary,loading} = useContext(globContext)
     const [wishlistColor, setWishlistColor] = useState("grey")
     const [readingColor, setReadingColor] = useState("#f17c56") 
     const [completedColor, setCompletedColor] = useState("grey")  
     const [bgColor, setBColor] = useState("#f17c56") 
     const [which,setWhich] = useState('reading')
+    const [refreshing, setRefreshing] = useState(false);
 
+    const onRefresh = useCallback(()=>{
+        setRefreshing(true)
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
+        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+        setRefreshing(false)
+    },[])
     
     const changeLibrary = (which, color1, color2, color3) => {
         setWhich(which)
@@ -25,14 +35,15 @@ const Library = () => {
     }
 
     return (
-        <ScrollView>
+        <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
              <View style={{flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly", marginLeft: 20, marginRight: 20}}>
                 <ButtonLibrary onPress={()=>{changeLibrary("wishlist", "#ffc04a", "grey", "grey")}} title="Wishlist" color={wishlistColor}/>
                 <ButtonLibrary onPress={()=>{changeLibrary("reading", "grey", "#f17c56", "grey")}} title="Reading" color ={readingColor}/>
                 <ButtonLibrary onPress={()=>{changeLibrary("completed", "grey", "grey", "#ee6f68")}} title="Completed" color ={completedColor}/>
             </View>
             <View>
-                {library[which].length == 0 ? <Text style = {[styles.text, {marginTop: 20}]}>You don't have any book in this category</Text> : 
+                {loading ?  <VerticalBookList /> : 
+                library[which].length == 0 ? <Text style = {[styles.text, {marginTop: 20}]}>You don't have any book in this category</Text> : 
                     <FlatList
                         scrollEnabled
                         data={library[which]}
