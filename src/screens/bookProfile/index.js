@@ -20,21 +20,20 @@ const BookProfile = ({route}) => {
 
     const fetchInfo = async () => {
         try { 
-        const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
-        if(response.status === 404) {
-            alert("404 Book not found")
-            return
-        }
-        const data = await response.json()
-        setInfo(data)
-        if(user.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
-        if(library.wishlist.find(x=> x.id === data.id) !== undefined) setValue('wishlist')
-        else if (library.reading.find(x=> x.id === data.id) !== undefined) setValue('reading')
-        else if (library.completed.find(x=> x.id === data.id) !== undefined) setValue("completed")
-        setLoading(false)
-        }catch (err) {
-            alert(`${err} -- check your internet connection\n\nLogging out`)
-            setAuth({type:"LOGOUT"})
+            const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
+            if(response.status === 404) {
+                alert("Error 404 - Book not found")
+                return
+            }
+            const data = await response.json()
+            setInfo(data)
+            if(user.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
+            if(library.wishlist.find(x=> x.id === data.id) !== undefined) setValue('wishlist')
+            else if (library.reading.find(x=> x.id === data.id) !== undefined) setValue('reading')
+            else if (library.completed.find(x=> x.id === data.id) !== undefined) setValue("completed")
+            setLoading(false)
+        } catch (err) {
+            alert(`${err} -- no internet connection`)
         } 
 
         //setLoading(false)
@@ -44,47 +43,47 @@ const BookProfile = ({route}) => {
     
     const putToLibrary = async (where) => {
         try { 
-        const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=${where}`, {
-            "method": "PUT",
-            "headers" : { "Authorization" : "Token " + token }
-        })
-        if (response.status === 401 || response.status === 404 || response.status === 406) {
-            if(response.status === 401) throw '401 Neutorizovaný používateľ'
-            else if(response.status === 404) alert('404 Neexistujúca kniha')
-            else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
-            return;
-        }
-        if(response.status == 409) return;
+            const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=${where}`, {
+                "method": "PUT",
+                "headers" : { "Authorization" : "Token " + token }
+            })
+            if (response.status === 401 || response.status === 404 || response.status === 406) {
+                if(response.status === 401) throw 'Error 401 - Neutorizovaný používateľ'
+                else if(response.status === 404) alert('Error 404 - Neexistujúca kniha')
+                else if(response.status === 406) alert('Error 406 - Neplatný príkaz - zlá kategória')
+                return;
+            }
+            if(response.status == 409) return;
 
-        const data = await response.json()
-        setUser(data)
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
-        }catch (err) {
+            const data = await response.json()
+            setUser(data)
+            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
+            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
+            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+        } catch (err) {
             alert(`${err}\n\nLogging out`)
             setAuth({type:"LOGOUT"})
         } 
     }
 
-    const deleteFromLibrary = async (where) => {
+    const deleteFromLibrary = async () => {
         try { 
-        const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/`,{
-            "method": "DELETE",
-            "headers" : { "Authorization" : "Token " + token }
-        })
-        if (response.status === 401 || response.status === 404) {
-            if(response.status === 401)  throw ('401 Neutorizovaný používateľ')
-            else if(response.status === 404) alert('404 Neexistujúca kniha')
-        }
-        if(response.status == 409) return;
+            const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/`,{
+                "method": "DELETE",
+                "headers" : { "Authorization" : "Token " + token }
+            })
+            if (response.status === 401 || response.status === 404) {
+                if(response.status === 401)  throw ('Error 401 - Neutorizovaný používateľ')
+                else if(response.status === 404) alert('Error 404 - Neexistujúca kniha')
+            }
+            if(response.status == 409) return;
 
-        const data = await response.json()
-        setUser(data)
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
-        }catch (err) {
+            const data = await response.json()
+            setUser(data)
+            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
+            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
+            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+        } catch (err) {
             alert(`${err}\n\nLogging out`)
             setAuth({type:"LOGOUT"})
         } 
@@ -93,24 +92,24 @@ const BookProfile = ({route}) => {
     const putToRecommended = async () => {
         if (textRecommendButton === "Recommended") {
             try { 
-            const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=unrecommend`,{
-                            "method": "PUT",
-                            "headers" : { "Authorization" : "Token " + token}
-            })
-            if (response.status === 401 || response.status === 404 || response.status === 406) {
-                if(response.status === 401) throw('401 Neutorizovaný používateľ')
-                else if(response.status === 404) alert('404 Neexistujúca kniha')
-                else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
-                return;
-            }
-            if(response.status == 409) return;
+                const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=unrecommend`,{
+                                "method": "PUT",
+                                "headers" : { "Authorization" : "Token " + token}
+                })
+                if (response.status === 401 || response.status === 404 || response.status === 406) {
+                    if(response.status === 401) throw('401 Neutorizovaný používateľ')
+                    else if(response.status === 404) alert('Error 404 - Neexistujúca kniha')
+                    else if(response.status === 406) alert('Erro 406 - Neplatný príkaz - zlá kategória')
+                    return;
+                }
+                if(response.status == 409) return;
 
-            const data = await response.json()
-            setUser(data)
-            setTextRecommendButton("Recommend")
-            }catch (err) {
-                alert(`${err}\n\nLogging out`)
-                setAuth({type:"LOGOUT"})
+                const data = await response.json()
+                setUser(data)
+                setTextRecommendButton("Recommend")
+            } catch (err) {
+                    alert(`${err}\n\nLogging out`)
+                    setAuth({type:"LOGOUT"})
             } 
         } else {
             try { 
@@ -119,9 +118,9 @@ const BookProfile = ({route}) => {
                             "headers" : { "Authorization" : "Token " + token}
             })
             if (response.status === 401 || response.status === 404 || response.status === 406) {
-                if(response.status === 401) throw('401 Neutorizovaný používateľ')
-                else if(response.status === 404) alert('404 Neexistujúca kniha')
-                else if(response.status === 406) alert('406 Neplatný príkaz - zlá kategória')
+                if(response.status === 401) throw('Error 401 - Neutorizovaný používateľ')
+                else if(response.status === 404) alert('Erro 404 - Neexistujúca kniha')
+                else if(response.status === 406) alert('Error 406 - Neplatný príkaz - zlá kategória')
                 return;
             }
             if(response.status == 409) return;

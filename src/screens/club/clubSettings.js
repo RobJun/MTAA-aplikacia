@@ -129,7 +129,7 @@ const BookSetttings = ({})=> {
     } 
     const onSubmit=  async ()=>{
         if(book === false){
-            alert('treba vzbrat knihu')
+            alert('treba vybrat knihu')
             return;
         }
         const resposne = await fetch(`http://${API_SERVER}/group/book/${info.id}/?q=${book.id}`, {
@@ -296,9 +296,7 @@ const ClubSettingScreen = ({navigation}) => {
             body: form
         })
 
-        if(response.status === 401){
-            throw '401 neautorizovany pouzivatel'
-        }
+        if(response.status === 401) throw '401 neautorizovany pouzivatel'
 
         if(response.status === 409){
             alert("Name already in use")

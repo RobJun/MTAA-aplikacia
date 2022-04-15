@@ -16,17 +16,25 @@ const SearchScreen = () => {
     const [searching,setSearching] = useState(true)
 
     const fetchBooks = async (query) => {
-        const response = await fetch(`http://${API_SERVER}/find/books/?q=${query}`)
-        setBooks(await response.json())
+        try {
+            const response = await fetch(`http://${API_SERVER}/find/books/?q=${query}`)
+            setBooks(await response.json())
+        } catch {
+            alert("Error - no internet connection")
+        }
     }
 
     const fetchGroups = async (query) => {
-        const response = await fetch(`http://${API_SERVER}/find/groups/?q=${query}`)
-        const data = await response.json()
-        data.forEach(element => {
-            element.photoPath = element.photoPath +`?time=${new Date().getTime()}`
-        });
-        setGroups(data) 
+        try {
+            const response = await fetch(`http://${API_SERVER}/find/groups/?q=${query}`)
+            const data = await response.json()
+            data.forEach(element => {
+                element.photoPath = element.photoPath +`?time=${new Date().getTime()}`
+            });
+            setGroups(data)
+        } catch {
+            alert("Error - no internet connection")
+        }
     }
 
     const fet = async (query) => {

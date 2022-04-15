@@ -82,9 +82,7 @@ const NewClubForm = ({navigation,route})=>{
         })
         console.log(response.status)
 
-        if(response.status === 401){
-            throw '401 neautorizovany pouzivatel'
-        }
+        if(response.status === 401) throw '401 neautorizovany pouzivatel'
 
         if(response.status === 409){
             alert("Name already in use")

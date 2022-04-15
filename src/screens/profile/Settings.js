@@ -102,25 +102,31 @@ const Settings = ({navigation}) => {
             if(formImage)
                 formb.append("photo", await compressImage(formImage));
             if(formb['_parts'].length === 0) return
-            const response = await fetch(`http://${API_SERVER}/user/modify/`,{
-                "method": "PUT",
-                "headers" : {
-                    "Content-Type": "multipart/form-data; boundary=---011000010111000001101001",
-                    "Authorization" : `Token ${token}`
-                },
-                body: formb
-            })
-    
-            if (response.status === 401 || response.status === 404){
-                if(response.status === 401) alert('Neatorizovaný používateľ')
-                else if(response.status === 404) alert('Prázdne pole DisplayName alebo fotka nie je podporovaný obrázok')
-                return;
-            }
 
-            const body = await response.json()
-            body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
-            setUser(body)
-            navigation.goBack()
+            try {
+                const response = await fetch(`http://${API_SERVER}/user/modify/`,{
+                    "method": "PUT",
+                    "headers" : {
+                        "Content-Type": "multipart/form-data; boundary=---011000010111000001101001",
+                        "Authorization" : `Token ${token}`
+                    },
+                    body: formb
+                })
+        
+                if (response.status === 401 || response.status === 404){
+                    if(response.status === 401) throw('Error 401 - Neatorizovaný používateľ')
+                    else if(response.status === 404) alert('Error 404 - Prázdne pole DisplayName alebo fotka nie je podporovaný obrázok')
+                    return;
+                }
+    
+                const body = await response.json()
+                body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
+                setUser(body)
+                navigation.goBack()
+            } catch (err) {
+                alert(`${err}\n\nLogging out`)
+                setAuth({type:"LOGOUT"})
+            }
     }
     
         return (
