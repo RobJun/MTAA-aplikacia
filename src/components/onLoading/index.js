@@ -35,7 +35,7 @@ export const LoadingProfilePhoto = ({size, source, style, local= false , positio
         end={{x: 1, y: 0}} 
         position={position} 
         colors={LOADING_COLORS} 
-        style={[{width:size,height:size, borderRadius : size/2},style]}></AnimetedGradient>)
+        style={[{width:size,height:size, borderRadius : 150/2},style]}></AnimetedGradient>)
 }
 
 

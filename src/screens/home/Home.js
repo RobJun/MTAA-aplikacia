@@ -8,7 +8,7 @@ import { fetchBooks, fetchGroups } from "../../api_calls/user_calls";
 import { LoadingList,HorizontalBookList } from "../../components/onLoading";
 
 const HomeScreen = ({navigation}) => {
-    const {auth:{user:{token,user_id}},groups,library:{reading},loading,setLibrary} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups, setGroups, library:{reading},loading,setLibrary} = useContext(globContext)
     const {navigate} = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
 
@@ -18,6 +18,7 @@ const HomeScreen = ({navigation}) => {
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
         setRefreshing(false)
     },[])
+
     const pos = new Animated.Value(0)
     useEffect(()=>{
         Animated.loop(
@@ -27,6 +28,7 @@ const HomeScreen = ({navigation}) => {
             useNativeDriver: false
         }),{iterations:-1}).start()
     },[])
+
     const position = pos.interpolate({
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
@@ -37,9 +39,9 @@ const HomeScreen = ({navigation}) => {
             <View style = {{height: 260}}>
                 <Image source={require('../../../assets/home.jpg')} style={styles.image}></Image>
             </View>
-            <Text style = {styles.text}>You're currently reading...</Text>
             <View style = {{marginRight: 20}}>
-                {loading ? <HorizontalBookList position={position} size={120} bookStyle={{marginLeft: 20}}/> : 
+                <Text style = {styles.text}>You're currently reading...</Text>
+                {loading ? <HorizontalBookList position={position} size={150} bookStyle={{marginLeft: 20}}/> : 
                      reading.length == 0 ? <Text style = {[styles.name, {fontWeight: "normal"}]}>You are not reading anything right now</Text> : 
                     <FlatList
                         horizontal
@@ -49,14 +51,14 @@ const HomeScreen = ({navigation}) => {
                         renderItem={({item})=>{
                             return (<View>
                                 <BookCover onPress = {()=>{navigation.navigate('Book',{bookID:item.id})}} 
-                                source = {item.cover_path} size =  {120} style = {{marginLeft: 20}}/>   
+                                source = {item.cover_path} size =  {150} style = {{marginLeft: 20}}/>   
                                 </View>)
                         }}
                         keyExtractor={(item)=>item.id}
                     /> }
             </View>
-            <Text style = {styles.text}>Your bookclubs</Text>
             <View style = {{marginRight: 20}}>
+                <Text style = {styles.text}>Your bookclubs</Text>
                 {loading ? <LoadingList 
                         position={position}
                         size={100} 
@@ -72,7 +74,7 @@ const HomeScreen = ({navigation}) => {
                         renderItem={({item})=> {
                             return (
                                 <TouchableOpacity onPress={()=>{navigation.navigate('Club',{screen: 'Club_screen', params:{clubID:item.id}})}}>
-                                <View style = {{marginLeft: 10, alignItems: "center"}}>
+                                <View style = {{marginLeft: 20, alignItems: "center"}}>
                                     <ProfileImage size = {100} source={item.photoPath} style={styles.club}/>
                                     <Text style={styles.name} key={item.id}>{item.name.length > 8 ? `${item.name.substring(0,6)}...` : item.name}</Text>
                                 </View>
@@ -89,7 +91,6 @@ const HomeScreen = ({navigation}) => {
     club: {
         borderRadius: 150 / 2,
         overflow: "hidden",
-        marginLeft: 20,
         alignItems: "center"
     },
     image: {
@@ -116,7 +117,6 @@ const HomeScreen = ({navigation}) => {
         color: "black",
         textAlign: "center",
         fontWeight: 'bold',
-        marginLeft:20,
         marginBottom: 20
     }
 })

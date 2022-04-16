@@ -55,10 +55,10 @@ const Profile = ({route}) => {
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style={{backgroundColor: "#c6d7b9", flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly"}}>
-                <View style = {{width:"40%", height: 130, marginLeft: 20, marginTop: 20, marginBottom: 20}}>
-                    {load ? <LoadingProfilePhoto size={130} position={position}/>:<ProfileImage size = {130} source={workUser.photoPath} style={styles.image}/>}
+                <View style = {{width:"35%", height: 140, marginLeft: 30, marginTop: 20, marginBottom: 20}}>
+                    {load ? <LoadingProfilePhoto size={"100%"} position={position}/>:<ProfileImage size = {"100%"} border = {140} source={workUser.photoPath} style={styles.image}/>}
                 </View>
-                <View style = {{width:"60%", marginRight: 20, marginTop: 20, marginBottom: 20, height: 130}}>
+                <View style = {{width:"60%", marginLeft: 10, marginRight: 10, marginTop: 20, marginBottom: 20, height: 140}}>
                     {load ? <LoadingText height={40} position={position} style={styles.title}/> : <Text style = {styles.title}>{workUser.displayName}</Text>}
                     {load ? <LoadingText lines={2} position={position} containerStyle={styles.text} randomlength={true} style={{margin:0}}/> : <Text style = {styles.text}>{workUser.bio}</Text>}
                 </View>
@@ -85,7 +85,7 @@ const Profile = ({route}) => {
                     </View>
             </View>
             <View style={{marginLeft: 20, marginRight: 20}}>
-                <Text style={styles.title}>Bookclubs</Text>
+                <Text style={[styles.title, {marginLeft: 0}]}>Bookclubs</Text>
                 {workUser.clubs.length == 0 ? <Text style = {styles.name}>{openedUser ? `${workUser.displayName} is` :"You are"} not in any bookclub</Text> : 
                 <View>
                     {load ? <LoadingList position={position} size={100} textStyle={styles.name} photoStyle={styles.club} viewStyle={{marginRight: 15}}/> : 
@@ -108,7 +108,7 @@ const Profile = ({route}) => {
                 }
             </View>
             <View style={{marginLeft: 20, marginRight: 20, marginBottom: 20}}>
-                <Text style={styles.title}>Recommended books</Text>
+                <Text style={[styles.title, {marginLeft: 0}]}>Recommended books</Text>
                 {load ? <HorizontalBookList position={position} size={130} viewStyle={{marginRight: 15}} bookStyle={{marginLeft: 10}}/> :
                 workUser.recommended_books.length == 0 ? <Text style = {styles.name}>{openedUser ? `${workUser.displayName} doesn't` :"You don't"} have any recommended books</Text> : 
                     <View>
@@ -121,7 +121,7 @@ const Profile = ({route}) => {
                                 return (
                                 <View style = {{marginRight: 15}}>
                                     <BookCover onPress = {()=>{navigate('ProfileNav', {screen: 'Book', params:{bookID:item.id}})}} 
-                                    source = {item.cover} size =  {130} style = {{marginLeft: 10}}/>   
+                                    source = {item.cover} size =  {130}/>   
                                 </View>)
                             }}
                             keyExtractor={(item)=>item.id}
@@ -143,19 +143,19 @@ const styles = StyleSheet.create({
         marginBottom: 30,
     },
     infoTop: {
-        fontSize: 17,
+        fontSize: 15,
         color: "black",
         marginLeft: 20,
         marginRight: 20,
-        marginTop: 10,
+        marginTop: 5,
         textAlign: "center",
     },
     infoBott: {
-        fontSize: 25,
+        fontSize: 20,
         color: "black",
         marginLeft: 20,
         marginRight: 20,
-        marginBottom: 10,
+        marginBottom: 5,
         textAlign: "center"
     },
     club: {
@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
     },
     image: {
         overflow: "hidden",
-        marginLeft: 10,
         marginBottom: 5,
     },
     title : {
@@ -173,7 +172,7 @@ const styles = StyleSheet.create({
         color: "black",
         marginTop: 10,
         marginRight: 10,
-        marginLeft: 5,
+        marginLeft: 10,
         marginBottom: 10,
         fontWeight: 'bold',
     },
@@ -182,7 +181,7 @@ const styles = StyleSheet.create({
         fontFamily:'serif',
         color: "black",
         textAlign: "left",
-        marginLeft: 5,
+        marginLeft: 10,
         marginRight: 10,
         marginBottom: 10,
     },

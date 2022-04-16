@@ -39,9 +39,9 @@ const Clubs = () => {
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
              <View style={{marginTop: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
                 <Text style = {styles.title1}>My bookclubs</Text>
-                <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="Create new club"/>
+                <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="Create club"/>
             </View>
-            <View>
+            <View style = {{marginBottom: 20}}>
                 {loading ? <VerticalClubList position={position} size={100}/> : (
                 groups.length ===0 ? (<View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
                     <Text style={{marginTop:'20%',fontSize :15}}>You are not in any bookclub</Text>
@@ -54,10 +54,10 @@ const Clubs = () => {
                         return (
                         <TouchableOpacity onPress={()=>{navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
                             <View style = {{flexDirection:'row', flex: 1}}>
-                                <View style = {{flexDirection: "row", flex: 1, width: "35%", height: 100, marginLeft:15, marginTop: 20, backgroundColor: "#f17c56", borderTopLeftRadius: 360, borderBottomLeftRadius: 360}}>  
-                                    <ProfileImage size = {100} source={item.photoPath} style={styles.image}/>
+                                <View style = {{flexDirection: "row", flex: 1, width: "35%", marginLeft:15, marginTop: 20, backgroundColor: "#f17c56", borderTopLeftRadius: 360, borderBottomLeftRadius: 360}}>  
+                                    <ProfileImage size = {"100%"} source={item.photoPath} style={styles.image}/>
                                 </View>
-                                <View style = {{width: "65%", height: 100, marginRight: 20, marginTop: 20, backgroundColor: "#f17c56", borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
+                                <View style = {{width: "65%", marginRight: 20, marginTop: 20, backgroundColor: "#f17c56", borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
                                     <Text style={styles.title}>{item.name}</Text>
                                     <Text style={styles.text}>Number of members: {item.number_of_members}</Text>
                                 </View>
@@ -82,10 +82,8 @@ const Clubs = () => {
     },
     image: {
         overflow: "hidden",
-        marginLeft: 0,
-        marginBottom: 5,
-        borderWidth: 1,
-        borderColor: "#f17c56"
+        borderWidth: 3,
+        borderColor: "#f17c56", 
     },
     title1 : {
         fontSize: 25,
@@ -113,7 +111,7 @@ const Clubs = () => {
         textAlign: "left",
         marginLeft: 15,
         marginRight: 10,
-        marginBottom: 10,
+        marginBottom: 30,
     }
 })
 

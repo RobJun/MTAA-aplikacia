@@ -172,8 +172,8 @@ const ClubScreen = ({navigation,route}) => {
                             roomID : clubID,
                             stun : stun
                         })}} style={styles.callButton}/>}
-                {loading ? <LoadingProfilePhoto size={180} position={position} /> : 
-                    <ProfileImage source={info.photoPath} size={180}/> }
+                {loading ? <LoadingProfilePhoto size={150} position={position} /> : 
+                    <ProfileImage source={info.photoPath} size={150}/> }
                 {loading ? <LoadingText width={200} height={40} style={styles.clubHeaderName} lines={1}  position={position}/> :
                         <Text style={styles.clubHeaderName}>{info.name}</Text> } 
                 <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10}}>
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     clubHeader : {
         backgroundColor: '#ee6f68',
         alignItems:'center',
-        paddingTop:70,
+        paddingTop:50,
         paddingBottom:20
     },
     callButton : {

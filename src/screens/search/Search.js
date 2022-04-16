@@ -1,9 +1,8 @@
 import React, { useEffect, useState} from "react"
-import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity,Animated} from 'react-native'
+import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity,Animated, Image} from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { API_SERVER } from "../../api_calls/constants";
 import ProfileImage from "../../components/profileImage";
-import BookCover from "../../components/BookCover";
 import SearchBar from "react-native-dynamic-search-bar";
 import ButtonSettings from "../profile/button";
 import { BookSearchList, LoadingList } from "../../components/onLoading";
@@ -114,18 +113,20 @@ const SearchScreen = () => {
                 }
             </View>
             <Text style={styles.text}>Books</Text>
-            <View style = {{marginLeft: 20}}>
+            <View style = {{marginLeft: 15}}>
                 {searching ? <BookSearchList position={position} coverStyle={{marginBottom: 10}} size={120}/> :
                 books.length === 0 ?
                     <Text style = {[styles.name, {fontWeight: "normal"}]}>No results</Text> : 
                     <FlatList
+                        scrollEnabled
                         columnWrapperStyle={{justifyContent: "space-around"}}
                         numColumns={3}
                         data={books}
                         renderItem={({item})=>{ return (
                             <View style = {{marginRight: 15}}>
-                                <BookCover onPress = {()=>{navigate('SearchNav', {screen: 'Book', params:{bookID:item.id}})}} 
-                                    source={item.cover} size={120} style = {{marginBottom: 10}}/>   
+                                <TouchableOpacity onPress = {()=>{navigate('SearchNav', {screen: 'Book', params:{bookID:item.id}})}} >
+                                    <Image source={{uri:item.cover}} style={{width: 120, height: 180, resizeMode: "contain", marginBottom: 10}}/>
+                                </TouchableOpacity>
                             </View>
                         ) 
                         }}

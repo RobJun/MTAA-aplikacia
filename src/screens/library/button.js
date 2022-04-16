@@ -11,15 +11,14 @@ const ButtonLibrary = (props) => {
 
 const styles = StyleSheet.create({
     button: {
-        backgroundColor: "grey",
         alignItems:'center',
-        marginHorizontal: 20,
         marginTop: 20,
         paddingVertical: 5,
-        borderRadius:10,
-        paddingLeft: 20,
-        paddingRight: 20,
-        borderRadius: 40
+        borderRadius: 40,
+        paddingLeft: 15,
+        paddingRight: 15,
+        marginLeft: 15,
+        marginRight: 15
     },
     buttonText: {
         fontSize: 20,
