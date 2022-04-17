@@ -14,13 +14,11 @@ const styles = StyleSheet.create({
         overflow: "visible",
         backgroundColor: "#5e8d5a",
         alignItems:'center',
-        marginRight: 20,
+        marginRight: 25,
         marginTop: 10,
-        paddingVertical: 10,
-        borderRadius:10,
-        paddingLeft: 20,
-        paddingRight: 20,
-        borderRadius: 40
+        padding: 10,
+        paddingHorizontal: 15, 
+        borderRadius: 100,
     },
     buttonText: {
         fontSize: 15,

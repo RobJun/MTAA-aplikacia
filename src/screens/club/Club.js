@@ -1,7 +1,6 @@
 import React,{useContext,useState,useEffect,useCallback} from "react";
-import {View,Text,FlatList,Image, StyleSheet,ScrollView,RefreshControl,Animated} from 'react-native'
+import {View,Text, StyleSheet,ScrollView,RefreshControl,Animated} from 'react-native'
 import { clubContext } from ".";
-import { API_SERVER } from "../../api_calls/constants";
 import Button from "../../components/button";
 import { globContext } from "../../context/globContext";
 import CallButton from "../../components/callButton";
@@ -24,8 +23,6 @@ const ClubScreen = ({navigation,route}) => {
     const {navigate} = useNavigation()
     const [refreshing, setRefreshing] = useState(false);
     const [loading,setLoading] = useState(true)
-
-
 
     const onRefresh = useCallback( async()=>{
         setRefreshing(true)
@@ -131,11 +128,11 @@ const ClubScreen = ({navigation,route}) => {
                     <ProfileImage source={info.photoPath} size={150}/> }
                 {loading ? <LoadingText width={200} height={40} style={styles.clubHeaderName} lines={1}  position={position}/> :
                         <Text style={styles.clubHeaderName}>{info.name}</Text> } 
-                <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10,marginTop:20}}>
+                <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10, marginTop: 10}}>
                     <View style = {styles.border}>
-                        <Text style={styles.infoTop}>Members</Text>
+                        <Text style={styles.infoTop}> Members</Text>
                         {loading ? 
-                        <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={33}position={position}/>:
+                        <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={33} position={position}/>:
                         <Text style = {styles.clubHeaderOwner}>{info.count}</Text>}
                     </View>
                     <View style = {styles.border}>
@@ -221,14 +218,14 @@ const styles = StyleSheet.create({
         textAlign:'center'
     },
     clubHeaderOwner : {
-        marginVertical: 10,
-        fontSize: 17,
+        marginVertical: 5,
+        fontSize: 15,
         fontWeight:'500',
         color:'black',
         fontFamily: 'serif',
         marginRight: 20,
         marginLeft: 20,
-        textAlign:'center'
+        textAlign:'center', 
     },
     header : {
         color: 'black',
@@ -266,11 +263,14 @@ const styles = StyleSheet.create({
         marginTop: 20
     },
     border: {
-        borderBottomWidth: 3,
+        width:'40%', 
         borderColor: "#5e8d5a",
         borderTopWidth: 3,
-        marginBottom: 30,
-        width:'50%'
+        borderBottomWidth: 3,
+        paddingRight: 20, 
+        marginLeft: 20, 
+        marginRight: 20, 
+        alignItems: "center", 
     },
     infoTop: {
         fontSize: 15,
@@ -279,6 +279,8 @@ const styles = StyleSheet.create({
         marginRight: 20,
         marginTop: 5,
         textAlign: "center",
+        fontFamily: "serif", 
+        fontWeight: "700",
     },
 })
 

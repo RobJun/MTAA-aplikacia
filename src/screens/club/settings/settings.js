@@ -123,8 +123,9 @@ const ClubSettingScreen = ({navigation}) => {
             return
         }
 
+        let success = false
         try{
-            await saveChanges(info.id,form,token,setInfo,setSubmiting)
+            success = await saveChanges(info.id,form,token,setInfo,setSubmiting)
         }catch(err){
             alert('Error'- err)
             setSubmiting(false)
@@ -132,6 +133,8 @@ const ClubSettingScreen = ({navigation}) => {
                 setAuth({type:"LOGOUT"})
             return
         }
+    
+        if(!success) return;
 
         try {
             fetchGroups(user_id,setGroups)

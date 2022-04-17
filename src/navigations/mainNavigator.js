@@ -17,7 +17,6 @@ import {fetchBooks, fetchGroups, fetchInfo } from '../api_calls/user_calls';
     
     const {auth:{user:{token,user_id},isLogged},setAuth,setUser,setLibrary,setGroups,visible,setLoading} = useContext(globContext)
 
-    
     useEffect(() => {
       const fetchData = async() => {
         try{

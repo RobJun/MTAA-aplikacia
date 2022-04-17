@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native"
 import React, {useContext,useEffect,useState, useCallback} from "react"
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Animated, RefreshControl} from 'react-native'
+import {View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ScrollView, Animated, RefreshControl, Dimensions} from 'react-native'
 import ButtonNewClub from "./buttonNewClub."
 import { globContext } from "../../context/globContext";
 import ProfileImage from "../../components/profileImage";
@@ -37,27 +37,27 @@ const Clubs = () => {
 
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
-             <View style={{marginTop: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
+             <View style={{marginTop: 20, marginBottom: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
                 <Text style = {styles.title1}>My bookclubs</Text>
-                <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="Create club"/>
+                <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="+"/>
             </View>
-            <View style = {{marginBottom: 20}}>
+            <View>
                 {loading ? <VerticalClubList position={position} size={100}/> : (
                 groups.length ===0 ? (<View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
-                    <Text style={{marginTop:'20%',fontSize :15}}>You are not in any bookclub</Text>
-                    <Fontisto name='frowning' style={{fontSize: 150,marginVertical:'10%'}}/>
-                    </View>): 
+                    <View style = {{flex: 1, alignItems: "center", width: "100%", height: Dimensions.get('window').height - 140}}>
+                        <Image source={require('../../../assets/club.png')} style={styles.frog}></Image>
+                    </View></View>): 
                 <FlatList
                     scrollEnabled
                     data={groups}
                     renderItem={({item})=>{
                         return (
                         <TouchableOpacity onPress={()=>{navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
-                            <View style = {{flexDirection:'row'}}>
-                                <View style = {{flexDirection: "row", flex: 1, width: "35%", marginLeft:15, marginTop: 20, backgroundColor: "#f17c56", borderTopLeftRadius: 360, borderBottomLeftRadius: 360}}>  
+                            <View style = {{flexDirection:'row', marginBottom: 20}}>
+                                <View style = {{flexDirection: "row", flex: 1, width: "35%", marginLeft:15, backgroundColor: "#f17c56", borderTopLeftRadius: 360, borderBottomLeftRadius: 360}}>  
                                     <ProfileImage size = {100} source={item.photoPath} style={styles.image}/>
                                 </View>
-                                <View style = {{width: "65%", marginRight: 20, marginTop: 20, backgroundColor: "#f17c56", borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
+                                <View style = {{width: "65%", marginRight: 20, backgroundColor: "#f17c56", borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
                                     <Text numberOfLines={1} style={styles.title}>{item.name}</Text>
                                     <Text style={styles.text}>Number of members: {item.number_of_members}</Text>
                                 </View>
@@ -72,6 +72,11 @@ const Clubs = () => {
  }
 
  const styles = StyleSheet.create({
+    frog: {
+        position: "absolute", 
+        bottom: 0, 
+        alignSelf: "flex-end"
+    },
     club: {
         width: 100,
         height: 100,

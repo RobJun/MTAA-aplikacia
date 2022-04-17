@@ -67,10 +67,7 @@ const RegisterValidator = ({navigation}) => {
             error = true
         }
 
-        if(error){
-            return;
-        }
-
+        if(error) return;
 
         if(form.name.length < 5 || form.password.length < 8) {error = true;}
 

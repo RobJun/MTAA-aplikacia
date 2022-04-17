@@ -58,7 +58,7 @@ const Profile = ({route}) => {
                 <View style = {{flex:1,alignContent:'flex-start' ,width:"35%", height: 140, marginLeft: 20, marginTop: 40, marginBottom: 10,}}>
                     {load ? <LoadingProfilePhoto size={"100%"} position={position}/>:<ProfileImage size = {140} border = {140} source={workUser.photoPath} style={styles.image}/>}
                 </View>
-                <View style = {{ width:"50%", marginLeft: 10, marginRight: 10, marginTop: 20, marginBottom: 30, height: 140}}>
+                <View style = {{ width:"53%", marginLeft: 10, marginRight: 10, marginTop: 40, marginBottom: 30, height: 140}}>
                     {load ? <LoadingText height={40} position={position} style={styles.title}/> : <Text style = {[styles.title,]}>{workUser.displayName}</Text>}
                     {load ? <LoadingText lines={2} position={position} containerStyle={styles.text} randomlength={true} style={{margin:0}}/> : 
                         <View style={{height:'70%'}}>

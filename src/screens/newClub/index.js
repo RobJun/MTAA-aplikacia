@@ -78,14 +78,18 @@ const NewClubForm = ({navigation,route})=>{
             id = body.id
         }
 
+        let success = false
         try {
-            await saveChanges(null,form,token,setClubID,setSubmiting,true)
+            success = await saveChanges(null,form,token,setClubID,setSubmiting,true)
         }catch(err){
             alert('Error'- err)
             setSubmiting(false)
             if (err == '401 neautorizovany pouzivatel')
                 setAuth({type:"LOGOUT"})
         }
+
+        if (!success) return;
+
         try {
         fetchGroups(user_id,setGroups)
         fetchInfo(user_id,setUser)

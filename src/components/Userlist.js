@@ -15,7 +15,7 @@ const UserList = ({users, onSelect,selectArray}) =>{
             <TouchableOpacity onPress={()=>{onSelect(item)}}>
         <View>
             <ProfileImage source={item.photoPath} size={70} style={[styles.member,selectArray.indexOf(item.id) > -1 &&{borderColor:'red',borderWidth:7}]}/>
-            <Text style={styles.name} key={item.id}>{item.displayName}</Text>
+            <Text style={styles.name} key={item.id}>{item.displayName.length > 6 ? `${item.displayName.substring(0,5)}...` : item.displayName}</Text>
         </View>
         </TouchableOpacity>)
     }}

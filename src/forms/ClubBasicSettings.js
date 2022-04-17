@@ -10,7 +10,7 @@ const BasicSettings = ({formImage,selectImage,resetImage, onChange,error,form,ti
     const child =(
             <View>
             <View style={styles.clubHeader}>
-                <ProfileImage source={formImage ? formImage.uri : defaultImage} size={180} local={true}/>
+                <ProfileImage source={formImage ? formImage.uri : defaultImage} size={150} local={true}/>
                 <Button onPress={selectImage} title='Change Image' style = {{backgroundColor: "#5e8d5a", marginTop: 20, paddingVertical: 15}}/>
                 {formImage && <Button onPress={resetImage} title='Reset Image' style = {{backgroundColor: "#5e8d5a", paddingVertical: 15}} />}
             </View>

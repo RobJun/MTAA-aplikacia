@@ -135,7 +135,7 @@ const Settings = ({navigation}) => {
             <ScrollView>
                 <Text style = {styles.title}>Profile Settings</Text>
                 <View style = {{marginLeft: 20, marginRight: 20, alignItems: "center"}}>
-                    <ProfileImage style = {styles.club} source={formImage ? formImage.uri : user.photoPath} size={180} local={true}/>
+                    <ProfileImage style = {styles.club} source={formImage ? formImage.uri : user.photoPath} size={150} local={true}/>
                     <ButtonSettings onPress={imagePicker} title='Change profile picture'></ButtonSettings>
                     {formImage && <ButtonSettings onPress={()=>setFormImage(false)} title='Reset profile picture'/>}
                 </View>

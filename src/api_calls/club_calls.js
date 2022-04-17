@@ -87,23 +87,24 @@ export const saveChanges = async (clubID=null,form,token,dispatch, load_dispatch
         if(response.status === 409){
             alert("Name already in use")
             load_dispatch(false)
-            return;
+            return false;
         }
         if (response.status === 406){
             alert("Not right name")
             load_dispatch(false)
-            return;
+            return false;
         }
         const body = await response.json()
         console.log(body)
         body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
         dispatch(body)
-        }catch(err){
+        } catch(err){
             console.log('error while saving')
             load_dispatch
             throw err;
         }
 
+        return true
 }
 
 export const deleteGroup = async (clubID,token) => {
