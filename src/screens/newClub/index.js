@@ -104,7 +104,6 @@ const NewClubForm = ({navigation,route})=>{
 
     return (
         <View>
-        {submiting && <ActivityIndicator visible={true} size='large'/>}
         <BasicSettings
          formImage={formImage}
          selectImage={imagePicker}
@@ -116,6 +115,7 @@ const NewClubForm = ({navigation,route})=>{
          onPress={submiting ? ()=>{} : onSubmit}
          title={'Create Bookclub'}
          scrollable={true}
+         visible={submiting}
          />
          </View>
     )

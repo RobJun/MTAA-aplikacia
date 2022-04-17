@@ -15,7 +15,7 @@ import {fetchBooks, fetchGroups, fetchInfo } from '../api_calls/user_calls';
   
   export default function MainNavigator() {
     
-    const {auth:{user:{token,user_id}},setAuth,setUser,setLibrary,setGroups,visible,setLoading} = useContext(globContext)
+    const {auth:{user:{token,user_id},isLogged},setAuth,setUser,setLibrary,setGroups,visible,setLoading} = useContext(globContext)
 
     
     useEffect(() => {
@@ -32,8 +32,9 @@ import {fetchBooks, fetchGroups, fetchInfo } from '../api_calls/user_calls';
           setAuth({type:"LOGOUT"})
         }
       }
-      fetchData().catch(console.error)
-    }, [])
+      if(isLogged)
+        fetchData().catch(console.error)
+    }, [isLogged])
 
 
     return (

@@ -53,12 +53,12 @@ const Clubs = () => {
                     renderItem={({item})=>{
                         return (
                         <TouchableOpacity onPress={()=>{navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
-                            <View style = {{flexDirection:'row', flex: 1}}>
+                            <View style = {{flexDirection:'row'}}>
                                 <View style = {{flexDirection: "row", flex: 1, width: "35%", marginLeft:15, marginTop: 20, backgroundColor: "#f17c56", borderTopLeftRadius: 360, borderBottomLeftRadius: 360}}>  
-                                    <ProfileImage size = {"100%"} source={item.photoPath} style={styles.image}/>
+                                    <ProfileImage size = {100} source={item.photoPath} style={styles.image}/>
                                 </View>
                                 <View style = {{width: "65%", marginRight: 20, marginTop: 20, backgroundColor: "#f17c56", borderTopRightRadius: 20, borderBottomRightRadius: 20}}>
-                                    <Text style={styles.title}>{item.name}</Text>
+                                    <Text numberOfLines={1} style={styles.title}>{item.name}</Text>
                                     <Text style={styles.text}>Number of members: {item.number_of_members}</Text>
                                 </View>
                                 </View>
@@ -111,7 +111,6 @@ const Clubs = () => {
         textAlign: "left",
         marginLeft: 15,
         marginRight: 10,
-        marginBottom: 30,
     }
 })
 

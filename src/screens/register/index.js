@@ -67,6 +67,11 @@ const RegisterValidator = ({navigation}) => {
             error = true
         }
 
+        if(error){
+            return;
+        }
+
+
         if(form.name.length < 5 || form.password.length < 8) {error = true;}
 
         if(!consistsOfCharacters(form.name)){
@@ -96,9 +101,9 @@ const RegisterValidator = ({navigation}) => {
 
         if (form.password !== form.repassword){
             auth.setAuth({type:"ERROR", payload:"passwords don't match"})
-            returnô
+            return
         }
-            
+        if(form.name && form.password )
         auth.setAuth({type: "LOADING"})
         register_call(form).then(response => {
         console.log("auth_login_screen_success")

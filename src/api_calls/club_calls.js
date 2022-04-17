@@ -17,7 +17,7 @@ export const getClubInfo =  async (clubID,dispatch,load_dispatch = null)=>{
     }
 }
 
-export const leaveClub = async (clubID,dispatch)=>{
+export const leaveClub = async (clubID,dispatch,token)=>{
     console.log('member')
     try {
         const response = await fetch(`http://${API_SERVER}/group/leave/${clubID}/`,{
@@ -39,7 +39,7 @@ export const leaveClub = async (clubID,dispatch)=>{
     }
 }
 
-export const joinClub = async (clubID,dispatch) => {
+export const joinClub = async (clubID,dispatch,token) => {
     try {
         const response = await fetch(`http://${API_SERVER}/group/join/${clubID}/`,{
             "method": "PUT",
@@ -140,9 +140,4 @@ export const removeMember = async (token,clubID,userID)=>{
         }catch(e){
             throw e
         }
-}
-
-
-export const createClub = async(token,clubID,userID)=>{
-    
 }

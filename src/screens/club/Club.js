@@ -77,7 +77,7 @@ const ClubScreen = ({navigation,route}) => {
     const memberButton = async ()=>{
         console.log('member')
         try {
-            await leaveClub(clubID,setInfo)
+            await leaveClub(clubID,setInfo,token)
             fetchGroups(user_id,setGroups)
             fetchInfo(user_id,setUser)
         }catch(err) {
@@ -88,7 +88,7 @@ const ClubScreen = ({navigation,route}) => {
 
     const otherButton = async ()=>{
         try {
-            await joinClub(clubID,setInfo)
+            await joinClub(clubID,setInfo,token)
             fetchGroups(user_id,setGroups)
             fetchInfo(user_id,setUser)
         }catch(err) {
@@ -131,11 +131,19 @@ const ClubScreen = ({navigation,route}) => {
                     <ProfileImage source={info.photoPath} size={150}/> }
                 {loading ? <LoadingText width={200} height={40} style={styles.clubHeaderName} lines={1}  position={position}/> :
                         <Text style={styles.clubHeaderName}>{info.name}</Text> } 
-                <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10}}>
-                    {loading ? <LoadingText style={styles.clubHeaderOwner} lines={1}  position={position}/> :
-                    <Text style={styles.clubHeaderOwner}>No. members: {info.count}</Text> }
-                    {loading ? <LoadingText  style={styles.clubHeaderOwner} lines={1}  position={position}/> :
-                    <Text style={styles.clubHeaderOwner}>Owner: {ownerName}</Text> }
+                <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10,marginTop:20}}>
+                    <View style = {styles.border}>
+                        <Text style={styles.infoTop}>Members</Text>
+                        {loading ? 
+                        <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={33}position={position}/>:
+                        <Text style = {styles.clubHeaderOwner}>{info.count}</Text>}
+                    </View>
+                    <View style = {styles.border}>
+                        <Text style={styles.infoTop}>Owner</Text>
+                        {loading ? 
+                        <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={33} position={position}/>:
+                        <Text style = {styles.clubHeaderOwner}>{ownerName}</Text>}
+                    </View>
                 </View>
             </View>
             <View>
@@ -209,7 +217,8 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight:'900',
         color:'black',
-        fontFamily: 'serif'
+        fontFamily: 'serif',
+        textAlign:'center'
     },
     clubHeaderOwner : {
         marginVertical: 10,
@@ -218,7 +227,8 @@ const styles = StyleSheet.create({
         color:'black',
         fontFamily: 'serif',
         marginRight: 20,
-        marginLeft: 20
+        marginLeft: 20,
+        textAlign:'center'
     },
     header : {
         color: 'black',
@@ -254,7 +264,22 @@ const styles = StyleSheet.create({
     },
     thirdSection : {
         marginTop: 20
-    }
+    },
+    border: {
+        borderBottomWidth: 3,
+        borderColor: "#5e8d5a",
+        borderTopWidth: 3,
+        marginBottom: 30,
+        width:'50%'
+    },
+    infoTop: {
+        fontSize: 15,
+        color: "black",
+        marginLeft: 20,
+        marginRight: 20,
+        marginTop: 5,
+        textAlign: "center",
+    },
 })
 
 

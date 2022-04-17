@@ -117,7 +117,11 @@ const ClubSettingScreen = ({navigation}) => {
         if(formImage)
             form.append("photo", await compressImage(formImage));
             //form.append("photo",formImage)
-        if(form['_parts'].length === 0) return
+        if(form['_parts'].length === 0) {
+            setSubmiting(false)
+            console.log('here')
+            return
+        }
 
         try{
             await saveChanges(info.id,form,token,setInfo,setSubmiting)

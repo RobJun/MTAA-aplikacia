@@ -15,10 +15,12 @@ const SearchScreen = () => {
     const [searching,setSearching] = useState(true)
 
     const fetchBooks = async (query) => {
+        console.log('fetching books')
         try {
             const response = await fetch(`http://${API_SERVER}/find/books/?q=${query}`)
             setBooks(await response.json())
         } catch {
+            console.log('ere')
             alert("Error - no internet connection")
         }
     }
