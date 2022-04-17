@@ -12,8 +12,9 @@ export const fetchInfo = async (user_id,dispatch) => {
             element.photoPath = element.photoPath +`?time=${new Date().getTime()}`
         });
         dispatch(data)
-    } catch {
+    } catch(err) {
         alert("Error - No internet connection")
+        throw err
     }
 }
 
@@ -32,6 +33,7 @@ export const fetchGroups = async (user_id,dispatch) => {
         dispatch(data)
     } catch {
         alert("Error - No internet connection")
+        throw err
     }
 }
 
@@ -47,5 +49,6 @@ export const fetchBooks = async (user_id,dispatch,category) => {
         dispatch(data)
     } catch {
         alert("Error - No internet connection")
+        throw err
     }
 }

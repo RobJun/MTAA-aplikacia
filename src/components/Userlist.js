@@ -1,6 +1,6 @@
 import React from "react";
 import {StyleSheet,View,Text,FlatList,TouchableOpacity, Image} from 'react-native'
-import ProfileImage from "../../components/profileImage";
+import ProfileImage from "./profileImage";
 
 
 const UserList = ({users, onSelect,selectArray}) =>{

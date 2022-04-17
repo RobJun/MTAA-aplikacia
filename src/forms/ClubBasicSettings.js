@@ -5,7 +5,7 @@ import Button from "../components/button"
 import ProfileImage from "../components/profileImage"
 
 
-const BasicSettings = ({formImage,selectImage,resetImage, onChange,error,form,title,onPress,defaultImage, scrollable=false}) =>{
+const BasicSettings = ({formImage,selectImage,resetImage, onChange,error,form,title,onPress,defaultImage, scrollable=false, visible = false}) =>{
     
     const child =(
             <View>
@@ -17,7 +17,7 @@ const BasicSettings = ({formImage,selectImage,resetImage, onChange,error,form,ti
             <CredentialInput label={'Name'} placeholder = {"Enter club name, max 20 characters"} multi = {false} value={form.name} onChangeText={(value)=>{onChange({name:'name',value})}} error={error.name}/>
             <CredentialInput label={'About'} height = {200} multi = {true} value={form.info} onChangeText={(value)=>{onChange({name:'info',value})}}/>
             <CredentialInput label={'Rules'} height = {200} multi = {true} value={form.rules} onChangeText={(value)=>{onChange({name:'rules',value})}}/>
-            <Button style = {{backgroundColor: "#5e8d5a", paddingVertical: 15}} title={title} onPress={onPress}/>
+            <Button style = {{backgroundColor: "#5e8d5a", paddingVertical: 15}} title={title} onPress={onPress} visible={visible}/>
             </View>
     )
 

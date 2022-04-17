@@ -3,10 +3,11 @@ import {View,Text,StyleSheet, ScrollView, FlatList, formImage, form} from 'react
 import ButtonSettings from "./button"
 import ProfileImage from "../../components/profileImage"
 import { globContext } from "../../context/globContext";
-import DocumentPicker, { types } from 'react-native-document-picker';
 import CredentialInput from "../../components/textInput";
 import { API_SERVER } from "../../api_calls/constants";
-import { compressImage } from "../../utils/imageCompression";
+import { compressImage, pickImage } from "../../utils/imageCompression";
+import { CHARSET_ERROR, MAX, onlySpaces, REQUIRED, SPACES } from "../../utils/validation";
+import Button from "../../components/button";
 
 const Settings = ({navigation}) => {
     const {auth:{user:{token, user_id}},user,setUser} = useContext(globContext)
@@ -14,13 +15,13 @@ const Settings = ({navigation}) => {
     const [form, setForm] = useState({})
     const [errors,setErrors] = useState({})
     const [countBio,setCountBio] = useState(0)
-    const REQUIRED = "This field is required"
+    const [submiting,setSubmiting] = useState(false)
     
     const onChange = ({name,value}) => {
         console.log(value)
         if(name === 'displayName') {
             if (value?.length > 20) {
-                setErrors({...errors, [name] : "max 20 characters"})
+                setErrors({...errors, [name] : MAX(20)})
                 return;
             }else {
                 setErrors({...errors, [name] : null})
@@ -28,7 +29,7 @@ const Settings = ({navigation}) => {
         }
         if(name === "bio"){
            if (value?.length > 80) {
-                setErrors({...errors, [name] : "max 80 characters"})
+                setErrors({...errors, [name] :  MAX(80)})
                 return;
             }else{
                 setErrors({...errors, [name] : null})
@@ -42,7 +43,7 @@ const Settings = ({navigation}) => {
 
         if(name === 'displayName') {
             if (value?.length > 20) {
-                setErrors({...errors, [name] : "max 20 characters"})
+                setErrors({...errors, [name] : MAX(20)})
                 return
             }
             if( value !== '') {
@@ -59,17 +60,7 @@ const Settings = ({navigation}) => {
     },[])
     
     const imagePicker = useCallback(async () =>{
-        try {
-            const response = await DocumentPicker.pick({
-              presentationStyle: 'fullScreen',
-              type: [types.images],
-              allowMultiSelection:false
-            });
-            console.log(response[0].uri)
-            setFormImage(response[0]);
-          } catch (err) {
-            console.warn(err);
-          }
+         await pickImage(setFormImage)
     })
 
     const saveChanges = async () => {
@@ -80,9 +71,9 @@ const Settings = ({navigation}) => {
                 return;
             }
             console.log(form.displayName)
-            if(!form.displayName.match(/^[a-zA-Z0-9!@#$%^&*]\w{1,20}$/)) {
+            if(onlySpaces(form.displayName)) {
                 setErrors((prev)=>{
-                    return {...prev, displayName : 'Name contains illegal characters (legal: a-zA-Z0-9!@#$%^&*)'}
+                    return {...prev, displayName : SPACES}
                 })
                 return;
             }else {
@@ -91,6 +82,7 @@ const Settings = ({navigation}) => {
                 })
             }
     
+            setSubmiting(true)
             const formb = new FormData();
             for (const [key, value] of Object.entries(form)) {
                 if(value !== user[key]){
@@ -101,7 +93,11 @@ const Settings = ({navigation}) => {
             }   
             if(formImage)
                 formb.append("photo", await compressImage(formImage));
-            if(formb['_parts'].length === 0) return
+            if(formb['_parts'].length === 0) {
+                navigation.goBack()
+                setSubmiting(false)
+                return
+            }
 
             try {
                 const response = await fetch(`http://${API_SERVER}/user/modify/`,{
@@ -116,6 +112,7 @@ const Settings = ({navigation}) => {
                 if (response.status === 401 || response.status === 404){
                     if(response.status === 401) throw('Error 401 - Neatorizovaný používateľ')
                     else if(response.status === 404) alert('Error 404 - Prázdne pole DisplayName alebo fotka nie je podporovaný obrázok')
+                    setSubmiting(false)
                     return;
                 }
     
@@ -124,9 +121,14 @@ const Settings = ({navigation}) => {
                 setUser(body)
                 navigation.goBack()
             } catch (err) {
-                alert(`${err}\n\nLogging out`)
-                setAuth({type:"LOGOUT"})
+                if(err === 'Error 401 - Neatorizovaný používateľ') {
+                    alert(`${err}\n\nLogging out`)
+                    setAuth({type:"LOGOUT"})
+                }else {
+                    alert('Network Connection error')
+                }
             }
+            setSubmiting(false)
     }
     
         return (
@@ -142,7 +144,7 @@ const Settings = ({navigation}) => {
                     <CredentialInput label={'Bio'} multi = {true} height = {200} placeholder = {"Enter bio, max 100 characters"} value={form.bio} onChangeText={(value)=>{onChange({name:'bio',value})}} error={errors.bio}/>
                     <Text style = {{textAlign: "right" ,color: "black", marginRight: 30, marginBottom: 10}}>{countBio}/80</Text>
                 </View>
-                <ButtonSettings onPress={()=>{saveChanges()}} title='Save changes'></ButtonSettings>
+                <Button onPress={submiting? ()=>{} : saveChanges} title='Save changes' style={styles.button} textStyle={styles.buttonText} visible={submiting}/>
             </ScrollView>
         )
     }
@@ -159,7 +161,23 @@ const styles = StyleSheet.create({
         color: "black",
         margin: 20,
         fontWeight: 'bold',
+    },    button: {
+        backgroundColor: "#c6d7b9",
+        alignItems:'center',
+        marginHorizontal: 20,
+        marginTop: 10,
+        paddingVertical: 10,
+        borderRadius:10,
+        paddingLeft: 20,
+        paddingRight: 20,
+        borderRadius: 40,
+        marginBottom: 20
     },
+    buttonText: {
+        fontSize: 20,
+        color: "#5e8d5a",
+        fontWeight: "bold"
+    }
 })
 
 export default Settings

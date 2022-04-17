@@ -1,8 +1,8 @@
-import { createStackNavigator } from "@react-navigation/stack";
 import React,{useContext,useState,useEffect,createContext,useReducer} from "react";
+import { createStackNavigator } from "@react-navigation/stack";
 import VideoContainer from "../video";
 import ClubScreen from "./Club";
-import ClubSettingScreen from "./clubSettings";
+import ClubSettingScreen from "./settings/settings"
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import BookProfile from "../bookProfile";
 import Profile from "../profile/Profile";

@@ -6,13 +6,14 @@ import BasicSettings from '../../forms/ClubBasicSettings'
 import { useNavigation } from '@react-navigation/native';
 import { globContext } from '../../context/globContext';
 import {fetchInfo, fetchGroups } from '../../api_calls/user_calls';
-import { compressImage } from '../../utils/imageCompression';
+import { compressImage, pickImage } from '../../utils/imageCompression';
+import { saveChanges } from '../../api_calls/club_calls';
+import { MAX, onlySpaces, REQUIRED, SPACES } from '../../utils/validation';
 
 const NewClubForm = ({navigation,route})=>{
     const [formImage,setFormImage] = useState(false)
     const [formS,setFormS] = useState({})
     const [errors,setErrors] = useState({})
-    const REQUIRED = 'Required field'
     const {navigate} = useNavigation()
     const {auth:{user:{token,user_id}},groups,setGroups,user,setUser,setAuth} = useContext(globContext)
     const [submiting,setSubmiting] = useState(false)
@@ -21,7 +22,7 @@ const NewClubForm = ({navigation,route})=>{
     const onChange = ({name,value}) => {
         if(name === 'name'){
             if (value?.length > 20) {
-                setErrors({...errors, [name] : "max 20 characters"})
+                setErrors({...errors, [name] : MAX(20)})
                 return;
                 }else{
                     setErrors({...errors, [name] : null})
@@ -50,9 +51,9 @@ const NewClubForm = ({navigation,route})=>{
             return;
         }
         
-        if(!formS.name.match(/^[a-zA-Z0-9!@#$%^&*]*$/)) {
+        if(onlySpaces(formS.name)) {
             setErrors((prev)=>{
-                return {...prev, name : 'Name contains illegal characters (legal: a-zA-Z0-9!@#$%^&*)'}
+                return {...prev, name : SPACES}
             })
             return;
         }else {
@@ -71,54 +72,34 @@ const NewClubForm = ({navigation,route})=>{
             form.append('photo',await compressImage(formImage))
         }
         console.log(form)
+
+        let id 
+        const setClubID = (body)=> {
+            id = body.id
+        }
+
         try {
-        const response = await fetch(`http://${API_SERVER}/group/create/`,{
-            "method": "POST",
-            "headers" : {
-                "Content-Type": "multipart/form-data; boundary=---011000010111000001101001",
-                "Authorization" : `Token ${token}`
-            },
-            body: form
-        })
-        console.log(response.status)
-
-        if(response.status === 401) throw '401 neautorizovany pouzivatel'
-
-        if(response.status === 409){
-            alert("Name already in use")
-            setSubmiting(false)
-            return;
-        }
-        if (response.status === 406){
-            alert("Not right name")
-            setSubmiting(false)
-            return;
-        }
-        const body = await response.json()
-
-        fetchGroups(user_id,setGroups)
-        fetchInfo(user_id,setUser)
-
-        navigation.pop()
-        navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:body.id}}})
+            await saveChanges(null,form,token,setClubID,setSubmiting,true)
         }catch(err){
             alert('Error'- err)
-            setAuth({type:"LOGOUT"})
+            setSubmiting(false)
+            if (err == '401 neautorizovany pouzivatel')
+                setAuth({type:"LOGOUT"})
         }
+        try {
+        fetchGroups(user_id,setGroups)
+        fetchInfo(user_id,setUser)
+        } catch (err) {
+            console.log(err)
+            setSubmiting(false)
+        }
+
+        navigation.pop()
+        navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:id}}})
     }
 
     const imagePicker = useCallback(async () =>{
-        try {
-            const response = await DocumentPicker.pick({
-              presentationStyle: 'fullScreen',
-              type: [types.images],
-              allowMultiSelection:false
-            });
-            console.log(response[0].uri)
-            setFormImage(response[0]);
-          } catch (err) {
-            console.warn(err);
-          }
+        await pickImage(setFormImage)
     })
 
     return (

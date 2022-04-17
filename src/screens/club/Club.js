@@ -6,11 +6,12 @@ import Button from "../../components/button";
 import { globContext } from "../../context/globContext";
 import CallButton from "../../components/callButton";
 import { useNavigation } from '@react-navigation/native';
-import UserList from "./Userlist";
+import UserList from "../../components/Userlist";
 import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
 import { fetchGroups, fetchInfo } from "../../api_calls/user_calls";
 import { LoadingBookCover, LoadingList, LoadingProfilePhoto,LoadingText } from "../../components/onLoading";
+import { getClubInfo, joinClub, leaveClub } from "../../api_calls/club_calls";
 
 
 const ClubScreen = ({navigation,route}) => {
@@ -25,42 +26,23 @@ const ClubScreen = ({navigation,route}) => {
     const [loading,setLoading] = useState(true)
 
 
-    const fetchClubInfo = async () => {
-        try {
-            const response = await fetch(`http://${API_SERVER}/group/info/${clubID}/`)
-            if(response.status > 400 ) { 
-                alert(`Error - ${response.status}`)
-                return;
-            }
-            const data = await response.json()
-            data.photoPath = data.photoPath +`?time=${new Date().getTime()}`
-            setInfo(data)
-            setLoading(false)
-        } catch(err){
-            alert('Connection error')
-        }
-    }
-
 
     const onRefresh = useCallback( async()=>{
         setRefreshing(true)
         try {
-        const response = await fetch(`http://${API_SERVER}/group/info/${clubID}/`)
-        if(response.status > 400 ) { 
-            alert(`Error - ${response.status}`)
-            return;
-        }
-        const data = await response.json()
-        data.photoPath = data.photoPath +`?time=${new Date().getTime()}`
-        setInfo(data)
-        setRefreshing(false)
+            await getClubInfo(clubID,setInfo,setRefreshing)
         } catch(err){
             alert('Connection error')
+            setRefreshing(false)
         }
     },[])
     
     useEffect(() => {
-        fetchClubInfo()
+        try {
+        getClubInfo(clubID,setInfo,setLoading)
+        } catch(err){
+            alert("Connection problems - ",err)
+        }
     }, [])
 
     useEffect(()=>{
@@ -95,21 +77,9 @@ const ClubScreen = ({navigation,route}) => {
     const memberButton = async ()=>{
         console.log('member')
         try {
-        const response = await fetch(`http://${API_SERVER}/group/leave/${clubID}/`,{
-            "method": "DELETE",
-            "headers" : {
-            "Authorization": `Token ${token}`
-            }
-        })
-        if (response.status === 401) throw '401 neautorizovany pouzivatel'
-        if ( response.status ===404 || response.status === 409){
-            alert('error')
-            return;
-        }
-        const data = await response.json()
-        setInfo(data)
-        fetchGroups(user_id,setGroups)
-        fetchInfo(user_id,setUser)
+            await leaveClub(clubID,setInfo)
+            fetchGroups(user_id,setGroups)
+            fetchInfo(user_id,setUser)
         }catch(err) {
             alert(`${err}\n\nLogging out`)
             setAuth({type:"LOGOUT"})
@@ -118,29 +88,14 @@ const ClubScreen = ({navigation,route}) => {
 
     const otherButton = async ()=>{
         try {
-        const response = await fetch(`http://${API_SERVER}/group/join/${clubID}/`,{
-            "method": "PUT",
-            "headers" : {
-            "Authorization" : "Token " + token
-            }
-        })
-        if (response.status === 401) throw '401 neautorizovany pouzivatel'
-        if ( response.status ===404 || response.status === 409){
-            alert(`Error - ${response.status}`)
-            return;
+            await joinClub(clubID,setInfo)
+            fetchGroups(user_id,setGroups)
+            fetchInfo(user_id,setUser)
+        }catch(err) {
+            alert(`${err}\n\nLogging out`)
+            setAuth({type:"LOGOUT"})
         }
-        const data = await response.json()
-        setInfo(data)
-        fetchGroups(user_id,setGroups)
-        fetchInfo(user_id,setUser)
-    }catch(err) {
-        alert(`${err}\n\nLogging out`)
-        setAuth({type:"LOGOUT"})
     }
-    }
-
-    console.log(info.photoPath)
-
 
     const pos = new Animated.Value(0)
     useEffect(()=>{

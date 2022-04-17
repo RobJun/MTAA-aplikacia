@@ -15,15 +15,14 @@ const Login = ({onSubmit,onChange,form,error}) => {
     }
     return (
         <ScrollView style={{marginTop:'10%'}}>
-            {auth.loading && <ActivityIndicator size='large'/>}
             <View  style={{justifyContent:'center',alignItems:'center'}}>
                 <Image source={require('../../../assets/logo_tr.png')} style={{width:170,height:170}} o></Image>
             </View>
-            <CredentialInput label={'Username'}  multi = {false} placeholder = {"Enter username"} onChangeText={(value) =>{onChange({name:'name',value})}} error={error.name} />
-            <CredentialInput label={'Password'} multi = {false} placeholder = {"Enter password"} password={true}  onChangeText={(value) =>{onChange({name:'password',value})}} error={error.password}/>
-            <Button title="Sign in" onPress={auth.loading ? ()=> {console.log("er")} : ()=>  {onSubmit()}}/>
+            <CredentialInput label={'Username'}  multi = {false} placeholder = {"Enter username"} value={form.name} onChangeText={(value) =>{onChange({name:'name',value})}} error={error.name} />
+            <CredentialInput label={'Password'} multi = {false} placeholder = {"Enter password"} password={true} value={form.password} onChangeText={(value) =>{onChange({name:'password',value})}} error={error.password}/>
+            <Button title="Sign in" onPress={auth.loading ? ()=> {console.log("er")} : ()=>  {onSubmit()}} visible={auth.loading}/>
             <View style={{ backgroundColor : "black", height : 1, borderWidth:2}} />
-            <Button title="Registracia" onPress={()=> {navigate('Register')}}/>
+            <Button title="Sign up" onPress={()=> {navigate('Register')}} />
         </ScrollView>
     )
 }
