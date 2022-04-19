@@ -8,7 +8,7 @@ import { globContext } from "../../context/globContext";
 import { fetchInfo } from "../../api_calls/user_calls"
 import { HorizontalBookList, LoadingList, LoadingProfilePhoto, LoadingText } from "../../components/onLoading"
 
-const Profile = ({route}) => {
+const Profile = ({navigation, route}) => {
     const {navigate} = useNavigation()
     const {auth:{user:{token,user_id}},user,setUser,loading} = useContext(globContext)
     const [openedUser,setOpenedUser] = useState(undefined)
@@ -20,6 +20,7 @@ const Profile = ({route}) => {
         fetchInfo(user_id, setUser)
         setRefreshing(false)
     },[])
+
     const fet = async ()=> {
             await fetchInfo(route.params.user_id,setOpenedUser)
             console.log('here')
@@ -101,7 +102,7 @@ const Profile = ({route}) => {
                         showsHorizontalScrollIndicator={false}
                         data={workUser.clubs}
                         renderItem={({item})=>{
-                            return (<TouchableOpacity onPress={()=>{navigate('ProfileNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>
+                            return (<TouchableOpacity onPress={()=>{navigation.navigate('Club',{screen: 'Club_screen', params:{clubID:item.id}})}}>
                             <View style = {{marginRight: 15}}>
                                 <ProfileImage size = {100} source={item.photoPath} style={styles.club}/>
                                 <Text style={styles.name} key={item.id}>{item.name.length > 8 ? `${item.name.substring(0,6)}...` : item.name}</Text>

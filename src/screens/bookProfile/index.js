@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from "react"
-import {View, Image, Text, StyleSheet, ScrollView,Animated} from 'react-native'
+import React, { useEffect, useState, useContext,useCallback } from "react"
+import {View, Image, Text, StyleSheet, ScrollView,Animated, RefreshControl} from 'react-native'
 import { API_SERVER } from "../../api_calls/constants";
 import { globContext } from "../../context/globContext";
 import DropDownPicker  from 'react-native-dropdown-picker'
@@ -12,6 +12,7 @@ const BookProfile = ({route}) => {
     const {auth:{user:{token,user_id}},user,library, setUser,setLibrary,setAuth} = useContext(globContext)
     const bookID = route.params.bookID
     const [textRecommendButton, setTextRecommendButton] = useState("Recommend")
+    const [refreshing, setRefreshing] = useState(false);
     const [loading,setLoading] = useState(true)
     const [info, setInfo] = useState({
         genre: {color: 0x808080ff},
@@ -26,6 +27,7 @@ const BookProfile = ({route}) => {
       {label: 'Completed', value:'completed'},
     ]);
 
+    
     const fetchInfo = async () => {
         try { 
             const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
@@ -55,7 +57,12 @@ const BookProfile = ({route}) => {
 
         //setLoading(false)
     }
-
+    
+    const onRefresh = useCallback(()=>{
+        setRefreshing(true)
+        fetchInfo()
+        setRefreshing(false)
+    },[])
     
     
     const putToLibrary = async (where) => {
@@ -169,7 +176,7 @@ const BookProfile = ({route}) => {
     })
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false} refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style={{backgroundColor: `rgb(${((info.genre.color & 0xff000000)>>24)& 0xff},${(info.genre.color & 0x00ff0000)>>16},${(info.genre.color & 0x0000ff00)>>8})`, alignItems:"center"}}>
                 {loading ? (<View style={{alignItems:"center"}}>
                                 <LoadingBookCover style={ styles.image} size={220} position={position}/>
