@@ -18,6 +18,14 @@ const BookProfile = ({route}) => {
         author:[{name: "Text",},],
         description: "text"})
 
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState(null);
+    const [items, setItems] = useState([
+      {label: 'Wishlist', value: 'wishlist'},
+      {label: 'Reading', value: 'reading'},
+      {label: 'Completed', value:'completed'},
+    ]);
+
     const fetchInfo = async () => {
         try { 
             const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
@@ -28,9 +36,18 @@ const BookProfile = ({route}) => {
             const data = await response.json()
             setInfo(data)
             if(user.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
-            if(library.wishlist.find(x=> x.id === data.id) !== undefined) setValue('wishlist')
-            else if (library.reading.find(x=> x.id === data.id) !== undefined) setValue('reading')
-            else if (library.completed.find(x=> x.id === data.id) !== undefined) setValue("completed")
+            if(library.wishlist.find(x=> x.id === data.id) !== undefined) {
+                setValue('wishlist')
+                setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
+            }
+            else if (library.reading.find(x=> x.id === data.id) !== undefined) {
+                setValue('reading')
+                setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
+            }
+            else if (library.completed.find(x=> x.id === data.id) !== undefined) {
+                setValue("completed")
+                setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
+            }
             setLoading(false)
         } catch (err) {
             alert(`${err} -- no internet connection`)
@@ -135,16 +152,6 @@ const BookProfile = ({route}) => {
         }
     }
 
-
-    const [open, setOpen] = useState(false);
-    const [value, setValue] = useState(null);
-    const [items, setItems] = useState([
-      {label: 'Wishlist', value: 'wishlist'},
-      {label: 'Reading', value: 'reading'},
-      {label: 'Completed', value:'completed'},
-      {label: 'Remove', value:'remove', disabled: true}
-    ]);
-
     
     const pos = new Animated.Value(0)
     useEffect(()=>{
@@ -205,21 +212,20 @@ const BookProfile = ({route}) => {
                     listParentLabelStyle={{fontSize: 17}}
                     dropDownContainerStyle={{backgroundColor: 'white',zIndex: 1000, elevation: 1000}}
                     onChangeValue={(item)=>{
+                        console.log('here')
                         if(item === null || item ==='remove'){
                             setValue(null)
-                            setItems(prev=>{
-                                const d = prev.pop()
-                                prev.push({...d,disabled:true})
-                                return prev })
-                            if(item === 'remove') deleteFromLibrary()
+                            console.log('here null')
+                            if(item === 'remove') {
+                                setItems(prev=> {prev.pop(); return prev})
+                                deleteFromLibrary()
+                            }
                         } else {
                             putToLibrary(item)
-                            
-                            setItems(prev=>{
-                                const d = prev.pop()
-                                prev.push({...d,disabled:false})
-                                return prev
-                            })
+                            console.log('here')
+                            if(items.length <4)
+                                setItems(prev=>{return [...prev,{label: 'Remove', value:'remove'}]})
+                            console.log(items)
                         }}}
                     />
                 <RecommendedButton onPress={putToRecommended} title= {textRecommendButton} color = {`rgb(${((info.genre.color & 0xff000000)>>24)& 0xff},${(info.genre.color & 0x00ff0000)>>16},${(info.genre.color & 0x0000ff00)>>8})`}/> 

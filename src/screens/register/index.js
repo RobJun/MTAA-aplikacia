@@ -121,7 +121,7 @@ const RegisterValidator = ({navigation}) => {
         }).catch(err => {
         console.log("error")
         console.log(err)
-        auth.setAuth({type: "ERROR",payload:"passwords don't match"})
+        auth.setAuth({type: "ERROR",payload:"network connection problem"})
         });
     }
 

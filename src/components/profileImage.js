@@ -18,7 +18,7 @@ const ProfileImage = ({size, source, style, local= false}) =>{
 
 const styles = StyleSheet.create({
     image :{
-
+        backgroundColor:'grey'
     }
 })
 
