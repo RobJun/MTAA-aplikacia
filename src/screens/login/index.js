@@ -57,7 +57,7 @@ const LoginValidator = () => {
 
         if(!consistsOfCharacters(form.password)) {
             setErrors((prev)=>{
-                return {...prev, name : CHARSET_ERROR}
+                return {...prev, password : CHARSET_ERROR}
             })
             error = true
         }
