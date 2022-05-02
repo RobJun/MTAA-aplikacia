@@ -19,11 +19,14 @@ const AppContainer = () =>{
     const loader = async () => {
         try {   
             const session = await EncryptedStorage.getItem("user_info");
-            const offline = await EncryptedStorage.getItem("user_offline");
+
+            console.log('loader -- ',isConnected)
             if(!isConnected) {
+                console.log('offline login')
+                const offline = await EncryptedStorage.getItem("user_offline");
                 const s = JSON.parse(offline)
                 await setAuth({type:"LOGIN",payload: s})
-                console.log("splash_screen_loader_offline_success" - log)
+                console.log("splash_screen_loader_offline_success")
                 return;
             }
             if (session !== undefined && session !== null) {
@@ -45,13 +48,15 @@ const AppContainer = () =>{
     }
 
     useEffect(() => {
+        if(!auth.isLogged){
         loader().then(() => { 
             setLoading(true)
         }).catch(err=> {
             console.log(err)
             setLoading(true)
         })
-    },[])
+        }
+    },[isConnected])
     console.log(loading)
     if(!loading) {
         console.log(loading)
@@ -60,7 +65,7 @@ const AppContainer = () =>{
 
     return(
         <NavigationContainer>
-            {auth.isLogged? <MainNavigator/>:<AuthNavigator/>}
+                {auth.isLogged? <MainNavigator/>:<AuthNavigator/>}
         </NavigationContainer>
     );
 };

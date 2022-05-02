@@ -10,13 +10,13 @@ import { CHARSET_ERROR, MAX, onlySpaces, REQUIRED, SPACES } from "../../utils/va
 import Button from "../../components/button";
 
 const Settings = ({navigation}) => {
-    const {auth:{user:{token, user_id}},user,setUser} = useContext(globContext)
+    const {auth:{user:{token, user_id}},setUser, offline:{userData}} = useContext(globContext)
     const [formImage,setFormImage] = useState(false)
     const [form, setForm] = useState({})
     const [errors,setErrors] = useState({})
     const [countBio,setCountBio] = useState(0)
     const [submiting,setSubmiting] = useState(false)
-    
+    var user = userData
     const onChange = ({name,value}) => {
         console.log(value)
         if(name === 'displayName') {

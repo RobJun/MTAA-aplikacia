@@ -9,7 +9,7 @@ import Fontisto from  'react-native-vector-icons/Fontisto'
 import { fetchGroups } from "../../api_calls/user_calls";
 
 const Clubs = () => {
-    const {auth:{user:{token,user_id}},groups,setGroups,loading} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups,setGroups,loading,offline:{clubs}} = useContext(globContext)
     const {navigate} = useNavigation()
     const [refreshing, setRefreshing] = useState(false);
 
@@ -43,13 +43,13 @@ const Clubs = () => {
             </View>
             <View>
                 {loading ? <VerticalClubList position={position} size={100}/> : (
-                groups.length ===0 ? (<View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                clubs.length ===0 ? (<View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
                     <View style = {{flex: 1, alignItems: "center", width: "100%", height: Dimensions.get('window').height - 140}}>
                         <Image source={require('../../../assets/club.png')} style={styles.frog}></Image>
                     </View></View>): 
                 <FlatList
                     scrollEnabled
-                    data={groups}
+                    data={clubs}
                     renderItem={({item})=>{
                         return (
                         <TouchableOpacity onPress={()=>{navigate('ClubsNav', {screen:'Club', params:{screen: 'Club_screen', params:{clubID:item.id}}})}}>

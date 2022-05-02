@@ -10,7 +10,7 @@ import { HorizontalBookList, LoadingList, LoadingProfilePhoto, LoadingText } fro
 
 const Profile = ({route}) => {
     const {navigate} = useNavigation()
-    const {auth:{user:{token,user_id}},user,setUser,loading} = useContext(globContext)
+    const {auth:{user:{token,user_id}},user,setUser,loading, offline:{userData}} = useContext(globContext)
     const [openedUser,setOpenedUser] = useState(undefined)
     const [refreshing, setRefreshing] = useState(false);
     const [loadingUser,setLoadingUser] = useState(true)
@@ -33,7 +33,7 @@ const Profile = ({route}) => {
         }
     },[])
 
-    const workUser = openedUser ? openedUser : user
+    const workUser = openedUser ? openedUser : userData
     const load = route.params?.user_id !== undefined && route.params.user_id !== user_id ? loadingUser: loading
 
     
