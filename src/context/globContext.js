@@ -1,10 +1,11 @@
 import React, {createContext, useReducer,useState} from 'react'
 import {authReducer,initAuthState} from './reducers/authReducer'
-
+import { userData,syncReducer } from './reducers/storageReducer';
 export const globContext = createContext({});
 
 const GlobProvider = ({children}) => {
     //pridavat globalne stavy
+    const [offline,setOffline] = useReducer()
     const [auth, setAuth] = useReducer(authReducer,initAuthState)
     const [stun,setStun] = useState(true)
     const [user,setUser] = useState({
@@ -36,7 +37,8 @@ const GlobProvider = ({children}) => {
                                         library,setLibrary,
                                         stun,setStun,
                                         visible,setVisible,
-                                        loading,setLoading}}>{children}</globContext.Provider>
+                                        loading,setLoading,
+                                        userData,syncReducer}}>{children}</globContext.Provider>
 }
 
 export default GlobProvider;

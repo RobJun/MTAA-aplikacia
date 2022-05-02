@@ -11,7 +11,7 @@ import BookCover from "../../components/BookCover";
 import { fetchGroups, fetchInfo } from "../../api_calls/user_calls";
 import { LoadingBookCover, LoadingList, LoadingProfilePhoto,LoadingText } from "../../components/onLoading";
 import { getClubInfo, joinClub, leaveClub } from "../../api_calls/club_calls";
-
+import { useIsConnected } from 'react-native-offline';
 
 const ClubScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
@@ -23,6 +23,7 @@ const ClubScreen = ({navigation,route}) => {
     const {navigate} = useNavigation()
     const [refreshing, setRefreshing] = useState(false);
     const [loading,setLoading] = useState(true)
+    const isConnected = useIsConnected();
 
     const onRefresh = useCallback( async()=>{
         setRefreshing(true)
@@ -117,13 +118,13 @@ const ClubScreen = ({navigation,route}) => {
                 />
             }>
             <View style={styles.clubHeader}>
-                {isPart && <CallButton icon={"video"} onPress={() =>{
+                {isPart && <CallButton icon={"video"} onPress={isConnected ? (() =>{
                     navigation.navigate('Club_video',{
                             username : user.displayName,
                             token : token,
                             roomID : clubID,
                             stun : stun
-                        })}} style={styles.callButton}/>}
+                        })}) : alert('This function is disabled when offline')} style={styles.callButton}/>}
                 {loading ? <LoadingProfilePhoto size={150} position={position} /> : 
                     <ProfileImage source={info.photoPath} size={150}/> }
                 {loading ? <LoadingText width={200} height={40} style={styles.clubHeaderName} lines={1}  position={position}/> :
