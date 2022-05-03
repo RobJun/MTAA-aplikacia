@@ -11,6 +11,8 @@ import {fetchBooks, fetchGroups, fetchInfo } from '../api_calls/user_calls';
 import { LOAD_FROM_MEMORY, LOAD_INITIAL, userData } from '../context/reducers/storageReducer';
 import { useIsConnected } from 'react-native-offline';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import { getClubInfo } from '../api_calls/club_calls';
+import { API_SERVER } from '../api_calls/constants';
 
   const Tab = createBottomTabNavigator();
   
@@ -33,6 +35,35 @@ import EncryptedStorage from 'react-native-encrypted-storage';
         await fetchBooks(user_id,(books)=>{state.reading = books},"reading")
         await fetchBooks(user_id,(books)=>{state.completed = books},"completed")
         await fetchGroups(user_id,(groups)=>{state.clubs = groups})
+        //fetch user books info
+        s = ['wishlist','reading','completed']
+        for(var i = 0; i <3;i++){
+          for(var j = 0;j < state[s[i]].length;j++){
+            const res = await fetch(`http://${API_SERVER}/find/info/${state[s[i]][j].id}/`)
+            const data = await res.json()
+            state.user_book_profiles = {
+              ...state.user_book_profiles,
+              [data.id] : data
+            }
+          }
+        }
+        for(var j = 0;j < state.userData.recommended_books.length;j++){
+          const res = await fetch(`http://${API_SERVER}/find/info/${state.userData.recommended_books[j].id}/`)
+          const data = await res.json()
+          state.user_book_profiles = {
+            ...state.user_book_profiles,
+            [data.id] : data
+          }
+        }
+        //fetch groups info
+        for(var i = 0; i < state.clubs.length;i++){
+           await getClubInfo(state.clubs[i].id,(group)=>{state.user_club_profiles = {
+            ...state.user_club_profiles,
+            [group.id] : group
+          }
+        })
+        }
+          
         console.log('this state -',state)
         setOffline({type:LOAD_INITIAL,payload :state})
         console.log('online --', offline)

@@ -8,6 +8,8 @@ export const userData = {
     reading : [],
     completed : [],
     clubs : [],
+    user_book_profiles : {},
+    user_club_profiles : {},
     
     isSynced : true,
     syncing : false,

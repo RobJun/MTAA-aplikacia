@@ -15,7 +15,7 @@ import { useIsConnected } from 'react-native-offline';
 
 const ClubScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
-    const {auth:{user:{token,user_id}},setGroups,setUser,user,stun,setAuth} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setGroups,setUser,user,stun,setAuth,offline} = useContext(globContext)
     const {info, setInfo} = useContext(clubContext)
     const [ownerName,setOwnerName] = useState('')
     const [isOwner,setIsOwner] = useState(false)
@@ -28,7 +28,12 @@ const ClubScreen = ({navigation,route}) => {
     const onRefresh = useCallback( async()=>{
         setRefreshing(true)
         try {
-            await getClubInfo(clubID,setInfo,setRefreshing)
+            if(isConnected) 
+                await getClubInfo(clubID,(group)=>{state.user_club_profiles = {
+                    ...state.user_club_profiles,
+                    [group.id] : group
+                  }
+                },setRefreshing)
         } catch(err){
             alert('Connection error')
             setRefreshing(false)
@@ -37,7 +42,16 @@ const ClubScreen = ({navigation,route}) => {
     
     useEffect(() => {
         try {
-        getClubInfo(clubID,setInfo,setLoading)
+        if(isConnected)
+            getClubInfo(clubID,(group)=>{offline.user_club_profiles = {
+                ...offline.user_club_profiles,
+                [group.id] : group
+              }
+            },setLoading)
+        console.log(offline.user_club_profiles)
+        setInfo(offline.user_club_profiles[clubID])
+        if(!isConnected) setLoading(false)
+            
         } catch(err){
             alert("Connection problems - ",err)
         }
