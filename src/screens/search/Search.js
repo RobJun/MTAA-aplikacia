@@ -6,6 +6,7 @@ import ProfileImage from "../../components/profileImage";
 import SearchBar from "react-native-dynamic-search-bar";
 import ButtonSettings from "../profile/button";
 import { BookSearchList, LoadingList } from "../../components/onLoading";
+import { useIsConnected } from "react-native-offline";
 
 const SearchScreen = () => {
     const [groups, setGroups] = useState([])
@@ -13,6 +14,7 @@ const SearchScreen = () => {
     const {navigate} = useNavigation()
     const [search,setSearch] = useState("")
     const [searching,setSearching] = useState(true)
+    const isConnected = useIsConnected()
 
     const fetchBooks = async (query) => {
         console.log('fetching books')
@@ -40,8 +42,10 @@ const SearchScreen = () => {
 
     const fet = async (query) => {
         setSearching(true)
-        await fetchBooks(query)
-        await fetchGroups(query)
+        if(isConnected){
+            await fetchBooks(query)
+            await fetchGroups(query)
+        }
         setSearching(false)
     }
 
@@ -76,7 +80,7 @@ const SearchScreen = () => {
     })
 
 
-    return (
+    return isConnected ? (
         <View>
         <View>
             <SearchBar 
@@ -138,7 +142,7 @@ const SearchScreen = () => {
             </View>
         </ScrollView>
         </View>
-    )
+    ) : <View><Text style={styles.text}>Nemozno vyhlavadať bez internetu, ša rozmyšlam ne.</Text></View>
 }
 
 const styles = StyleSheet.create({

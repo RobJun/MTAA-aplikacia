@@ -6,13 +6,15 @@ import DropDownPicker  from 'react-native-dropdown-picker'
 import RecommendedButton from "./RecommendedButton";
 import { fetchBooks } from "../../api_calls/user_calls";
 import {LoadingBookCover, LoadingText} from '../../components/onLoading'
+import { useIsConnected } from "react-native-offline";
 
 
 const BookProfile = ({route}) => {
-    const {auth:{user:{token,user_id}},user,library, setUser,setLibrary,setAuth} = useContext(globContext)
+    const {auth:{user:{token,user_id}},user,library, setUser,setLibrary,setAuth,offline,setOffline} = useContext(globContext)
     const bookID = route.params.bookID
     const [textRecommendButton, setTextRecommendButton] = useState("Recommend")
     const [refreshing, setRefreshing] = useState(false);
+    var isConnected = useIsConnected()
     const [loading,setLoading] = useState(true)
     const [info, setInfo] = useState({
         genre: {color: 0x808080ff},
@@ -29,24 +31,31 @@ const BookProfile = ({route}) => {
 
     
     const fetchInfo = async () => {
+
         try { 
-            const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
-            if(response.status === 404) {
-                alert("Error 404 - Book not found")
-                return
+            var data = null
+            if(isConnected){
+                const response = await fetch(`http://${API_SERVER}/find/info/${bookID}/`)
+                if(response.status === 404) {
+                    alert("Error 404 - Book not found")
+                    return
+                }
+                    data = await response.json()
+            }else {
+                console.log('dddsds',offline)
+                data = offline.user_book_profiles[bookID]
             }
-            const data = await response.json()
             setInfo(data)
-            if(user.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
-            if(library.wishlist.find(x=> x.id === data.id) !== undefined) {
+            if(offline.userData.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
+            if(offline.wishlist.find(x=> x.id === data.id) !== undefined) {
                 setValue('wishlist')
                 setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
             }
-            else if (library.reading.find(x=> x.id === data.id) !== undefined) {
+            else if (offline.reading.find(x=> x.id === data.id) !== undefined) {
                 setValue('reading')
                 setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
             }
-            else if (library.completed.find(x=> x.id === data.id) !== undefined) {
+            else if (offline.completed.find(x=> x.id === data.id) !== undefined) {
                 setValue("completed")
                 setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
             }

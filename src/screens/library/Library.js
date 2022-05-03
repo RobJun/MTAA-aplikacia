@@ -8,7 +8,7 @@ import { VerticalBookList } from "../../components/onLoading";
 
 const Library = () => {
     const {navigate} = useNavigation()
-    const {auth:{user:{token,user_id}},library, setLibrary,loading} = useContext(globContext)
+    const {auth:{user:{token,user_id}},library, setLibrary,loading,offline, offline:{wishlist, completed, reading}} = useContext(globContext)
     const [wishlistColor, setWishlistColor] = useState("grey")
     const [readingColor, setReadingColor] = useState("#f17c56") 
     const [completedColor, setCompletedColor] = useState("grey")  
@@ -18,9 +18,9 @@ const Library = () => {
 
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+        fetchBooks(user_id,(books)=>{state.wishlist = books},"wishlist")
+        fetchBooks(user_id,(books)=>{state.reading = books},"reading")
+        fetchBooks(user_id,(books)=>{state.completed = books},"completed")
         setRefreshing(false)
     },[])
     
@@ -58,11 +58,11 @@ const Library = () => {
             </View>
             <View style = {{marginBottom: 10, marginTop: 20}}>
                 {loading ? <VerticalBookList position={position} bgcolor={bgColor}/> :
-                library[which].length == 0 ? <Text style = {[styles.text, {marginTop: 20}]}>You don't have any book in this category</Text> : 
+                offline[which].length == 0 ? <Text style = {[styles.text, {marginTop: 20}]}>You don't have any book in this category</Text> : 
                     <FlatList
                         scrollEnabled
-                        data={library[which]}
-                        extraData={library}
+                        data={offline[which]}
+                        extraData={offline}
                         renderItem={({item})=>{
                             return ( 
                             <TouchableOpacity onPress={()=>{navigate('LibraryNav', {screen:'Book', params:{bookID:item.id}})}}>

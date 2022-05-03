@@ -7,17 +7,28 @@ import AuthNavigator from './authNavigator';
 import { globContext } from '../context/globContext';
 import SplashScreen from '../screens/splashscreen';
 import {login_call} from '../api_calls/auth_calls';
+import { useIsConnected } from 'react-native-offline';
 
 
 
 const AppContainer = () =>{
     const {auth, setAuth} = useContext(globContext)
     const [loading, setLoading] = useState(false)
-
+    const isConnected = useIsConnected();
 
     const loader = async () => {
         try {   
             const session = await EncryptedStorage.getItem("user_info");
+
+            console.log('loader -- ',isConnected)
+            if(!isConnected) {
+                console.log('offline login')
+                const offline = await EncryptedStorage.getItem("user_offline");
+                const s = JSON.parse(offline)
+                await setAuth({type:"LOGIN",payload: s})
+                console.log("splash_screen_loader_offline_success")
+                return;
+            }
             if (session !== undefined && session !== null) {
                 const s = JSON.parse(session)
                 console.log("splash_screen_loader -- ",s)
@@ -26,7 +37,7 @@ const AppContainer = () =>{
                     throw "didn't loggin"
                 }
                 console.log("splash_screen_loader_success" - log)
-                await setAuth({type: "LOGIN", payload : log.body})
+                await setAuth({type: "LOGIN", payload : s})
                 return ;
             }
         } catch (error) {
@@ -37,13 +48,15 @@ const AppContainer = () =>{
     }
 
     useEffect(() => {
+        if(!auth.isLogged){
         loader().then(() => { 
             setLoading(true)
         }).catch(err=> {
             console.log(err)
             setLoading(true)
         })
-    },[])
+        }
+    },[isConnected])
     console.log(loading)
     if(!loading) {
         console.log(loading)
@@ -52,7 +65,7 @@ const AppContainer = () =>{
 
     return(
         <NavigationContainer>
-            {auth.isLogged? <MainNavigator/>:<AuthNavigator/>}
+                {auth.isLogged? <MainNavigator/>:<AuthNavigator/>}
         </NavigationContainer>
     );
 };

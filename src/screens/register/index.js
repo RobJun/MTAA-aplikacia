@@ -113,6 +113,7 @@ const RegisterValidator = ({navigation}) => {
         }else {
             try {
                 EncryptedStorage.setItem( "user_info", JSON.stringify(form));
+                EncryptedStorage.setItem("user_offline",JSON.stringify({user_id : response.body.id, token : response.body.token}))
                 auth.setAuth({type: "LOGIN", payload : {user_id : response.body.id, token : response.body.token}})
             } catch (error) {
                 auth.setAuth({type: "ERROR",payload:"cant store token"})
