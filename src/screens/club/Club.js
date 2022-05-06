@@ -12,10 +12,13 @@ import { fetchGroups, fetchInfo } from "../../api_calls/user_calls";
 import { LoadingBookCover, LoadingList, LoadingProfilePhoto,LoadingText } from "../../components/onLoading";
 import { getClubInfo, joinClub, leaveClub } from "../../api_calls/club_calls";
 import { useIsConnected } from 'react-native-offline';
+import { join_club, leave_club } from "../../context/actions/offline";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { ADD_CLUB } from "../../context/reducers/storageReducer";
 
 const ClubScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
-    const {auth:{user:{token,user_id}},setGroups,setUser,user,stun,setAuth,offline} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setGroups,setUser,user,stun,setAuth,offline,setOffline} = useContext(globContext)
     const {info, setInfo} = useContext(clubContext)
     const [ownerName,setOwnerName] = useState('')
     const [isOwner,setIsOwner] = useState(false)
@@ -23,7 +26,7 @@ const ClubScreen = ({navigation,route}) => {
     const {navigate} = useNavigation()
     const [refreshing, setRefreshing] = useState(false);
     const [loading,setLoading] = useState(true)
-    const isConnected = useIsConnected();
+    const {isConnected} = useNetInfo();
 
     const onRefresh = useCallback( async()=>{
         setRefreshing(true)
@@ -42,25 +45,27 @@ const ClubScreen = ({navigation,route}) => {
     
     useEffect(() => {
         try {
-        if(isConnected)
-            getClubInfo(clubID,(group)=>{offline.user_club_profiles = {
-                ...offline.user_club_profiles,
-                [group.id] : group
-              }
-            },setLoading)
-        console.log(offline.user_club_profiles)
-        setInfo(offline.user_club_profiles[clubID])
-        if(!isConnected) setLoading(false)
+        if(isConnected === undefined || loading === false) return;
+
+        if(isConnected === true){
+            console.log('fetching group')
+            getClubInfo(clubID,(group)=>{setOffline({type:ADD_CLUB,payload : group})},setLoading)
+        }
+        if(isConnected === false) setLoading(false)
             
         } catch(err){
             alert("Connection problems - ",err)
         }
-    }, [])
+    }, [isConnected])
+
 
     useEffect(()=>{
-        console.log("info changed")
+        console.log('----->changing info')
+        if(offline.loaded === false ||  offline.user_club_profiles[clubID]=== undefined) return;
+        console.log("info changed", offline.user_club_profiles, clubID)
         var p = false
-        info.users.forEach(user => {
+        offline.user_club_profiles[clubID].users.forEach(user => {
+            console.log(user)
             if(user.owner === true){
                 setOwnerName(user.displayName)
             }
@@ -78,7 +83,7 @@ const ClubScreen = ({navigation,route}) => {
             setIsPart(false)
         }
 
-    },[info])
+    },[offline])
 
 
     const ownerButton = ()=>{
@@ -89,9 +94,7 @@ const ClubScreen = ({navigation,route}) => {
     const memberButton = async ()=>{
         console.log('member')
         try {
-            await leaveClub(clubID,setInfo,token)
-            fetchGroups(user_id,setGroups)
-            fetchInfo(user_id,setUser)
+            await leave_club(clubID,token,user_id,!isConnected,setOffline)
         }catch(err) {
             alert(`${err}\n\nLogging out`)
             setAuth({type:"LOGOUT"})
@@ -100,9 +103,7 @@ const ClubScreen = ({navigation,route}) => {
 
     const otherButton = async ()=>{
         try {
-            await joinClub(clubID,setInfo,token)
-            fetchGroups(user_id,setGroups)
-            fetchInfo(user_id,setUser)
+            await join_club(clubID,token,user_id,!isConnected,setOffline)
         }catch(err) {
             alert(`${err}\n\nLogging out`)
             setAuth({type:"LOGOUT"})
@@ -122,8 +123,9 @@ const ClubScreen = ({navigation,route}) => {
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
     })
-
-
+    if(offline.user_club_profiles[clubID] === undefined && isConnected == false) {
+        return (<View><Text>error</Text></View>)
+    }
     return (
         <ScrollView
             refreshControl={
@@ -140,15 +142,15 @@ const ClubScreen = ({navigation,route}) => {
                             stun : stun
                         })}) : ()=> {alert('This function is disabled when offline')}} style={styles.callButton}/>}
                 {loading ? <LoadingProfilePhoto size={150} position={position} /> : 
-                    <ProfileImage source={info.photoPath} size={150}/> }
+                    <ProfileImage source={offline.user_club_profiles[clubID].photoPath} size={150}/> }
                 {loading ? <LoadingText width={200} height={40} style={styles.clubHeaderName} lines={1}  position={position}/> :
-                        <Text style={styles.clubHeaderName}>{info.name}</Text> } 
+                        <Text style={styles.clubHeaderName}>{offline.user_club_profiles[clubID].name}</Text> } 
                 <View style = {{flexDirection: "row", justifyContent: "space-evenly", marginLeft: 10, marginRight: 10, marginTop: 10}}>
                     <View style = {styles.border}>
                         <Text style={styles.infoTop}> Members</Text>
                         {loading ? 
                         <LoadingText style={{margin:20, flex: 0, alignSelf:'center'}} width={'50%'} height={33} position={position}/>:
-                        <Text style = {styles.clubHeaderOwner}>{info.count}</Text>}
+                        <Text style = {styles.clubHeaderOwner}>{offline.user_club_profiles[clubID].count}</Text>}
                     </View>
                     <View style = {styles.border}>
                         <Text style={styles.infoTop}>Owner</Text>
@@ -162,25 +164,25 @@ const ClubScreen = ({navigation,route}) => {
                 <View style={styles.firstSection}>
                     <Text style={styles.header}>About</Text>
                     {loading ? <LoadingText  style={styles.text} lines={5} randomlength={true}  position={position}/> :
-                    <Text style={styles.text}>{info.info ? info.info : "About not set"}</Text>}
+                    <Text style={styles.text}>{offline.user_club_profiles[clubID].info ? offline.user_club_profiles[clubID].info : "About not set"}</Text>}
                     <Text style={styles.header}>Rules</Text>
                     {loading ? <LoadingText  style={styles.text} lines={5}  position={position} randomlength={true}/> :
-                    <Text style={styles.text}>{info.rules ? info.rules : "Rules not set"}</Text> }
+                    <Text style={styles.text}>{offline.user_club_profiles[clubID].rules ? offline.user_club_profiles[clubID].rules : "Rules not set"}</Text> }
                 </View>
                 <View style={styles.secondSection}>
                     <Text style={styles.header}>Book of the week</Text>
                     
-                    { loading ? <LoadingBookCover size={150} style={styles.bowImage}  position={position}/> :info.book_of_the_week ? <BookCover 
-                                source={info.book_of_the_week.cover}
+                    { loading ? <LoadingBookCover size={150} style={styles.bowImage}  position={position}/> :offline.user_club_profiles[clubID].book_of_the_week ? <BookCover 
+                                source={offline.user_club_profiles[clubID].book_of_the_week.cover}
                                 style={styles.bowImage}
-                                onPress={()=>{ navigation.navigate('Club_Book',{bookID: info.book_of_the_week.id})}}/> 
+                                onPress={()=>{ navigation.navigate('Club_Book',{bookID: offline.user_club_profiles[clubID].book_of_the_week.id})}}/> 
                                 : <Text style={styles.noBook}>No book of the week</Text>}
                 </View>
                 <View style={styles.thirdSection}>
                     <Text style={styles.header}>Members</Text>
                     <View style = {{marginRight: 20}}>
                     { loading ? <LoadingList  position={position}/> :
-                        <UserList users={info.users} onSelect={(item)=>{navigation.navigate('Club_Member',{user_id:item.id})}} selectArray={[]}/>}
+                        <UserList users={offline.user_club_profiles[clubID].users} onSelect={(item)=>{navigation.navigate('Club_Member',{user_id:item.id})}} selectArray={[]}/>}
                     </View>
                 </View>
                 <View style={styles.fourthSection}>

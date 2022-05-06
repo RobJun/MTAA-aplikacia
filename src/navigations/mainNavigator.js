@@ -30,10 +30,12 @@ import { API_SERVER } from '../api_calls/constants';
       const fetchData = async() => { //prerobenie na to abz sa ukkladalo do pamati
         try{
         var state = {...userData}
+        console.log(user_id)
         await fetchInfo(user_id,(user)=>{state.userData = user})
         await fetchBooks(user_id,(books)=>{state.wishlist = books},"wishlist")
         await fetchBooks(user_id,(books)=>{state.reading = books},"reading")
         await fetchBooks(user_id,(books)=>{state.completed = books},"completed")
+        console.log('fetched basic ',state)
         //fetch user books info
         s = ['wishlist','reading','completed']
         for(var i = 0; i <3;i++){
@@ -74,7 +76,7 @@ import { API_SERVER } from '../api_calls/constants';
           setAuth({type:"LOGOUT"})
         }
       }
-      if(isConnected === null) return;
+      if(isConnected === null || offline.loaded == true) return;
       if(isLogged){
         console.log('connection',isConnected)
         if(isConnected){

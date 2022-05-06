@@ -1,10 +1,16 @@
-import React, {createContext, useReducer,useState} from 'react'
+import React, {createContext, useEffect, useReducer,useState} from 'react'
 import { NetworkProvider } from 'react-native-offline';
 import {authReducer,initAuthState} from './reducers/authReducer'
-import { userData,syncReducer } from './reducers/storageReducer';
+import { userData,syncReducer, SYNC_SUCCESS, SYNC_FAILED, LEAVE_CLUB, JOIN_CLUB, CHANGE_VALUE } from './reducers/storageReducer';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import { useNetInfo } from '@react-native-community/netinfo';
+import { joinClub, leaveClub } from '../api_calls/club_calls';
+import { fetchInfo } from '../api_calls/user_calls';
 export const globContext = createContext({});
 
 const GlobProvider = ({children}) => {
+
+    const {isConnected} = useNetInfo()
     //pridavat globalne stavy
     const [offline,setOffline] = useReducer(syncReducer,userData)
     const [auth, setAuth] = useReducer(authReducer,initAuthState)
@@ -31,6 +37,47 @@ const GlobProvider = ({children}) => {
 
 
     const [loading,setLoading] = useState(true)
+
+    useEffect(()=>{
+        console.log(offline.callQueue)
+        if(offline.loaded)
+        EncryptedStorage.setItem('user_data',JSON.stringify(offline, function replacer(key, value) { return value}))
+    },[offline])
+
+    useEffect(()=>{
+        const f = async()=>{
+            callQ = [...offline.callQueue]
+            var clubdata = {}
+            while(callQ.lenght !== 0){
+                if(isConnected === false){
+                    setOffline({type : SYNC_FAILED, payload : {callQueue : callQ}})
+                    return;
+                }
+                switch(callQ[0].type){
+                    case LEAVE_CLUB:
+                        clubdata = await leaveClub(callQ[0].club_id,(data)=>{},callQ[0].token)
+                        break;
+                    case JOIN_CLUB:
+                        clubdata = await joinClub(callQ[0].club_id,(data)=>{},callQ[0].token)
+                        break;
+                }
+
+                const userData = await fetchInfo(callQ[0].user_id,(data)=>{})
+
+
+                setOffline({type:CHANGE_VALUE,offline: false, payload : {type : callQ[0].type,data : {userData : userData,clubInfo: clubdata}}})
+
+
+                callQ.splice(0,1)
+            }
+
+
+            setOffline({type : SYNC_SUCCESS, payload : {}})
+        }
+        if(isConnected === true || offline.isSynced === false){
+           f()
+        }
+    },[isConnected])
 
     return(<globContext.Provider value={{auth,setAuth,
                                         user,setUser,

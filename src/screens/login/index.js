@@ -75,7 +75,7 @@ const LoginValidator = () => {
                 auth.setAuth({type: "ERROR",payload:"zle meno alebo heslo"})
             }else {
                 try {
-                    EncryptedStorage.setItem( "user_info", JSON.stringify(response.body));
+                    EncryptedStorage.setItem( "user_info", JSON.stringify(form));
                     EncryptedStorage.setItem("user_offline",JSON.stringify(response.body));
                     auth.setAuth({type: "LOGIN", payload : response.body})
                 } catch (error) {

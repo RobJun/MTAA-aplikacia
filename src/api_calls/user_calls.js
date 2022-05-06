@@ -12,6 +12,7 @@ export const fetchInfo = async (user_id,dispatch) => {
             element.photoPath = element.photoPath +`?time=${new Date().getTime()}`
         });
         dispatch(data)
+        return data
     } catch(err) {
         alert("Error - No internet connection")
         throw err

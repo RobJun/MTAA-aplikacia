@@ -7,14 +7,16 @@ import AuthNavigator from './authNavigator';
 import { globContext } from '../context/globContext';
 import SplashScreen from '../screens/splashscreen';
 import {login_call} from '../api_calls/auth_calls';
-import { useIsConnected } from 'react-native-offline';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 
 
 const AppContainer = () =>{
     const {auth, setAuth} = useContext(globContext)
     const [loading, setLoading] = useState(false)
-    const isConnected = useIsConnected();
+    const [loadedNetInfo, setLoadedNetInfo] = useState(false)
+    const {isConnected} =useNetInfo()
+
 
     const loader = async () => {
         try {   
@@ -24,6 +26,7 @@ const AppContainer = () =>{
             if(!isConnected) {
                 console.log('offline login')
                 const offline = await EncryptedStorage.getItem("user_offline");
+                if(offline === null) return;
                 const s = JSON.parse(offline)
                 await setAuth({type:"LOGIN",payload: s})
                 console.log("splash_screen_loader_offline_success")
@@ -33,11 +36,12 @@ const AppContainer = () =>{
                 const s = JSON.parse(session)
                 console.log("splash_screen_loader -- ",s)
                 let log = await login_call(s)
+                console.log('response -',log)
                 if(log.code !== 200) {
                     throw "didn't loggin"
                 }
                 console.log("splash_screen_loader_success" - log)
-                await setAuth({type: "LOGIN", payload : s})
+                await setAuth({type: "LOGIN", payload : log.body})
                 return ;
             }
         } catch (error) {
@@ -47,7 +51,12 @@ const AppContainer = () =>{
         return;
     }
 
+    useEffect(()=>{
+        if(isConnected === true || isConnected === false) setLoadedNetInfo(true)
+    },[isConnected])
+
     useEffect(() => {
+        if(loadedNetInfo === false) return;
         if(!auth.isLogged){
         loader().then(() => { 
             setLoading(true)
@@ -56,7 +65,10 @@ const AppContainer = () =>{
             setLoading(true)
         })
         }
-    },[isConnected])
+    },[loadedNetInfo])
+
+
+
     console.log(loading)
     if(!loading) {
         console.log(loading)

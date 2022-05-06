@@ -12,7 +12,9 @@ import  AppContainer from './src/navigations'
 
 
 export default function App() {
-  return ( <NetworkProvider><GlobProvider>
-    <AppContainer></AppContainer>
-    </GlobProvider></NetworkProvider>)
+  return ( <NetworkProvider>
+            <GlobProvider>
+              <AppContainer></AppContainer>
+            </GlobProvider>
+          </NetworkProvider>)
 }

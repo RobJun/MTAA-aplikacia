@@ -12,6 +12,7 @@ export const getClubInfo =  async (clubID,dispatch,load_dispatch = null)=>{
         dispatch(data)
         if(load_dispatch !== null)
             load_dispatch(false)
+        return data
     } catch(err){
        throw err
     }
@@ -34,6 +35,7 @@ export const leaveClub = async (clubID,dispatch,token)=>{
         const data = await response.json()
         data.photoPath = data.photoPath +`?time=${new Date().getTime()}`
         dispatch(data)
+        return data
     }catch(err) {
         throw err
     }
@@ -54,6 +56,7 @@ export const joinClub = async (clubID,dispatch,token) => {
         }
         const data = await response.json()
         dispatch(data)
+        return data;
     }catch(err) {
         throw err
     }
@@ -98,6 +101,7 @@ export const saveChanges = async (clubID=null,form,token,dispatch, load_dispatch
         console.log(body)
         body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
         dispatch(body)
+        return body
         } catch(err){
             console.log('error while saving')
             load_dispatch
