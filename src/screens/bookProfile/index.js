@@ -31,7 +31,6 @@ const BookProfile = ({route}) => {
 
     
     const fetchInfo = async () => {
-
         try { 
             var data = null
             if(isConnected){

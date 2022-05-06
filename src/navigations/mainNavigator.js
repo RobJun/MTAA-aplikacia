@@ -7,7 +7,7 @@ import ClubNavigator from './clubNavigator';
 import LibraryNavigation from '../screens/library';
 import SearchNavigator from '../screens/search';
 import ProfileNavigation from '../screens/profile';
-import {fetchBooks, fetchGroups, fetchInfo } from '../api_calls/user_calls';
+import {fetchBooks, fetchInfo } from '../api_calls/user_calls';
 import { LOAD_FROM_MEMORY, LOAD_INITIAL, userData } from '../context/reducers/storageReducer';
 import { useIsConnected } from 'react-native-offline';
 import EncryptedStorage from 'react-native-encrypted-storage';
@@ -18,7 +18,7 @@ import { API_SERVER } from '../api_calls/constants';
   
   export default function MainNavigator() { 
     const isConnected = useIsConnected()
-    const {auth:{user:{token,user_id},isLogged},setAuth,setUser,setLibrary,setGroups,visible,setLoading,setOffline,offline} = useContext(globContext)
+    const {auth:{user:{token,user_id},isLogged},setAuth,visible,setLoading,setOffline,offline} = useContext(globContext)
 
     useEffect(() => {
       const loadFromMemory =  async() =>{
@@ -34,7 +34,6 @@ import { API_SERVER } from '../api_calls/constants';
         await fetchBooks(user_id,(books)=>{state.wishlist = books},"wishlist")
         await fetchBooks(user_id,(books)=>{state.reading = books},"reading")
         await fetchBooks(user_id,(books)=>{state.completed = books},"completed")
-        await fetchGroups(user_id,(groups)=>{state.clubs = groups})
         //fetch user books info
         s = ['wishlist','reading','completed']
         for(var i = 0; i <3;i++){
@@ -56,8 +55,8 @@ import { API_SERVER } from '../api_calls/constants';
           }
         }
         //fetch groups info
-        for(var i = 0; i < state.clubs.length;i++){
-           await getClubInfo(state.clubs[i].id,(group)=>{state.user_club_profiles = {
+        for(var i = 0; i < state.userData.clubs.length;i++){
+           await getClubInfo(state.userData.clubs[i].id,(group)=>{state.user_club_profiles = {
             ...state.user_club_profiles,
             [group.id] : group
           }

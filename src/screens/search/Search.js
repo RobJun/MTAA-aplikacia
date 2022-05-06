@@ -1,12 +1,13 @@
-import React, { useEffect, useState} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity,Animated, Image} from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { API_SERVER } from "../../api_calls/constants";
 import ProfileImage from "../../components/profileImage";
-import SearchBar from "react-native-dynamic-search-bar";
 import ButtonSettings from "../profile/button";
 import { BookSearchList, LoadingList } from "../../components/onLoading";
 import { useIsConnected } from "react-native-offline";
+import { globContext } from "../../context/globContext";
+import SearchBar from "react-native-dynamic-search-bar";
 
 const SearchScreen = () => {
     const [groups, setGroups] = useState([])
@@ -15,6 +16,7 @@ const SearchScreen = () => {
     const [search,setSearch] = useState("")
     const [searching,setSearching] = useState(true)
     const isConnected = useIsConnected()
+    const {offline:{user_book_profiles, user_club_profiles}} = useContext(globContext)
 
     const fetchBooks = async (query) => {
         console.log('fetching books')
@@ -40,13 +42,47 @@ const SearchScreen = () => {
         }
     }
 
+    const fetchOfflineBooks = (query) => {
+        var boo =  Object.values(user_book_profiles)
+        if(query == "") setBooks(boo)
+        else { 
+            var book = []
+            boo.forEach(e => {
+                console.log(e)
+                var author = e.author[0].name
+                var title = e.title
+                if(author.includes(query)|| title.includes(query)) {
+                    book.push(e)
+                }
+            })
+            setBooks(book)
+        }
+    }
+
+    const fetchOfflineClubs = (query) => {
+        var boo = Object.values(user_club_profiles)
+        if(query == "") setGroups(boo)
+        else { 
+            var club = []
+            boo.forEach(e => {
+                var name = e.name
+                if(name.includes(query)) club.push(e)
+            })
+            setGroups(club)
+        }
+    }
+
     const fet = async (query) => {
         setSearching(true)
         if(isConnected){
             await fetchBooks(query)
             await fetchGroups(query)
+        } else {
+            await fetchOfflineBooks(query)
+            await fetchOfflineClubs(query)
         }
         setSearching(false)
+        console.log("seeearch", search)
     }
 
     useEffect(()=>{
@@ -80,15 +116,20 @@ const SearchScreen = () => {
     })
 
 
-    return isConnected ? (
+    return (
         <View>
         <View>
             <SearchBar 
                 placeholder="Search book, author, group..."
                 onChangeText={(text) => {setSearch(text)}}
                 onClearPress={()=>{
-                    fetchGroups('')
-                    fetchBooks('')
+                    if(isConnected){
+                        fetchBooks('')
+                        fetchGroups('')
+                    } else {
+                        fetchOfflineBooks("")
+                        fetchOfflineClubs("")
+                    }
                 }}
                 fontSize = {16}
                 style = {{width: "95%", marginTop: 15, height: 50, borderRadius: 20}}
@@ -142,7 +183,7 @@ const SearchScreen = () => {
             </View>
         </ScrollView>
         </View>
-    ) : <View><Text style={styles.text}>Nemozno vyhlavadať bez internetu, ša rozmyšlam ne.</Text></View>
+    )
 }
 
 const styles = StyleSheet.create({

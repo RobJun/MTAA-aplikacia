@@ -8,7 +8,7 @@ import { fetchBooks, fetchGroups } from "../../api_calls/user_calls";
 import { LoadingList,HorizontalBookList } from "../../components/onLoading";
 
 const HomeScreen = ({navigation}) => {
-    const {auth:{user:{token,user_id}},groups, setGroups,loading,setLibrary,offline:{reading,clubs},auth} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups, setGroups,loading,setLibrary,offline:{reading,userData:{clubs}},auth} = useContext(globContext)
     const {navigate} = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
     const onRefresh = useCallback(()=>{

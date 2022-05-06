@@ -7,7 +7,6 @@ export const userData = {
     wishlist : [],
     reading : [],
     completed : [],
-    clubs : [],
     user_book_profiles : {},
     user_club_profiles : {},
     
@@ -38,14 +37,14 @@ export const syncReducer = (state,{type,payload})=>{
                 isSynced : true,
                 syncing : false,
                 error : null,
-                callQueue :[]
+                callQueue : []
             }, function replacer(key, value) { return value}))
             return {
                 ...payload,
                 isSynced : true,
                 syncing : false,
                 error : null,
-                callQueue :[]
+                callQueue : []
             }
         case SYNC:
             //go through all calls in queue
