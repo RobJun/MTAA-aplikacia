@@ -11,15 +11,19 @@ import { CHARSET_ERROR, MAX, onlySpaces, REQUIRED, SPACES } from "../../../utils
 import { styles } from "./style";
 import BookSettings from "./bookSettings";
 import MemberSettings from "./memberSettings";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { delete_club } from "../../../context/actions/offline";
 
-const ClubSettingScreen = ({navigation}) => {
+const ClubSettingScreen = ({navigation,route}) => {
+    const clubID = route.params.clubID
     const [formS,setFormS] = useState({})
     const [errors,setErrors] = useState({ username : false});
-    const {auth:{user:{token,user_id}},setUser,setGroups,setAuth} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setUser,setGroups,setAuth,offline,setOffline} = useContext(globContext)
     const {info, setInfo} = useContext(clubContext)
     const [formImage,setFormImage] = useState(false)
     const [submiting,setSubmiting] = useState(false)
     const [deleting,setDeleting] = useState(false)
+    const {isConnected} = useNetInfo()
 
 
     const onChange = ({name,value}) => {
@@ -44,9 +48,9 @@ const ClubSettingScreen = ({navigation}) => {
     }
 
     useEffect(()=>{
-        onChange({name:'name',value:info.name})
-        onChange({name:'info',value:info.info})
-        onChange({name:'rules',value:info.rules})
+        onChange({name:'name',value:offline.user_club_profiles[clubID].name})
+        onChange({name:'info',value:offline.user_club_profiles[clubID].info})
+        onChange({name:'rules',value:offline.user_club_profiles[clubID].rules})
     },[])
 
 
@@ -59,25 +63,17 @@ const ClubSettingScreen = ({navigation}) => {
         setDeleting(true)
         let success
         try {
-            success = await deleteGroup(info.id,token)
+            success = await delete_club(clubID,token,user_id,!isConnected,setOffline)
         }catch(err){
-            alert('Error'- err)
-            setAuth({type:"LOGOUT"})
-            setDeleting(false)
+            console.log('----------\nerror---',err,'\n------------')
+            if(err === 0xff){
+                alert('Couldnt delete club',err)
+                setDeleting(false)
+            }
             return
-        }
-        if(success){
-        try {
-        fetchGroups(user_id,setGroups)
-        fetchInfo(user_id,setUser)
-        }catch (err) {
-            console.log(err)
         }
         console.log(navigation)
         navigation.getParent()?.goBack()
-        }else{
-            alert("couldn't delete club")
-        }
         setDeleting(false)
     }
 
@@ -152,6 +148,7 @@ const ClubSettingScreen = ({navigation}) => {
         <Text style={styles.header}>Bookclub settings</Text>
     </View>
     <BasicSettings 
+        editable={isConnected}
         formImage={formImage}
         selectImage={imagePicker} 
         defaultImage={info.photoPath}
@@ -163,7 +160,7 @@ const ClubSettingScreen = ({navigation}) => {
         title={'Save Changes'}
         visible={submiting}/>
     <BookSettings/>
-    <MemberSettings/>
+    <MemberSettings club_id={clubID}/>
     <Button title='Delete BookClub' onPress={deleting ? ()=>{} : ()=>{
         Alert.alert(`DELETE ${info.name}`,`Are you sure about deleting ${info.name}?`,[
             {

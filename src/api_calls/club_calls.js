@@ -90,12 +90,12 @@ export const saveChanges = async (clubID=null,form,token,dispatch, load_dispatch
         if(response.status === 409){
             alert("Name already in use")
             load_dispatch(false)
-            return false;
+            return;
         }
         if (response.status === 406){
             alert("Not right name")
             load_dispatch(false)
-            return false;
+            return;
         }
         const body = await response.json()
         console.log(body)
@@ -122,7 +122,7 @@ export const deleteGroup = async (clubID,token) => {
           )
         if(response.status === 401) throw '401 -- unauthorized to delete Group'
         if(response.status > 400) {
-            return false
+            throw false
         }  
         return true
     } catch(err) {

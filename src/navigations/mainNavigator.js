@@ -8,11 +8,12 @@ import LibraryNavigation from '../screens/library';
 import SearchNavigator from '../screens/search';
 import ProfileNavigation from '../screens/profile';
 import {fetchBooks, fetchInfo } from '../api_calls/user_calls';
-import { LOAD_FROM_MEMORY, LOAD_INITIAL, userData } from '../context/reducers/storageReducer';
+import {  userData } from '../context/reducers/storageReducer';
 import { useIsConnected } from 'react-native-offline';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { getClubInfo } from '../api_calls/club_calls';
 import { API_SERVER } from '../api_calls/constants';
+import { LOAD_FROM_MEMORY, LOAD_INITIAL } from '../context/constants/offline';
 
   const Tab = createBottomTabNavigator();
   

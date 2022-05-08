@@ -14,7 +14,7 @@ import { getClubInfo, joinClub, leaveClub } from "../../api_calls/club_calls";
 import { useIsConnected } from 'react-native-offline';
 import { join_club, leave_club } from "../../context/actions/offline";
 import { useNetInfo } from "@react-native-community/netinfo";
-import { ADD_CLUB } from "../../context/reducers/storageReducer";
+import { ADD_CLUB } from "../../context/constants/offline";
 
 const ClubScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
@@ -88,7 +88,7 @@ const ClubScreen = ({navigation,route}) => {
 
     const ownerButton = ()=>{
         console.log('Owner')
-        navigation.navigate('Club_settings')
+        navigation.navigate('Club_settings',{clubID : clubID})
     }
 
     const memberButton = async ()=>{
@@ -123,8 +123,11 @@ const ClubScreen = ({navigation,route}) => {
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
     })
-    if(offline.user_club_profiles[clubID] === undefined && isConnected == false) {
+    if(offline.user_club_profiles[clubID] === undefined && isConnected == false ) {
         return (<View><Text>error</Text></View>)
+    }
+    if(offline.user_club_profiles[clubID] === undefined){
+        return (<View><Text>undefined</Text></View>)
     }
     return (
         <ScrollView

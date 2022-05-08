@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import { View, StyleSheet, TextInput,Text } from "react-native";
 
-const CredentialInput = ({label,value,onChangeText,password,error, placeholder, multi, height}) => {
+const CredentialInput = ({label,value,onChangeText,password,error, placeholder, multi, height, editable = true}) => {
     const [focused, setFocused] = useState(false)
 
     const getBorderColor = () => {
@@ -23,6 +23,7 @@ const CredentialInput = ({label,value,onChangeText,password,error, placeholder, 
             setFocused(true)
         }}
         onBlur={()=> setFocused(false)}
+        editable={editable}
        />
       {error && <Text style={styles.error}>{error}</Text>}
     </View>

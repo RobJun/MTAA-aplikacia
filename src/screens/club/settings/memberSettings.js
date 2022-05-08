@@ -8,28 +8,34 @@ import UserList from "../../../components/Userlist"
 import SearchBar from "react-native-dynamic-search-bar";
 import { getClubInfo, removeMember } from "../../../api_calls/club_calls";
 import { styles } from "./style";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 
 
-const MemberSettings = ({}) => {
-    const {info, setInfo,setAuth} = useContext(clubContext)
-    const {auth:{user:{token,user_id}}} = useContext(globContext)
+const MemberSettings = ({club_id}) => {
+    const {info, setInfo,setAuth,} = useContext(clubContext)
+    const {auth:{user:{token,user_id}},offline,setOffline} = useContext(globContext)
     const [removeUserIDs,setRemoveUserIDs] = useState([])
     const [search,setSearch] = useState('')
     const [removing,setRemoving] = useState(false)
+    const {isConnected} = useNetInfo()
 
 
     const [filtred,setFiltred] = useState([])
     useEffect(()=>{
-        setFiltred(info.users.filter(user=>{ return user.displayName.toLowerCase().includes(search)}))
+        setFiltred(offline.user_club_profiles[club_id].users.filter(user=>{ return user.displayName.toLowerCase().includes(search.toLowerCase())}))
     },[search])
     const removeMembers = async () => {
+        if(!isConnected){
+            alert("can't remove members offline")
+            return;
+        }
         setRemoving(true)
         var newInfo = undefined
         var refetchData = false
         for(let i = 0; i< removeUserIDs.length;i++){
             try{
-            const response = await removeMember(token,info.id,removeUserIDs[i])
+            const response = await removeMember(token,club_id,removeUserIDs[i])
             if(response.status === 401) {
                 setRemoving(false)
                 setAuth({type:'LOGOUT'})
@@ -54,7 +60,7 @@ const MemberSettings = ({}) => {
                 newInfo = info
             } 
             try{
-                await getClubInfo(info.id,setter)
+                getClubInfo(club_id,(group)=>{setOffline({type:ADD_CLUB,payload : group})},setter)
             }catch(err){
                 console.log('Connection error')
                 setRemoving(false)

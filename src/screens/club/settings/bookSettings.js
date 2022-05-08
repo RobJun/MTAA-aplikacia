@@ -7,16 +7,18 @@ import { globContext } from "../../../context/globContext";
 import SearchBar from "react-native-dynamic-search-bar";
 import BookCover from "../../../components/BookCover";
 import { styles } from "./style";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 
 const BookSettings = ({})=> {
     const {info, setInfo} = useContext(clubContext)
-    const {auth:{user:{token,user_id}},setAuth} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setAuth,offline} = useContext(globContext)
     const [book,setBook] = useState(false)
     const [search,setSearch] = useState("")
     const [searchResult,setSearchResult] = useState([])
     const [searching,setSearching] = useState(false)
     const [setting,setSetting] = useState(false)
+    const {isConnected} = useNetInfo()
 
     const fetchBooks = async (query) => {
         setSearching(true)
@@ -34,9 +36,20 @@ const BookSettings = ({})=> {
             console.log('cant search, search on going')
             return;
         }
-        fetchBooks(search)
+        if(isConnected){
+            fetchBooks(search)
+        }
 
     },[search])
+
+    useEffect(()=>{
+        console.log('settings - ',offline.user_book_profiles)
+        var a = []
+        for (const key in offline.user_book_profiles){
+            a.push(offline.user_book_profiles[key])
+        }
+        setSearchResult(a)
+    },[])
 
     const onSelect = (item) => {
         if(book === false){

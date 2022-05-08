@@ -9,13 +9,14 @@ import {fetchInfo, fetchGroups } from '../../api_calls/user_calls';
 import { compressImage, pickImage } from '../../utils/imageCompression';
 import { saveChanges } from '../../api_calls/club_calls';
 import { MAX, onlySpaces, REQUIRED, SPACES } from '../../utils/validation';
+import { create_club } from '../../context/actions/offline';
 
 const NewClubForm = ({navigation,route})=>{
     const [formImage,setFormImage] = useState(false)
     const [formS,setFormS] = useState({})
     const [errors,setErrors] = useState({})
     const {navigate} = useNavigation()
-    const {auth:{user:{token,user_id}},groups,setGroups,user,setUser,setAuth} = useContext(globContext)
+    const {auth:{user:{token,user_id}},groups,setGroups,user,setUser,setAuth,setOffline} = useContext(globContext)
     const [submiting,setSubmiting] = useState(false)
 
 
@@ -80,22 +81,18 @@ const NewClubForm = ({navigation,route})=>{
 
         let success = false
         try {
-            success = await saveChanges(null,form,token,setClubID,setSubmiting,true)
+            const ret = await create_club(form, token,user_id,setOffline,setClubID)
+            if(ret == false){
+                setSubmiting(false)
+                return;
+            }
+            //success = await saveChanges(null,form,token,setClubID,setSubmiting,true)
         }catch(err){
             alert('Error'- err)
             setSubmiting(false)
             if (err == '401 neautorizovany pouzivatel')
                 setAuth({type:"LOGOUT"})
-        }
-
-        if (!success) return;
-
-        try {
-        fetchGroups(user_id,setGroups)
-        fetchInfo(user_id,setUser)
-        } catch (err) {
-            console.log(err)
-            setSubmiting(false)
+            return
         }
 
         navigation.pop()
