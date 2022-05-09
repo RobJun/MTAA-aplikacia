@@ -17,7 +17,7 @@ const HomeScreen = ({navigation}) => {
         fetchGroups(user_id, setGroups)
         fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
         } catch (err) {
-            console.log(err)
+           
         }
         setRefreshing(false)
     },[])
@@ -36,7 +36,7 @@ const HomeScreen = ({navigation}) => {
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
     })
-    console.log('home -- ',auth)
+   
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style = {{height: 260}}>

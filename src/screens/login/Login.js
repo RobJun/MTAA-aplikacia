@@ -10,7 +10,7 @@ const Login = ({onSubmit,onChange,form,error}) => {
     const {navigate} = useNavigation();
     const {auth,setAuth} = useContext(globContext)
     if (auth.error) {
-        console.log(auth)
+       
         Alert.alert(auth.error, auth.error, [{text: "OK",onPress: () => {setAuth({type: "CLEAR"})}}])
     }
     return (

@@ -72,7 +72,7 @@ const NewClubForm = ({navigation,route})=>{
         if(formImage){
             form.append('photo',await compressImage(formImage))
         }
-        console.log(form)
+       
 
         let id 
         const setClubID = (body)=> {

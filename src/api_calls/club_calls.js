@@ -19,7 +19,7 @@ export const getClubInfo =  async (clubID,dispatch,load_dispatch = null)=>{
 }
 
 export const leaveClub = async (clubID,dispatch,token)=>{
-    console.log('member')
+   
     try {
         const response = await fetch(`http://${API_SERVER}/group/leave/${clubID}/`,{
             "method": "DELETE",
@@ -62,7 +62,12 @@ export const joinClub = async (clubID,dispatch,token) => {
     }
 }
 
-export const saveChanges = async (clubID=null,form,token,dispatch, load_dispatch , create= false) => {
+export const saveChanges = async (clubID=null,form,token,dispatch, load_dispatch = (bool)=>{}, create= false) => {
+    console.log(form["_parts"][0][0],form["_parts"][1])
+    var newForm = new FormData()
+    form["_parts"].forEach(element => {
+        newForm.append(element[0],element[1])
+    });
     try{
         let response
         if(create){
@@ -72,7 +77,7 @@ export const saveChanges = async (clubID=null,form,token,dispatch, load_dispatch
                 "Content-Type": "multipart/form-data; boundary=---011000010111000001101001",
                 "Authorization" : `Token ${token}`
             },
-            body: form
+            body: newForm
             })
         }else{
             response = await fetch(`http://${API_SERVER}/group/modify/${clubID}/`,{
@@ -81,34 +86,29 @@ export const saveChanges = async (clubID=null,form,token,dispatch, load_dispatch
                     "Content-Type": "multipart/form-data; boundary=---011000010111000001101001",
                     "Authorization" : `Token ${token}`
                 },
-                body: form
+                body: newForm
             })
         }
+        console.log(response)
 
         if(response.status === 401) throw '401 neautorizovany pouzivatel'
 
         if(response.status === 409){
-            alert("Name already in use")
             load_dispatch(false)
-            return;
+            throw "Name already in use"
         }
         if (response.status === 406){
-            alert("Not right name")
             load_dispatch(false)
-            return;
+            throw "Not right name"
         }
         const body = await response.json()
-        console.log(body)
+       
         body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
         dispatch(body)
         return body
         } catch(err){
-            console.log('error while saving')
-            load_dispatch
             throw err;
         }
-
-        return true
 }
 
 export const deleteGroup = async (clubID,token) => {
@@ -145,4 +145,22 @@ export const removeMember = async (token,clubID,userID)=>{
         }catch(e){
             throw e
         }
+}
+
+export const setBook = async (club_id,book_id,token)=>{
+    var resposne ={}
+    try{
+        resposne = await fetch(`http://${API_SERVER}/group/book/${club_id}/?q=${book_id}`, {
+        "method": "PUT",
+        "headers": {
+          "Authorization": `Token ${token}`
+        }
+    })
+    }catch(err) {
+        throw err
+    }
+    if(resposne.status > 400){
+        throw resposne.status
+    }
+    return await resposne.json()
 }

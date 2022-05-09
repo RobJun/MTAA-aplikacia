@@ -4,7 +4,7 @@ export const login_call  = async (user_data) => {
         const timeout = 5000
         const controller = new AbortController()
         const id = setTimeout(()=>controller.abort(),timeout)
-        console.log("api_call_login -- ", user_data)
+       
         try {
             let data = await fetch(`${API_CALL}/auth/login/`, {
                     "method": "POST",
@@ -21,10 +21,10 @@ export const login_call  = async (user_data) => {
                 return {code : code, body : {}}
             }
             const body = await data.json()
-            console.log("auth_call_login_body --", body)
+           
             return {code: code, body : body}
         }catch (err) {
-            console.log("auth_call_login_error -- ", user_data)
+           
             throw err;
         }
     }
@@ -33,7 +33,7 @@ export const register_call = async (user_data) => {
         const timeout = 5000
         const controller = new AbortController()
         const id = setTimeout(()=>controller.abort(),timeout)
-        console.log("api_call_register -- ", user_data)
+       
 
         try {
             let data =await fetch(`${API_CALL}/auth/register/`, {
@@ -50,10 +50,10 @@ export const register_call = async (user_data) => {
                 return {code: code,body: {}}
             }
             const body = await data.json()
-            console.log("auth_call_register_body --", body)
+           
             return {code : code, body: body}
         }catch(err){
-            console.log("auth_call_login_error -- ", user_data)
+           
             throw err;
         }
     }

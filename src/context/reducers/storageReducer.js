@@ -21,8 +21,9 @@ import { SYNC,
     SAVE_CLUB,   
     CREATE_CLUB,
     DELETE_CLUB,
+    SET_BOOK_WEEK,
      } from '../constants/offline';
-import { joinClub, leaveClub,deleteClub,createClub } from './stateChangers';
+import { joinClub, leaveClub,deleteClub,createClub, changeClub, setBookOfTheWeek } from './stateChangers';
 
 export const userData = {
     userData : {},
@@ -47,10 +48,8 @@ export const syncReducer = (state,{type,payload})=>{
         case LOAD_INITIAL: //prvotny stav -- ked v pamati nie su data -- nacitaj z internetu
             return {
                 ...payload,
-                isSynced : true,
                 syncing : false,
                 error : null,
-                callQueue :[],
                 loaded : true
             }
         case SYNC:
@@ -77,6 +76,7 @@ export const syncReducer = (state,{type,payload})=>{
                 club_id : payload?.club_id,
                 book_id : payload?.book_id,
                 book_op : payload?.list,
+                form : payload?.form, //form data from settings
                 data : payload?.data // if data where fetched with online -- must consists of userData and clubInfo
             }
             var editedState = {...state}
@@ -93,6 +93,9 @@ export const syncReducer = (state,{type,payload})=>{
                 case CREATE_CLUB:
                     var editedState = createClub(state,operation,payload.offline)
                     break;
+                case SET_BOOK_WEEK:
+                    var editedState = setBookOfTheWeek(state,operation,payload.offline)
+                    break;
                 case ADD_BOOK: 
                     //var editedState = addBook(state,operation)
                     break;
@@ -108,11 +111,13 @@ export const syncReducer = (state,{type,payload})=>{
                 case SAVE_USER: 
                     break;
                 case SAVE_CLUB:
+                   
+                    var editedState = changeClub(state,operation,payload.offline)
                     break;
                 default:
                     return {...state}
             }
-            console.log('state-',editedState.user_club_profiles)
+           
             return{
                 ...editedState,
                 isSynced: !payload.offline,
@@ -139,7 +144,7 @@ export const syncReducer = (state,{type,payload})=>{
                 error : null
             }
         case LOAD_FROM_MEMORY:
-            console.log(LOAD_FROM_MEMORY,payload)
+           
             return payload
         case ERROR:
             return {

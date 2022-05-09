@@ -8,11 +8,12 @@ import SearchBar from "react-native-dynamic-search-bar";
 import BookCover from "../../../components/BookCover";
 import { styles } from "./style";
 import { useNetInfo } from "@react-native-community/netinfo";
+import { set_book_of_week } from "../../../context/actions/offline";
 
 
-const BookSettings = ({})=> {
+const BookSettings = ({club_id})=> {
     const {info, setInfo} = useContext(clubContext)
-    const {auth:{user:{token,user_id}},setAuth,offline} = useContext(globContext)
+    const {auth:{user:{token,user_id}},setAuth,offline,setOffline} = useContext(globContext)
     const [book,setBook] = useState(false)
     const [search,setSearch] = useState("")
     const [searchResult,setSearchResult] = useState([])
@@ -29,11 +30,11 @@ const BookSettings = ({})=> {
 
     useEffect(()=>{
         if(search.length < 4 ){
-            console.log('string must be atleast 4 characters')
+           
             return;
         }
         if(searching){
-            console.log('cant search, search on going')
+           
             return;
         }
         if(isConnected){
@@ -43,13 +44,15 @@ const BookSettings = ({})=> {
     },[search])
 
     useEffect(()=>{
-        console.log('settings - ',offline.user_book_profiles)
+       
         var a = []
+        if(!isConnected){
         for (const key in offline.user_book_profiles){
             a.push(offline.user_book_profiles[key])
         }
         setSearchResult(a)
-    },[])
+    }
+    },[isConnected])
 
     const onSelect = (item) => {
         if(book === false){
@@ -68,31 +71,30 @@ const BookSettings = ({})=> {
             return;
         }
         setSetting(true)
+        
         var resposne
         try{
-            resposne = await fetch(`http://${API_SERVER}/group/book/${info.id}/?q=${book.id}`, {
-            "method": "PUT",
-            "headers": {
-              "Authorization": `Token ${token}`
+            if(!isConnected) {
+                var index = false
+                for (const prop in offline.user_book_profiles){
+                    if(prop === book.id){
+                        index = true;
+                        break;
+                    }
+                }
+                if(!index){
+                    alert("can't set this book in offline")
+                    return;
+                }
             }
-        })
-        }catch(err) {
-            alert('Connection problems')
+            await set_book_of_week(club_id,book.id,token,!isConnected,setOffline)
+        }catch(err){
+           
+            setSetting(false)
         }
-        if(resposne.status === 401) {
-            alert(`unauthorized`)
-            setAuth({type:'LOGOUT'})
-            return
-        }
-        if(resposne.status > 400){
-            alert(`Bad request: ${resposne.status}`)
-            return;
-        }
-        setInfo(await resposne.json())
         setSetting(false)
-        alert('Your book was set')
-
     }
+
     return (<View>
             <Text style={styles.removeMembers}>Book of the Week</Text>
             <SearchBar 
@@ -100,7 +102,7 @@ const BookSettings = ({})=> {
             onPress={()=>{console.log("onPress")}}
             onChangeText={(text) => {setSearch(text)}}
             onSearchPress={(text) => console.log('searching: ', text)}/>
-            { (info.book_of_the_week || book) ? <Image source={{uri: book ? book.cover : info.book_of_the_week.cover}} style={styles.bowImage}/> : <Text style={styles.noBook}>No book of the week</Text>}
+            { (offline.user_club_profiles[club_id].book_of_the_week || book) ? <Image source={{uri: book ? book.cover : offline.user_club_profiles[club_id].book_of_the_week.cover}} style={styles.bowImage}/> : <Text style={styles.noBook}>No book of the week</Text>}
             {searchResult.length > 0 ? <FlatList
                 style={{marginVertical:20}}
                 horizontal

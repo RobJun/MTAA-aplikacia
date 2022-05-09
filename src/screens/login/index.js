@@ -12,10 +12,10 @@ const LoginValidator = () => {
 
     const onChange = ({name,value}) => {
         const val = (name === 'name' ? 20 : 32)
-        console.log(name,val , value.length)
+       
         if (value?.length > val) {
             setErrors({...errors, [name] : MAX(val)})
-            console.log('')
+           
             return;
         }else {
             setErrors({...errors, [name] : null})
@@ -33,7 +33,7 @@ const LoginValidator = () => {
 
     //validacia zadanych dat
     const onSubmit = () => {
-        console.log(form)
+       
         let error = false
         if(!form.name){
             setErrors((prev)=>{
@@ -67,11 +67,11 @@ const LoginValidator = () => {
         }
 
         auth.setAuth({type: "LOADING"})
-        console.log("re")
+       
         login_call(form).then(response => {
-            console.log("auth_login_screen_success")
+           
             if(response.code == 401) {
-                console.log("auth_login_screen_success -- unauthorized")
+               
                 auth.setAuth({type: "ERROR",payload:"zle meno alebo heslo"})
             }else {
                 try {
@@ -83,8 +83,8 @@ const LoginValidator = () => {
                 }
             }
         }).catch(err => {
-            console.log("error")
-            console.log(err)
+           
+           
             auth.setAuth({type: "ERROR",payload:"nedari sa pripojit na server"})
         });
     }

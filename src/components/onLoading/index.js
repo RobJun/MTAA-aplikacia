@@ -61,7 +61,7 @@ export const LoadingText = ({style, lines=1, width,height=20, randomlength = fal
             position={position} 
             colors={LOADING_COLORS}
             style={[style,styles.textL,{height:height,width:randomlength ? `${length}%` : width}]}>
-                 <Text style={[style, styles.text,{fontSize:height}]}>{randomlength ? randString(length) : '_______'}</Text>
+                 <Text key={Math.random()} style={[style, styles.text,{fontSize:height}]}>{randomlength ? randString(length) : '_______'}</Text>
         </AnimetedGradient>)
                 }) }
         </View>)
@@ -72,11 +72,12 @@ export const LoadingList = ({position,size=70 ,textStyle,photoStyle, viewStyle})
     horizontal
     showsHorizontalScrollIndicator={false}
     data={Array.from({length : 3})}
+    keyExtractor={(item)=>item}
     renderItem={({item})=>{
         return (
         <View style={viewStyle ? viewStyle :{justifyContent:'center',alignItems:'center'}}>
             <LoadingProfilePhoto size={size} style={photoStyle ? photoStyle : styles.member} position={position}/>
-            <LoadingText style={textStyle ? textStyle : styles.name}  position={position}/>
+            <LoadingText style={textStyle ? textStyle : styles.name}  position={position} key={item}/>
         </View>)
     }}
     />

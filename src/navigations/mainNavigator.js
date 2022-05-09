@@ -15,28 +15,40 @@ import { getClubInfo } from '../api_calls/club_calls';
 import { API_SERVER } from '../api_calls/constants';
 import { LOAD_FROM_MEMORY, LOAD_INITIAL } from '../context/constants/offline';
 
+
   const Tab = createBottomTabNavigator();
   
   export default function MainNavigator() { 
     const isConnected = useIsConnected()
-    const {auth:{user:{token,user_id},isLogged},setAuth,visible,setLoading,setOffline,offline} = useContext(globContext)
+    const {auth:{user:{token,user_id},isLogged},setAuth,visible,setLoading,setOffline,offline,setInitLoading} = useContext(globContext)
 
     useEffect(() => {
       const loadFromMemory =  async() =>{
         const val = JSON.parse(await EncryptedStorage.getItem('user_data'))
-        console.log(val)
+       
         setOffline({type:LOAD_FROM_MEMORY, payload: val})
         setLoading(false)
+        setInitLoading(true)
       }
       const fetchData = async() => { //prerobenie na to abz sa ukkladalo do pamati
         try{
+
         var state = {...userData}
-        console.log(user_id)
+        const val = JSON.parse(await EncryptedStorage.getItem('user_data'))
+      
+
+        if(val !== null)
+          state = {
+            ...state,
+            callQueue : val.callQueue,
+            isSynced : val.isSynced,
+          }
+
         await fetchInfo(user_id,(user)=>{state.userData = user})
         await fetchBooks(user_id,(books)=>{state.wishlist = books},"wishlist")
         await fetchBooks(user_id,(books)=>{state.reading = books},"reading")
         await fetchBooks(user_id,(books)=>{state.completed = books},"completed")
-        console.log('fetched basic ',state)
+       
         //fetch user books info
         s = ['wishlist','reading','completed']
         for(var i = 0; i <3;i++){
@@ -66,23 +78,24 @@ import { LOAD_FROM_MEMORY, LOAD_INITIAL } from '../context/constants/offline';
         })
         }
           
-        console.log('this state -',state)
+       
         setOffline({type:LOAD_INITIAL,payload :state})
-        console.log('online --', offline)
+       
         setLoading(false)
-        console.log('here')
+       
+        setInitLoading(true)
         } catch(err) {
-          console.log(err)
+         
           alert('Network connection error')
           setAuth({type:"LOGOUT"})
         }
       }
       if(isConnected === null || offline.loaded == true) return;
       if(isLogged){
-        console.log('connection',isConnected)
+       
         if(isConnected){
           fetchData().catch(console.error)
-          console.log('online --', offline)
+         
         }else{
           loadFromMemory()
         }
@@ -91,7 +104,8 @@ import { LOAD_FROM_MEMORY, LOAD_INITIAL } from '../context/constants/offline';
 
 
     return (
-        <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown:false, tabBarStyle : {display: (visible ? 'flex' : 'none')}}} tabBarOptions={{showLabel: false, activeTintColor: '#5e8d5a'}}>
+        <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown:false, tabBarStyle : {display: (visible ? 'flex' : 'none')},tabBarActiveTintColor: "#5e8d5a",
+        tabBarShowLabel: false,}}>
           <Tab.Screen 
                 name="HomeNav"
                 component={HomeScreen}

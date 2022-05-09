@@ -23,7 +23,7 @@ const Profile = ({navigation, route}) => {
 
     const fet = async ()=> {
             await fetchInfo(route.params.user_id,setOpenedUser)
-            console.log('here')
+           
             setLoadingUser(false)
     }
     useEffect(()=>{

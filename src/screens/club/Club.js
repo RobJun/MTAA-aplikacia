@@ -48,7 +48,7 @@ const ClubScreen = ({navigation,route}) => {
         if(isConnected === undefined || loading === false) return;
 
         if(isConnected === true){
-            console.log('fetching group')
+           
             getClubInfo(clubID,(group)=>{setOffline({type:ADD_CLUB,payload : group})},setLoading)
         }
         if(isConnected === false) setLoading(false)
@@ -60,17 +60,17 @@ const ClubScreen = ({navigation,route}) => {
 
 
     useEffect(()=>{
-        console.log('----->changing info')
+       
         if(offline.loaded === false ||  offline.user_club_profiles[clubID]=== undefined) return;
-        console.log("info changed", offline.user_club_profiles, clubID)
+       
         var p = false
         offline.user_club_profiles[clubID].users.forEach(user => {
-            console.log(user)
+           
             if(user.owner === true){
                 setOwnerName(user.displayName)
             }
             if(user_id === user.id){
-                console.log(user.displayName)
+               
                 setIsPart(true)
                 p = true
                 if(user.owner === true){
@@ -87,12 +87,12 @@ const ClubScreen = ({navigation,route}) => {
 
 
     const ownerButton = ()=>{
-        console.log('Owner')
+       
         navigation.navigate('Club_settings',{clubID : clubID})
     }
 
     const memberButton = async ()=>{
-        console.log('member')
+       
         try {
             await leave_club(clubID,token,user_id,!isConnected,setOffline)
         }catch(err) {

@@ -27,9 +27,9 @@ const ClubContext = ({children}) =>{
 const Club = ({navigation,route})=>{
     React.useLayoutEffect(() => {
         const routeName = getFocusedRouteNameFromRoute(route);
-        console.log(routeName)
+       
         if (routeName === "Club_video"){
-          console.log("should be invisible")
+         
             navigation.setOptions({tabBarStyle: {display: 'none'}});
         }else {
             navigation.setOptions({tabBarStyle: {display: 'flex'}});

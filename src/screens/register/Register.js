@@ -7,7 +7,7 @@ import { globContext } from '../../context/globContext';
 const Register = ({onSubmit,onChange,form,error,navigation}) => {
     const {auth,setAuth} = useContext(globContext)
     if (auth.error) {
-        console.log(auth)
+       
         Alert.alert(auth.error, auth.error, [{text: "OK",onPress: () => {setAuth({type: "CLEAR"})}}])
     }
     return (

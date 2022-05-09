@@ -41,7 +41,7 @@ const BookProfile = ({route}) => {
                 }
                     data = await response.json()
             }else {
-                console.log('dddsds',offline)
+               
                 data = offline.user_book_profiles[bookID]
             }
             setInfo(data)
@@ -227,20 +227,20 @@ const BookProfile = ({route}) => {
                     listParentLabelStyle={{fontSize: 17}}
                     dropDownContainerStyle={{backgroundColor: 'white',zIndex: 1000, elevation: 1000}}
                     onChangeValue={(item)=>{
-                        console.log('here')
+                       
                         if(item === null || item ==='remove'){
                             setValue(null)
-                            console.log('here null')
+                           
                             if(item === 'remove') {
                                 setItems(prev=> {prev.pop(); return prev})
                                 deleteFromLibrary()
                             }
                         } else {
                             putToLibrary(item)
-                            console.log('here')
+                           
                             if(items.length <4)
                                 setItems(prev=>{return [...prev,{label: 'Remove', value:'remove'}]})
-                            console.log(items)
+                           
                         }}}
                     />
                 <RecommendedButton onPress={putToRecommended} title= {textRecommendButton} color = {`rgb(${((info.genre.color & 0xff000000)>>24)& 0xff},${(info.genre.color & 0x00ff0000)>>16},${(info.genre.color & 0x0000ff00)>>8})`}/> 

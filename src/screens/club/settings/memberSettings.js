@@ -9,6 +9,7 @@ import SearchBar from "react-native-dynamic-search-bar";
 import { getClubInfo, removeMember } from "../../../api_calls/club_calls";
 import { styles } from "./style";
 import { useNetInfo } from "@react-native-community/netinfo";
+import { ADD_CLUB } from "../../../context/constants/offline";
 
 
 
@@ -24,7 +25,7 @@ const MemberSettings = ({club_id}) => {
     const [filtred,setFiltred] = useState([])
     useEffect(()=>{
         setFiltred(offline.user_club_profiles[club_id].users.filter(user=>{ return user.displayName.toLowerCase().includes(search.toLowerCase())}))
-    },[search])
+    },[search,offline.user_club_profiles])
     const removeMembers = async () => {
         if(!isConnected){
             alert("can't remove members offline")
@@ -42,7 +43,7 @@ const MemberSettings = ({club_id}) => {
                 return
             }
             if(response.status === 409){
-                console.log('e')
+               
                 refetchData=true
                 continue;
             }
@@ -55,33 +56,33 @@ const MemberSettings = ({club_id}) => {
         }
         setRemoveUserIDs([])
         if(refetchData){
-            console.log("refetching")
+           
             const setter = (info)=>{
                 newInfo = info
             } 
             try{
                 getClubInfo(club_id,(group)=>{setOffline({type:ADD_CLUB,payload : group})},setter)
             }catch(err){
-                console.log('Connection error')
+               
                 setRemoving(false)
                 return;
             }
         }
         if(newInfo !== undefined){
-            setInfo(newInfo)
+            setOffline({type:ADD_CLUB,payload : newInfo})
         }
         setRemoving(false)
     }
 
     const onSelect = ({id,owner}) => {
-        console.log(id)
+       
         setRemoveUserIDs(prev=>{
             if(owner) return [...prev]
             if(prev.includes(id)){
-                console.log(prev)
+               
                 const index = prev.indexOf(id)
                 prev.splice(index,1)
-                console.log(prev)
+               
                 return [...prev]
             }
             return [...prev,id]
@@ -94,7 +95,7 @@ const MemberSettings = ({club_id}) => {
                             placeholder="Search here"
                             onPress={()=>{console.log("onPress")}}
                             onChangeText={(text) => {setSearch(text)}}
-                            onSearchPress={(text) => console.log('searching: ', text)}
+                            onSearchPress={(text) =>console.log('searching: ', text)}
                             style={{marginBottom:15}}/>
                         <UserList users={filtred} onSelect={onSelect} selectArray={removeUserIDs}/>
                         <Button title='Remove Members' onPress={removing ? ()=>{} :removeMembers} style={styles.deleteButton} visible={removing}></Button>

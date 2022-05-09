@@ -22,25 +22,25 @@ const AppContainer = () =>{
         try {   
             const session = await EncryptedStorage.getItem("user_info");
 
-            console.log('loader -- ',isConnected)
+           
             if(!isConnected) {
-                console.log('offline login')
+               
                 const offline = await EncryptedStorage.getItem("user_offline");
                 if(offline === null) return;
                 const s = JSON.parse(offline)
                 await setAuth({type:"LOGIN",payload: s})
-                console.log("splash_screen_loader_offline_success")
+               
                 return;
             }
             if (session !== undefined && session !== null) {
                 const s = JSON.parse(session)
-                console.log("splash_screen_loader -- ",s)
+               
                 let log = await login_call(s)
-                console.log('response -',log)
+               
                 if(log.code !== 200) {
                     throw "didn't loggin"
                 }
-                console.log("splash_screen_loader_success" - log)
+               
                 await setAuth({type: "LOGIN", payload : log.body})
                 return ;
             }
@@ -61,7 +61,7 @@ const AppContainer = () =>{
         loader().then(() => { 
             setLoading(true)
         }).catch(err=> {
-            console.log(err)
+           
             setLoading(true)
         })
         }
@@ -69,9 +69,9 @@ const AppContainer = () =>{
 
 
 
-    console.log(loading)
+   
     if(!loading) {
-        console.log(loading)
+       
         return <SplashScreen/>
     }
 

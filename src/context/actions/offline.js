@@ -1,4 +1,6 @@
-import { deleteGroup, getClubInfo, joinClub, leaveClub, saveChanges } from "../../api_calls/club_calls"
+import { elementsThatOverlapOffsets } from "react-native/Libraries/Lists/VirtualizeUtils";
+import { deleteGroup, getClubInfo, joinClub, leaveClub, saveChanges, setBook } from "../../api_calls/club_calls"
+import { API_SERVER } from "../../api_calls/constants";
 import { fetchInfo } from "../../api_calls/user_calls"
 import { SYNC,            
     ADD_TO_QUEUE    ,
@@ -20,6 +22,7 @@ import { SYNC,
     SAVE_CLUB,   
     DELETE_CLUB,
     CREATE_CLUB,
+    SET_BOOK_WEEK,
      } from '../constants/offline';
 
 /*
@@ -45,7 +48,7 @@ export const join_club = async (club_id,token,user_id, offline,dispatch) =>{
         })
     }else{
         club = await joinClub(club_id,(data)=>{},token)
-        console.log('online', club)
+       
         if(club === undefined) return;
         const userData = await fetchInfo(user_id, (data)=>{})
         dispatch({
@@ -67,7 +70,7 @@ export const create_club = async (data,token,user_id,dispatch = (op) =>{},getClu
     const val = await saveChanges(null,data,token,getClub_id,(ddd)=>{},true)
     if(val === undefined) return false;
     const userData = await fetchInfo(user_id, (data)=>{})
-    console.log(userData)
+   
     dispatch({
         type : CHANGE_VALUE, 
         payload : {
@@ -93,7 +96,7 @@ export const leave_club = async (club_id,token,user_id, offline,dispatch = (op) 
         }})
     }else{
         club = await leaveClub(club_id,(data)=>{},token)
-        console.log('online', club)
+       
         if(club === undefined) return;
         const userData = await fetchInfo(user_id, (data)=>{})
         dispatch({
@@ -127,7 +130,7 @@ export const delete_club = async (club_id,token,user_id, offline,dispatch = (op)
         try{
         await deleteGroup(club_id,token)
         }catch(err){
-            console.log('crashed here')
+           
             return 0xff
         }
         const userData = await fetchInfo(user_id, (data)=>{})
@@ -145,4 +148,77 @@ export const delete_club = async (club_id,token,user_id, offline,dispatch = (op)
 
     }
     return true;
+}
+
+export const save_club_changes = async (club_id, data,token,user_id,offline,dispatch = ({type,payload},load_dispatch) =>{}) => {
+    if(offline) {
+        dispatch({
+            type: CHANGE_VALUE,
+            payload : {
+                type : SAVE_CLUB,
+                club_id : club_id,
+                token : token,
+                form : data,
+                user_id : user_id,
+                offline : true
+            }
+        })
+    }else{
+       
+        var club_profile = {}
+        try {
+            club_profile = await saveChanges(club_id,data,token,(data)=>{})
+           
+        } catch(err) {
+            console.warn('crashed here')
+            throw err
+        }
+        const user_data = await fetchInfo(user_id,(data)=>{})
+       
+        dispatch({
+            type : CHANGE_VALUE,
+            payload : {
+                type : SAVE_CLUB,
+                club_id : club_id,
+                offline : false,
+                data : {
+                    userData : user_data,
+                    clubInfo : club_profile
+                }
+            }
+        })
+    }
+}
+
+export const set_book_of_week = async (club_id,book_id,token,offline,dispatch  = ({type,payload},load_dispatch) =>{}) =>{
+    if(offline){
+        dispatch({
+            type : CHANGE_VALUE,
+            payload : {
+                type: SET_BOOK_WEEK,
+                club_id : club_id,
+                book_id : book_id,
+                offline : true,
+                token : token
+            }
+        })
+    }else{
+        var data = {}
+        try{
+            data = await setBook(club_id,book_id,token)
+        }catch(err) {
+            throw err
+        }
+        dispatch({
+            type : CHANGE_VALUE,
+            payload : {
+                type: SET_BOOK_WEEK,
+                club_id : club_id,
+                offline : false,
+                data : {
+                    clubInfo : data
+                }
+            }
+        })
+    }
 }

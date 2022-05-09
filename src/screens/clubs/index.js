@@ -35,7 +35,7 @@ const Clubs = () => {
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
     })
-    console.log(groups)
+   
 
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>

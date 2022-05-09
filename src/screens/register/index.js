@@ -46,7 +46,7 @@ const RegisterValidator = ({navigation}) => {
 
     //validacia zadanych dat
     const onSubmit = () => {
-        console.log(form)
+       
         var error = false
         if(!form.name){
             setErrors((prev)=>{
@@ -103,12 +103,12 @@ const RegisterValidator = ({navigation}) => {
         if(form.name && form.password )
         auth.setAuth({type: "LOADING"})
         register_call(form).then(response => {
-        console.log("auth_login_screen_success")
+       
         if(response.code == 406) {
             auth.setAuth({type: "ERROR",payload:"bad register request"})
         }
         else if(response.code == 409) {
-            console.log("auth_login_screen_success -- unauthorized")
+           
             auth.setAuth({type: "ERROR",payload:"username is used"})
         }else {
             try {
@@ -120,8 +120,8 @@ const RegisterValidator = ({navigation}) => {
             }
         }
         }).catch(err => {
-        console.log("error")
-        console.log(err)
+       
+       
         auth.setAuth({type: "ERROR",payload:"network connection problem"})
         });
     }

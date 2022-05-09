@@ -22,8 +22,8 @@ import { SYNC,
 export const joinClub = (state,operation,offline) =>{  
     //if online just set fetche data
     if(!offline) {
-        console.log('here - joinClub',operation.club_id)
-        console.log('here - joinClub',operation.data)
+       
+       
         const ret = {
             ...state,
             userData : operation.data.userData,
@@ -32,7 +32,7 @@ export const joinClub = (state,operation,offline) =>{
                 [operation.club_id] : operation.data.clubInfo
             }
         }
-        console.log('returnig ',ret)
+       
         return ret
     }
     //check if in state is operation for leaving club
@@ -84,7 +84,7 @@ export const joinClub = (state,operation,offline) =>{
 export const leaveClub = (state,operation, offline) => {
     //if online just set fetche data
     if(!offline) {
-        console.log('here - leaveClub', operation.data)
+       
         return {
             ...state,
             userData : operation.data.userData,
@@ -147,7 +147,7 @@ export const deleteClub = (state,operation, offline)=>{
     var temp_object = {}
     for(const id in state.user_club_profiles){
         if(id === operation.club_id) {
-            console.log('deleted --',id)
+           
             continue;
         }
         temp_object = {
@@ -182,9 +182,92 @@ export const deleteClub = (state,operation, offline)=>{
 
 
 export const createClub = (state,operation) =>{
-    console.log('creating -- ',operation.data.userData)
+   
     return {
         ...state,
         userData : operation.data.userData
+    }
+}
+
+export const setBookOfTheWeek = (state,operation,offline) => {
+    if(!offline){
+        return {
+            ...state,
+            user_club_profiles : {
+                ...state.user_club_profiles,
+                [operation.club_id] : operation.data.clubInfo
+            }
+        }
+    }
+    var temp_club = {...state.user_club_profiles[operation.club_id]}
+    temp_club = {
+        ...temp_club,
+        book_of_the_week : state.user_book_profiles[operation.book_id]
+    }
+    
+    return {
+        ...state,
+        user_club_profiles : {
+            ...state.user_club_profiles,
+            [operation.club_id] : temp_club
+        }
+    }
+}
+
+export const changeClub  = (state,operation,offline) =>{
+   
+    if(!offline){
+
+        return {
+            ...state,
+            userData : operation.data.userData,
+            user_club_profiles : {
+                ...state.user_club_profiles,
+                [operation.club_id] : operation.data.clubInfo
+            }
+        }
+    }
+    var temp_club = {...state.user_club_profiles[operation.club_id]}
+    var temp_user = {...state.userData}
+
+    operation.form['_parts'].forEach(element => {
+        if(element[0] === 'info'){
+            temp_club = {
+                ...temp_club,
+                info : element[1]
+            }
+        }else if(element[0]==='rules'){
+            temp_club = {
+                ...temp_club,
+                rules : element[1]
+            }
+        }else if(element[0] === 'photo'){
+           
+            temp_club = {
+                ...temp_club,
+                photoPath : element[1].uri
+            }
+            temp_user = {
+                ...temp_user,
+                photoPath : element[1].uri
+            }
+        }
+    });
+   
+
+    console.log({
+        ...state.user_club_profiles,
+        [operation.club_id] : temp_club
+    })
+
+   
+
+    return {
+        ...state,
+        userData : temp_user,
+        user_club_profiles : {
+            ...state.user_club_profiles,
+            [operation.club_id] : temp_club
+        }
     }
 }

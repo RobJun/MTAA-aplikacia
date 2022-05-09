@@ -19,12 +19,12 @@ const SearchScreen = () => {
     const {offline:{user_book_profiles, user_club_profiles}} = useContext(globContext)
 
     const fetchBooks = async (query) => {
-        console.log('fetching books')
+       
         try {
             const response = await fetch(`http://${API_SERVER}/find/books/?q=${query}`)
             setBooks(await response.json())
         } catch {
-            console.log('ere')
+           
             alert("Error - no internet connection")
         }
     }
@@ -48,7 +48,7 @@ const SearchScreen = () => {
         else { 
             var book = []
             boo.forEach(e => {
-                console.log(e)
+               
                 var author = e.author[0].name
                 var title = e.title
                 if(author.includes(query)|| title.includes(query)) {
@@ -82,16 +82,16 @@ const SearchScreen = () => {
             await fetchOfflineClubs(query)
         }
         setSearching(false)
-        console.log("seeearch", search)
+       
     }
 
     useEffect(()=>{
         if(search.length < 4 ){
-            console.log('string must be atleast 4 characters')
+           
             return;
         }
         if(searching){
-            console.log('cant search, search on going')
+           
             return;
         }
         fet(search)

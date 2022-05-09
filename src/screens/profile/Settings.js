@@ -18,7 +18,7 @@ const Settings = ({navigation}) => {
     const [submiting,setSubmiting] = useState(false)
     var user = userData
     const onChange = ({name,value}) => {
-        console.log(value)
+       
         if(name === 'displayName') {
             if (value?.length > 20) {
                 setErrors({...errors, [name] : MAX(20)})
@@ -70,7 +70,7 @@ const Settings = ({navigation}) => {
                 })
                 return;
             }
-            console.log(form.displayName)
+           
             if(onlySpaces(form.displayName)) {
                 setErrors((prev)=>{
                     return {...prev, displayName : SPACES}

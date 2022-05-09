@@ -12,7 +12,7 @@ import { styles } from "./style";
 import BookSettings from "./bookSettings";
 import MemberSettings from "./memberSettings";
 import { useNetInfo } from "@react-native-community/netinfo";
-import { delete_club } from "../../../context/actions/offline";
+import { delete_club, save_club_changes } from "../../../context/actions/offline";
 
 const ClubSettingScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
@@ -65,14 +65,14 @@ const ClubSettingScreen = ({navigation,route}) => {
         try {
             success = await delete_club(clubID,token,user_id,!isConnected,setOffline)
         }catch(err){
-            console.log('----------\nerror---',err,'\n------------')
+           
             if(err === 0xff){
                 alert('Couldnt delete club',err)
                 setDeleting(false)
             }
             return
         }
-        console.log(navigation)
+       
         navigation.getParent()?.goBack()
         setDeleting(false)
     }
@@ -106,7 +106,7 @@ const ClubSettingScreen = ({navigation,route}) => {
         
         const form = new FormData();
         for (const [key, value] of Object.entries(formS)) {
-            if(value !== info[key]){
+            if(value !== offline.user_club_profiles[clubID][key]){
                 form.append(key,value)
             }
         }   
@@ -115,13 +115,13 @@ const ClubSettingScreen = ({navigation,route}) => {
             //form.append("photo",formImage)
         if(form['_parts'].length === 0) {
             setSubmiting(false)
-            console.log('here')
+           
             return
         }
 
-        let success = false
         try{
-            success = await saveChanges(info.id,form,token,setInfo,setSubmiting)
+            await save_club_changes(clubID,form,token,user_id,!isConnected,setOffline)
+            setFormImage(false)
         }catch(err){
             alert('Error'- err)
             setSubmiting(false)
@@ -129,18 +129,7 @@ const ClubSettingScreen = ({navigation,route}) => {
                 setAuth({type:"LOGOUT"})
             return
         }
-    
-        if(!success) return;
-
-        try {
-            fetchGroups(user_id,setGroups)
-            fetchInfo(user_id,setUser)
-            setSubmiting(false)
-            alert("Changes made")
-        }catch(err){
-            alert('Error'- err)
-            setSubmiting(false)
-        }
+        setSubmiting(false)
     }
 
     return (<ScrollView>
@@ -151,7 +140,7 @@ const ClubSettingScreen = ({navigation,route}) => {
         editable={isConnected}
         formImage={formImage}
         selectImage={imagePicker} 
-        defaultImage={info.photoPath}
+        defaultImage={offline.user_club_profiles[clubID].photoPath}
         resetImage={()=>setFormImage(false)} 
         onChange={onChange}
         error={errors} 
@@ -159,10 +148,11 @@ const ClubSettingScreen = ({navigation,route}) => {
         onPress={submiting ? ()=>{} : onSubmit} 
         title={'Save Changes'}
         visible={submiting}/>
-    <BookSettings/>
+    <BookSettings club_id={clubID}/>
     <MemberSettings club_id={clubID}/>
     <Button title='Delete BookClub' onPress={deleting ? ()=>{} : ()=>{
-        Alert.alert(`DELETE ${info.name}`,`Are you sure about deleting ${info.name}?`,[
+        Alert.alert(`DELETE ${offline.user_club_profiles[clubID].name}`,`Are you sure about deleting ${offline.user_club_profiles[clubID].name}?`,
+        [
             {
                 text: "Cancel",
                 onPress: () => {},
