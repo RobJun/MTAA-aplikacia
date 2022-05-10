@@ -8,6 +8,7 @@ import { BookSearchList, LoadingList } from "../../components/onLoading";
 import { useIsConnected } from "react-native-offline";
 import { globContext } from "../../context/globContext";
 import SearchBar from "react-native-dynamic-search-bar";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 const SearchScreen = () => {
     const [groups, setGroups] = useState([])
@@ -15,7 +16,7 @@ const SearchScreen = () => {
     const {navigate} = useNavigation()
     const [search,setSearch] = useState("")
     const [searching,setSearching] = useState(true)
-    const isConnected = useIsConnected()
+    const {isConnected} = useNetInfo()
     const {offline:{user_book_profiles, user_club_profiles}} = useContext(globContext)
     const [refreshing, setRefreshing] = useState(false);
 
@@ -100,7 +101,7 @@ const SearchScreen = () => {
     
     useEffect(() => {
         fet('')
-    }, [], [])
+    }, [isConnected])
 
 
     const onRefresh = useCallback(()=>{

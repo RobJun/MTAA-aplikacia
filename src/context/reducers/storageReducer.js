@@ -50,7 +50,16 @@ export const syncReducer = (state,{type,payload})=>{
     switch (type){
         case LOAD_INITIAL: //prvotny stav -- ked v pamati nie su data -- nacitaj z internetu
             return {
+                ...state,
                 ...payload,
+                user_book_profiles : {
+                    ...state.user_book_profiles,
+                    ...payload.user_book_profiles
+                },
+                user_club_profiles : {
+                    ...state.user_club_profiles,
+                    ...payload.user_club_profiles
+                },
                 syncing : false,
                 error : null,
                 loaded : true

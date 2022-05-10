@@ -49,8 +49,8 @@ const BookProfile = ({route}) => {
             }else {
                 data = offline.user_book_profiles[bookID]
             }
-            setInfo(data)
             if(data == undefined) return;
+            setInfo(data)
             if(offline.userData.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
             if(offline.wishlist.find(x=> x.id === data.id) !== undefined) {
                 setValue('wishlist')
