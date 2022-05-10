@@ -149,7 +149,7 @@ const SearchScreen = () => {
                 {searching ? <LoadingList position={position} size={100} photoStyle={styles.image} viewStyle={{marginRight: 15}} textStyle={styles.name}/> :
                 groups.length === 0 ?
                     (<View><Text style = {[styles.name, {fontWeight: "normal"}]}>No results</Text> 
-                    <ButtonSettings onPress = {()=>{navigate('ClubsNav',{screen: 'Create_Club',params:{clubName : search.substring(0,20)}})}} title="Create new bookclub"/></View>) : 
+                    <ButtonSettings onPress = {isConnected ? ()=>{navigate('ClubsNav',{screen: 'Create_Club',params:{clubName : search.substring(0,20)}})}  : ()=>{alert("can't create clubs in offline mode")}} title="Create new bookclub"/></View>) : 
                     <FlatList
                         horizontal
                         scrollEnabled

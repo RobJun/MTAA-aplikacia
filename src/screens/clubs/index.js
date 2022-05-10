@@ -41,7 +41,7 @@ const Clubs = () => {
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
              <View style={{marginTop: 20, marginBottom: 20, flexDirection:'row', justifyContent: "space-between", marginLeft: 20}}>
                 <Text style = {styles.title1}>My bookclubs</Text>
-                <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="+"/>
+                <ButtonNewClub onPress={isConnected ? ()=>{navigate('ClubsNav',{screen:'Create_Club'})} : ()=>{alert("can't create clubs in offline mode")}} title="+"/>
             </View>
             <View >
                 {loading ? <VerticalClubList position={position} size={100}/> : (
