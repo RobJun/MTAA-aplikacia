@@ -375,7 +375,7 @@ export const putBooks= (state,operation,offline) => {
         var i_read = temp_reading.findIndex(e=>e.id === operation.book_id)
         if(i_read !== -1){
             temp_reading.splice(i_read,1)
-            temp_user.reading-=1;
+            temp_user.currently_reading-=1;
         }
         var i_comp = temp_completed.findIndex(e=>e.id === operation.book_id)
         if(i_comp !== -1){
@@ -390,7 +390,7 @@ export const putBooks= (state,operation,offline) => {
             temp_user.wishlist +=1;
         }else if(operation.book_op === 'reading'){
             temp_reading.push(profile)
-            temp_user.reading +=1;
+            temp_user.currently_reading +=1;
         }else if(operation.book_op === 'completed'){
             temp_completed.push(profile)
             temp_user.completed +=1;
@@ -435,7 +435,7 @@ export const deleteBooks = (state,operation,offline) => {
     var i_read = temp_reading.findIndex(e=>e.id === operation.book_id)
     if(i_read !== -1){
         temp_reading.splice(i_read,1)
-        temp_user.reading-=1;
+        temp_user.currently_reading-=1;
     }
     var i_comp = temp_completed.findIndex(e=>e.id === operation.book_id)
     if(i_comp !== -1){

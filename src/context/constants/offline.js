@@ -9,6 +9,7 @@ export const UNSYNC             = 0x07
 export const SYNC_FAILED        = 0x08
 export const CLEAR_ERROR        = 0x09
 export const ADD_CLUB           = 0x0a
+export const OFFLINE            = 0x0b
 
 export const LEAVE_CLUB         = 0x10
 export const JOIN_CLUB          = 0x20

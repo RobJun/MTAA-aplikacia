@@ -13,7 +13,7 @@ import { useIsConnected } from 'react-native-offline';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { getClubInfo } from '../api_calls/club_calls';
 import { API_SERVER } from '../api_calls/constants';
-import { LOAD_FROM_MEMORY, LOAD_INITIAL } from '../context/constants/offline';
+import { LOAD_FROM_MEMORY, LOAD_INITIAL, OFFLINE } from '../context/constants/offline';
 import OfflineScreen from '../screens/offlineScreen';
 
   const Tab = createBottomTabNavigator();
@@ -24,9 +24,7 @@ import OfflineScreen from '../screens/offlineScreen';
 
     useEffect(() => {
       const loadFromMemory =  async() =>{
-        const val = JSON.parse(await EncryptedStorage.getItem('user_data'))
-       
-        setOffline({type:LOAD_FROM_MEMORY, payload: val})
+        setOffline({type:OFFLINE})
         setLoading(false)
         setInitLoading(true)
       }
@@ -34,7 +32,7 @@ import OfflineScreen from '../screens/offlineScreen';
         try{
 
         var state = {...userData}
-        const val = JSON.parse(await EncryptedStorage.getItem('user_data'))
+        /*const val = JSON.parse(await EncryptedStorage.getItem('user_data'))
       
 
         if(val !== null)
@@ -42,7 +40,7 @@ import OfflineScreen from '../screens/offlineScreen';
             ...state,
             callQueue : val.callQueue,
             isSynced : val.isSynced,
-          }
+          }*/
 
         await fetchInfo(user_id,(user)=>{state.userData = user})
         state.wishlist= await fetchBooks(user_id,(books)=>{},"wishlist")
@@ -81,19 +79,16 @@ import OfflineScreen from '../screens/offlineScreen';
           
        
         setOffline({type:LOAD_INITIAL,payload :state})
-       
+        console.log('setOFfline')
         setLoading(false)
        
         setInitLoading(true)
         } catch(err) {
-         
-          alert('Network connection error')
-          setAuth({type:"LOGOUT"})
+          console.log(err)
         }
       }
-      if(isConnected === null || offline.loaded == true) return;
+      if(isConnected === null) return;
       if(isLogged){
-       
         if(isConnected){
           fetchData().catch(console.error)
          

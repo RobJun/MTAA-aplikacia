@@ -24,6 +24,7 @@ import { SYNC,
     DELETE_CLUB,
     SET_BOOK_WEEK,
     REMOVE_MEMBER,
+    OFFLINE,
      } from '../constants/offline';
 import { joinClub, leaveClub,deleteClub,createClub, changeClub, setBookOfTheWeek, removeMembers, saveUserSettings, putBooks, deleteBooks } from './stateChangers';
 
@@ -55,8 +56,10 @@ export const syncReducer = (state,{type,payload})=>{
                 loaded : true
             }
         case SYNC:
-            //go through all calls in queue
-            return;
+            return {
+                ...state,
+                syncing : true,
+            };
         case ADD_CLUB:
             console.log('sdasdas',{user_club_profiles : {
                 ...state.user_club_profiles,
@@ -128,7 +131,7 @@ export const syncReducer = (state,{type,payload})=>{
            
             return{
                 ...editedState,
-                isSynced: !payload.offline,
+                isSynced: state.isSynced ? !payload.offline : state.isSynced,
                 callQueue : payload.offline ? [...editedState.callQueue,operation] : [...editedState.callQueue]
             }
         case SYNC_SUCCESS:
@@ -154,6 +157,11 @@ export const syncReducer = (state,{type,payload})=>{
         case LOAD_FROM_MEMORY:
            
             return payload
+        case OFFLINE:
+            return {
+                ...state,
+                loaded : true
+            }
         case ERROR:
             return {
                 ...state,

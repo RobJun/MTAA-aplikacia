@@ -6,7 +6,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { deleteGroup, joinClub, leaveClub, removeMember, saveChanges, setBook } from '../api_calls/club_calls';
 import { fetchBooks, fetchInfo, putBook, saveUserChanges } from '../api_calls/user_calls';
-import { ADD_BOOK, CHANGE_VALUE, DELETE_CLUB, JOIN_CLUB, LEAVE_CLUB, REMOVE_BOOK, REMOVE_MEMBER, SAVE_CLUB, SAVE_USER, SET_BOOK_WEEK, SYNC_FAILED, SYNC_SUCCESS } from './constants/offline';
+import { ADD_BOOK, CHANGE_VALUE, DELETE_CLUB, JOIN_CLUB, LEAVE_CLUB, REMOVE_BOOK, REMOVE_MEMBER, SAVE_CLUB, SAVE_USER, SET_BOOK_WEEK, SYNC, SYNC_FAILED, SYNC_SUCCESS } from './constants/offline';
 export const globContext = createContext({});
 
 const GlobProvider = ({children}) => {
@@ -16,16 +16,7 @@ const GlobProvider = ({children}) => {
     const [offline,setOffline] = useReducer(syncReducer,userData)
     const [auth, setAuth] = useReducer(authReducer,initAuthState)
     const [stun,setStun] = useState(true)
-    const [user,setUser] = useState({
-        id: "string",
-        displayName: "string",
-        photoPath: "string",
-        wishlist: 0,
-        currently_reading: 0,
-        completed: 0,
-        recommended_books: [],
-        clubs: []
-    })
+    const [user,setUser] = useState(false)
     const [library,setLibrary] = useState({
         wishlist : [],
         reading : [],
@@ -47,7 +38,8 @@ const GlobProvider = ({children}) => {
 
     useEffect(()=>{
         const f = async()=>{
-            callQ = [...offline.callQueue]
+            setOffline({type:SYNC})
+            var callQ = [...offline.callQueue]
             var clubdata =  undefined
             var userData = {...offline.userData}
             var wishlist = {...offline.wishlist}
@@ -59,6 +51,8 @@ const GlobProvider = ({children}) => {
                     setOffline({type : SYNC_FAILED, payload : {callQueue : callQ}})
                     return;
                 }
+                try {
+                console.log("syncing: ", callQ[0].type)
                 switch(callQ[0].type){
                     case LEAVE_CLUB:
                         clubdata = await leaveClub(callQ[0].club_id,(data)=>{},callQ[0].token)
@@ -114,16 +108,24 @@ const GlobProvider = ({children}) => {
                         }
                     }
                 })
+                }catch(err){
+                    console.log(err)
+                }
 
 
                 callQ.splice(0,1)
+                console.log("synced")
             }
 
             setOffline({type : SYNC_SUCCESS, payload : {}})
         }
        
-        if(initLoading !== true) return;
-        if(isConnected === true && offline.isSynced === false){   
+        if(offline.loaded !== true){
+            console.log('initLoading')
+             return;
+        }
+        if(isConnected === true && offline.isSynced === false){ 
+            console.log('here i am')  
            f()
         }
     },[isConnected,initLoading])
