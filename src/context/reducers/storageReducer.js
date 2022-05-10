@@ -22,8 +22,9 @@ import { SYNC,
     CREATE_CLUB,
     DELETE_CLUB,
     SET_BOOK_WEEK,
+    REMOVE_MEMBER,
      } from '../constants/offline';
-import { joinClub, leaveClub,deleteClub,createClub, changeClub, setBookOfTheWeek } from './stateChangers';
+import { joinClub, leaveClub,deleteClub,createClub, changeClub, setBookOfTheWeek, removeMembers } from './stateChangers';
 
 export const userData = {
     userData : {},
@@ -75,6 +76,7 @@ export const syncReducer = (state,{type,payload})=>{
                 token : payload?.token,
                 club_id : payload?.club_id,
                 book_id : payload?.book_id,
+                member_id : payload?.member_id,
                 book_op : payload?.list,
                 form : payload?.form, //form data from settings
                 data : payload?.data // if data where fetched with online -- must consists of userData and clubInfo
@@ -96,6 +98,9 @@ export const syncReducer = (state,{type,payload})=>{
                 case SET_BOOK_WEEK:
                     var editedState = setBookOfTheWeek(state,operation,payload.offline)
                     break;
+                case REMOVE_MEMBER:
+                    var editedState = removeMembers(state,operation,payload.offline)
+                    break;
                 case ADD_BOOK: 
                     //var editedState = addBook(state,operation)
                     break;
@@ -109,9 +114,9 @@ export const syncReducer = (state,{type,payload})=>{
                     //var editedState = unrecommendBook(state,operation)
                     break;
                 case SAVE_USER: 
+                    //user settings
                     break;
                 case SAVE_CLUB:
-                   
                     var editedState = changeClub(state,operation,payload.offline)
                     break;
                 default:

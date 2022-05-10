@@ -271,3 +271,44 @@ export const changeClub  = (state,operation,offline) =>{
         }
     }
 }
+
+
+export const removeMembers = (state,operation,offline) => {
+    if(!offline){
+        console.log('hrer')
+        return {
+            ...state,
+            userData : operation.data.userData,
+            user_club_profiles : {
+                ...state.user_club_profiles,
+                [operation.club_id] : operation.data.clubInfo
+            }
+        }
+    }
+
+    // vymazat z clenov
+    var temp_user = {...state.userData}
+    var index = temp_user.clubs.findIndex(el => el.id === operation.club_id)
+    temp_user.clubs[index].number_of_members -= 1
+
+
+    var temp_club = {...state.user_club_profiles[operation.club_id]}
+    var ind = temp_club.users.findIndex(el => el.id === operation.member_id)
+    var temp_users = [...temp_club.users]
+    if(ind == -1) return;
+    temp_users.splice(ind,1)
+    temp_club.count -= 1
+    temp_club = {
+        ...temp_club,
+        users : temp_users
+    }
+
+    return {
+        ...state,
+        userData : temp_user,
+        user_club_profiles : {
+            ...state.user_club_profiles,
+            [operation.club_id] : temp_club
+        }
+    }
+}

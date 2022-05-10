@@ -28,41 +28,50 @@ const ClubScreen = ({navigation,route}) => {
     const [loading,setLoading] = useState(true)
     const {isConnected} = useNetInfo();
 
+    useEffect(()=>{
+        console.log("changing id to:", clubID )
+        setInfo(clubID)
+    },[])
+
     const onRefresh = useCallback( async()=>{
         setRefreshing(true)
         try {
-            if(isConnected) 
+            if(isConnected) {
+                console.log('loading profile')
                 await getClubInfo(clubID,(group)=>{state.user_club_profiles = {
                     ...state.user_club_profiles,
                     [group.id] : group
                   }
                 },setRefreshing)
+            }
         } catch(err){
             alert('Connection error')
             setRefreshing(false)
         }
-    },[])
+    },[info])
     
     useEffect(() => {
         try {
-        if(isConnected === undefined || loading === false) return;
+        if(isConnected === undefined || loading === false){
+            return;
+        } 
 
         if(isConnected === true){
-           
-            getClubInfo(clubID,(group)=>{setOffline({type:ADD_CLUB,payload : group})},setLoading)
+            var data = {}
+            getClubInfo(clubID,(group)=>{setOffline({type:ADD_CLUB,payload : group});setInfo(group)},setLoading)
+        
         }
         if(isConnected === false) setLoading(false)
             
         } catch(err){
             alert("Connection problems - ",err)
         }
-    }, [isConnected])
+    }, [info])
 
 
     useEffect(()=>{
        
         if(offline.loaded === false ||  offline.user_club_profiles[clubID]=== undefined) return;
-       
         var p = false
         offline.user_club_profiles[clubID].users.forEach(user => {
            
@@ -83,7 +92,7 @@ const ClubScreen = ({navigation,route}) => {
             setIsPart(false)
         }
 
-    },[offline])
+    },[info])
 
 
     const ownerButton = ()=>{

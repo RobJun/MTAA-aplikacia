@@ -88,7 +88,7 @@ const NewClubForm = ({navigation,route})=>{
             }
             //success = await saveChanges(null,form,token,setClubID,setSubmiting,true)
         }catch(err){
-            alert('Error'- err)
+            alert(`Error --> ${err}`)
             setSubmiting(false)
             if (err == '401 neautorizovany pouzivatel')
                 setAuth({type:"LOGOUT"})

@@ -10,6 +10,7 @@ import { getClubInfo, removeMember } from "../../../api_calls/club_calls";
 import { styles } from "./style";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { ADD_CLUB } from "../../../context/constants/offline";
+import { remove_member } from "../../../context/actions/offline";
 
 
 
@@ -27,49 +28,9 @@ const MemberSettings = ({club_id}) => {
         setFiltred(offline.user_club_profiles[club_id].users.filter(user=>{ return user.displayName.toLowerCase().includes(search.toLowerCase())}))
     },[search,offline.user_club_profiles])
     const removeMembers = async () => {
-        if(!isConnected){
-            alert("can't remove members offline")
-            return;
-        }
         setRemoving(true)
-        var newInfo = undefined
-        var refetchData = false
         for(let i = 0; i< removeUserIDs.length;i++){
-            try{
-            const response = await removeMember(token,club_id,removeUserIDs[i])
-            if(response.status === 401) {
-                setRemoving(false)
-                setAuth({type:'LOGOUT'})
-                return
-            }
-            if(response.status === 409){
-               
-                refetchData=true
-                continue;
-            }
-            if(response.status >= 400) continue;
-            refetchData=false
-            newInfo = response.body
-            }catch(e){
-                alert('Network Connection Problems')
-            }
-        }
-        setRemoveUserIDs([])
-        if(refetchData){
-           
-            const setter = (info)=>{
-                newInfo = info
-            } 
-            try{
-                getClubInfo(club_id,(group)=>{setOffline({type:ADD_CLUB,payload : group})},setter)
-            }catch(err){
-               
-                setRemoving(false)
-                return;
-            }
-        }
-        if(newInfo !== undefined){
-            setOffline({type:ADD_CLUB,payload : newInfo})
+            await remove_member(club_id,removeUserIDs[i],user_id,token,!isConnected,setOffline)
         }
         setRemoving(false)
     }

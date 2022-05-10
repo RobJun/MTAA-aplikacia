@@ -21,3 +21,4 @@ export const SAVE_CLUB          = 0x80
 export const DELETE_CLUB        = 0x90
 export const CREATE_CLUB        = 0xa0
 export const SET_BOOK_WEEK      = 0xb0
+export const REMOVE_MEMBER      = 0xc0

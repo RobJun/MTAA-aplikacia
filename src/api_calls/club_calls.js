@@ -51,8 +51,7 @@ export const joinClub = async (clubID,dispatch,token) => {
         })
         if (response.status === 401) throw '401 neautorizovany pouzivatel'
         if ( response.status ===404 || response.status === 409){
-            alert(`Error - ${response.status}`)
-            return;
+            throw response.status 
         }
         const data = await response.json()
         dispatch(data)
@@ -138,10 +137,10 @@ export const removeMember = async (token,clubID,userID)=>{
             "Authorization" : `Token ${token}`
             }
         })
-        if(response.status >= 400)  return({status : response.status, body : {}})
+        if(response.status >= 400)  throw response.status
         body = await response.json()
         body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
-        return {status : response.status, body : body}
+        return body
         }catch(e){
             throw e
         }

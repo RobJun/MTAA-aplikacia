@@ -10,10 +10,12 @@ import { HorizontalBookList, LoadingList, LoadingProfilePhoto, LoadingText } fro
 
 const Profile = ({navigation, route}) => {
     const {navigate} = useNavigation()
-    const {auth:{user:{token,user_id}},user,setUser,loading, offline:{userData}} = useContext(globContext)
+    const {auth:{user:{token,user_id}},user,setUser,loading,offline, offline:{userData}} = useContext(globContext)
     const [openedUser,setOpenedUser] = useState(undefined)
     const [refreshing, setRefreshing] = useState(false);
     const [loadingUser,setLoadingUser] = useState(true)
+    const [workUser,setWorkUser] = useState({clubs : [0]})
+    const [load,setLoad] = useState(true)
     
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
@@ -22,20 +24,29 @@ const Profile = ({navigation, route}) => {
     },[])
 
     const fet = async ()=> {
-            await fetchInfo(route.params.user_id,setOpenedUser)
+            await fetchInfo(route.params.user_id,setWorkUser)
            
-            setLoadingUser(false)
+            setLoad(false)
     }
     useEffect(()=>{
-        
+        if(offline.loaded == true){
+            console.log(route)
+            if(route.params === undefined || route.params.user_id == user_id){
+                setWorkUser(userData)
+                setLoad(false)
+            }
+        }
+    },[offline])
+    useEffect(()=>{
         if(route.params?.user_id){
-            if(route.params.user_id == user_id) return;
+            if(route.params.user_id == user_id){
+                 return;
+            }
             fet()
+            return;
         }
     },[])
 
-    const workUser = openedUser ? openedUser : userData
-    const load = route.params?.user_id !== undefined && route.params.user_id !== user_id ? loadingUser: loading
 
     
     const pos = new Animated.Value(0)
@@ -51,7 +62,7 @@ const Profile = ({navigation, route}) => {
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
     })
-    
+
     
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
@@ -102,7 +113,7 @@ const Profile = ({navigation, route}) => {
                         showsHorizontalScrollIndicator={false}
                         data={workUser.clubs}
                         renderItem={({item})=>{
-                            return (<TouchableOpacity onPress={()=>{navigation.navigate('Club',{screen: 'Club_screen', params:{clubID:item.id}})}}>
+                            return (<TouchableOpacity onPress={()=>{navigation.push('Club',{screen: 'Club_screen', params:{clubID:item.id}})}}>
                             <View style = {{marginRight: 15}}>
                                 <ProfileImage size = {100} source={item.photoPath} style={styles.club}/>
                                 <Text style={styles.name} key={item.id}>{item.name.length > 8 ? `${item.name.substring(0,6)}...` : item.name}</Text>

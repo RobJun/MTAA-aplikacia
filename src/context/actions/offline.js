@@ -1,5 +1,5 @@
 import { elementsThatOverlapOffsets } from "react-native/Libraries/Lists/VirtualizeUtils";
-import { deleteGroup, getClubInfo, joinClub, leaveClub, saveChanges, setBook } from "../../api_calls/club_calls"
+import { deleteGroup, getClubInfo, joinClub, leaveClub, saveChanges, setBook ,removeMember} from "../../api_calls/club_calls"
 import { API_SERVER } from "../../api_calls/constants";
 import { fetchInfo } from "../../api_calls/user_calls"
 import { SYNC,            
@@ -23,7 +23,9 @@ import { SYNC,
     DELETE_CLUB,
     CREATE_CLUB,
     SET_BOOK_WEEK,
+    REMOVE_MEMBER,
      } from '../constants/offline';
+import { userData } from "../reducers/storageReducer";
 
 /*
     Tu vkladat funckie v podobnom tvare ako join a leave
@@ -67,7 +69,11 @@ export const join_club = async (club_id,token,user_id, offline,dispatch) =>{
 }
 
 export const create_club = async (data,token,user_id,dispatch = (op) =>{},getClub_id) => {
+    try {
     const val = await saveChanges(null,data,token,getClub_id,(ddd)=>{},true)
+    } catch(err){
+        throw err
+    }
     if(val === undefined) return false;
     const userData = await fetchInfo(user_id, (data)=>{})
    
@@ -150,7 +156,7 @@ export const delete_club = async (club_id,token,user_id, offline,dispatch = (op)
     return true;
 }
 
-export const save_club_changes = async (club_id, data,token,user_id,offline,dispatch = ({type,payload},load_dispatch) =>{}) => {
+export const save_club_changes = async (club_id, data,token,user_id,offline,dispatch = ({type,payload}) =>{}) => {
     if(offline) {
         dispatch({
             type: CHANGE_VALUE,
@@ -190,7 +196,7 @@ export const save_club_changes = async (club_id, data,token,user_id,offline,disp
     }
 }
 
-export const set_book_of_week = async (club_id,book_id,token,offline,dispatch  = ({type,payload},load_dispatch) =>{}) =>{
+export const set_book_of_week = async (club_id,book_id,token,offline,dispatch  = ({type,payload}) =>{}) =>{
     if(offline){
         dispatch({
             type : CHANGE_VALUE,
@@ -217,6 +223,44 @@ export const set_book_of_week = async (club_id,book_id,token,offline,dispatch  =
                 offline : false,
                 data : {
                     clubInfo : data
+                }
+            }
+        })
+    }
+}
+
+export const remove_member = async (club_id,member_id,user_id,token, offline, dispatch = ({type,payload}) =>{}) => {
+    if(offline){
+        dispatch({
+            type : CHANGE_VALUE,
+            payload : {
+                type: REMOVE_MEMBER,
+                offline: true,
+                club_id : club_id,
+                member_id : member_id,
+                user_id : user_id,
+                token : token
+            }
+        })
+    }else{
+        var data = {}
+        try {
+            data = await removeMember(token,club_id,member_id)
+        }catch(err){
+            if(err === 409)
+                data = await getClubInfo(club_id,(gg)=>{})
+        }
+        const user_data = await fetchInfo(user_id,(data)=>{})
+        console.log('removed', data)
+        dispatch({
+            type : CHANGE_VALUE,
+            payload : {
+                type: REMOVE_MEMBER,
+                offline: false,
+                club_id : club_id,
+                data : {
+                    clubInfo : data,
+                    userData : user_data
                 }
             }
         })
