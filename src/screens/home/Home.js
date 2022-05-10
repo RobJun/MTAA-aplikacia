@@ -6,10 +6,11 @@ import ProfileImage from "../../components/profileImage";
 import BookCover from "../../components/BookCover";
 import { fetchBooks, fetchGroups } from "../../api_calls/user_calls";
 import { LoadingList,HorizontalBookList } from "../../components/onLoading";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 const HomeScreen = ({navigation}) => {
-    const {auth:{user:{token,user_id}},groups, setGroups,loading,setLibrary,offline:{reading,userData:{clubs}},auth} = useContext(globContext)
-    const {navigate} = useNavigation();
+    const {auth:{user:{token,user_id}},groups, setGroups,loading,setLibrary,offline,offline:{reading,userData:{clubs}},auth} = useContext(globContext)
+    const {isConnected} = useNetInfo()
     const [refreshing, setRefreshing] = useState(false);
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
@@ -38,6 +39,7 @@ const HomeScreen = ({navigation}) => {
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
     })
+    console.log(JSON.stringify(offline,function replacer(key, value) { return value}))
    
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
@@ -59,7 +61,7 @@ const HomeScreen = ({navigation}) => {
                                         <View style = {{alignItems: "center", marginLeft: 20}}>
                                             <Image source={{uri:item.cover_path}} style={{width: 150, height: 230, resizeMode: "contain", marginBottom: 5, backgroundColor:'grey'}}/>
                                             <Text style = {{color: "black", marginBottom: 10}}>
-                                                {item.title.length > 10 ? `${item.title.substring(0,17)}...12345678910` : item.title}
+                                                {item.title.length > 10 ? `${item.title.substring(0,17)}...` : item.title}
                                             </Text>
                                         </View>
                                 </TouchableOpacity>

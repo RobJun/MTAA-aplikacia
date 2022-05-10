@@ -9,14 +9,17 @@ import {LoadingBookCover, LoadingText} from '../../components/onLoading'
 import { useIsConnected } from "react-native-offline";
 import OfflineScreen from "../offlineScreen";
 import { ADD_BOOK } from "../../context/constants/offline";
+import { delete_book, put_book } from "../../context/actions/offline";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 const BookProfile = ({route}) => {
     const {auth:{user:{token,user_id}},user,library, setUser,setLibrary,setAuth,offline,setOffline} = useContext(globContext)
     const bookID = route.params.bookID
     const [textRecommendButton, setTextRecommendButton] = useState("Recommend")
     const [refreshing, setRefreshing] = useState(false);
-    var isConnected = useIsConnected()
+    const {isConnected} = useNetInfo()
     const [loading,setLoading] = useState(true)
+    const [l,setL] = useState(false)
     const [info, setInfo] = useState({
         genre: {color: 0x808080ff},
         author:[{name: "Text",},],
@@ -44,7 +47,6 @@ const BookProfile = ({route}) => {
                 console.log('what')
                 setOffline({type: ADD_BOOK,payload: data})
             }else {
-               
                 data = offline.user_book_profiles[bookID]
             }
             setInfo(data)
@@ -80,94 +82,34 @@ const BookProfile = ({route}) => {
     
     const putToLibrary = async (where) => {
         try { 
-            const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=${where}`, {
-                "method": "PUT",
-                "headers" : { "Authorization" : "Token " + token }
-            })
-            if (response.status === 401 || response.status === 404 || response.status === 406) {
-                if(response.status === 401) throw 'Error 401 - Neutorizovaný používateľ'
-                else if(response.status === 404) alert('Error 404 - Neexistujúca kniha')
-                else if(response.status === 406) alert('Error 406 - Neplatný príkaz - zlá kategória')
-                return;
-            }
-            if(response.status == 409) return;
-
-            const data = await response.json()
-            setUser(data)
-            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
-            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
-            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+            await put_book(bookID,where,token,user_id,!isConnected,setOffline)
         } catch (err) {
-            alert(`${err}\n\nLogging out`)
-            setAuth({type:"LOGOUT"})
+            console.log(err)
         } 
     }
 
     const deleteFromLibrary = async () => {
         try { 
-            const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/`,{
-                "method": "DELETE",
-                "headers" : { "Authorization" : "Token " + token }
-            })
-            if (response.status === 401 || response.status === 404) {
-                if(response.status === 401)  throw ('Error 401 - Neutorizovaný používateľ')
-                else if(response.status === 404) alert('Error 404 - Neexistujúca kniha')
-            }
-            if(response.status == 409) return;
-
-            const data = await response.json()
-            setUser(data)
-            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , wishlist : books}})},"wishlist")
-            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
-            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , completed : books}})},"completed")
+            await delete_book(bookID, token, user_id, !isConnected, setOffline)
         } catch (err) {
-            alert(`${err}\n\nLogging out`)
-            setAuth({type:"LOGOUT"})
+            console.log(err)
         } 
     }
 
     const putToRecommended = async () => {
         if (textRecommendButton === "Recommended") {
             try { 
-                const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=unrecommend`,{
-                                "method": "PUT",
-                                "headers" : { "Authorization" : "Token " + token}
-                })
-                if (response.status === 401 || response.status === 404 || response.status === 406) {
-                    if(response.status === 401) throw('401 Neutorizovaný používateľ')
-                    else if(response.status === 404) alert('Error 404 - Neexistujúca kniha')
-                    else if(response.status === 406) alert('Erro 406 - Neplatný príkaz - zlá kategória')
-                    return;
-                }
-                if(response.status == 409) return;
-
-                const data = await response.json()
-                setUser(data)
+                await put_book(bookID,'unrecommend',token,user_id,!isConnected,setOffline)
                 setTextRecommendButton("Recommend")
             } catch (err) {
-                    alert(`${err}\n\nLogging out`)
-                    setAuth({type:"LOGOUT"})
+                    alert(`${err}`)
             } 
         } else {
-            try { 
-            const response = await fetch(`http://${API_SERVER}/user/book/${bookID}/?q=recommend`,{
-                            "method": "PUT",
-                            "headers" : { "Authorization" : "Token " + token}
-            })
-            if (response.status === 401 || response.status === 404 || response.status === 406) {
-                if(response.status === 401) throw('Error 401 - Neutorizovaný používateľ')
-                else if(response.status === 404) alert('Erro 404 - Neexistujúca kniha')
-                else if(response.status === 406) alert('Error 406 - Neplatný príkaz - zlá kategória')
-                return;
-            }
-            if(response.status == 409) return;
-
-            const data = await response.json()
-            setUser(data)
+            try{
+            await put_book(bookID,'recommend',token,user_id,!isConnected,setOffline)
             setTextRecommendButton("Recommended")
             }catch (err) {
-                alert(`${err}\n\nLogging out`)
-                setAuth({type:"LOGOUT"})
+                alert(`${err}`)
             } 
         }
     }
@@ -237,7 +179,10 @@ const BookProfile = ({route}) => {
                     listParentLabelStyle={{fontSize: 17}}
                     dropDownContainerStyle={{backgroundColor: 'white',zIndex: 1000, elevation: 1000}}
                     onChangeValue={(item)=>{
-                       
+                        if(!l) {
+                            setL(true)
+                            return;
+                        }
                         if(item === null || item ==='remove'){
                             setValue(null)
                            
@@ -246,6 +191,7 @@ const BookProfile = ({route}) => {
                                 deleteFromLibrary()
                             }
                         } else {
+                            console.log('dsdsd')
                             putToLibrary(item)
                            
                             if(items.length <4)

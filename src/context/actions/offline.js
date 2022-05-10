@@ -1,7 +1,7 @@
 import { elementsThatOverlapOffsets } from "react-native/Libraries/Lists/VirtualizeUtils";
 import { deleteGroup, getClubInfo, joinClub, leaveClub, saveChanges, setBook ,removeMember} from "../../api_calls/club_calls"
 import { API_SERVER } from "../../api_calls/constants";
-import { fetchInfo, saveUserChanges } from "../../api_calls/user_calls"
+import { deleteBook, fetchBooks, fetchInfo, putBook, saveUserChanges } from "../../api_calls/user_calls"
 import { SYNC,            
     ADD_TO_QUEUE    ,
     CHANGE_VALUE   , 
@@ -288,6 +288,75 @@ export const save_settings = async (form,token, offline,dispatch= ({type,payload
                 offline : false,
                 data : {
                     userData : user_data
+                }
+            }
+        })
+    }
+}
+
+export const put_book = async(book_id,list,token,user_id,offline,dispatch = ({type,payload}) =>{}) =>{
+    if(offline){
+        dispatch({
+            type: CHANGE_VALUE,
+            payload : {
+                type : ADD_BOOK,
+                book_id : book_id,
+                user_id : user_id,
+                list : list,
+                token : token,
+                offline : true
+            }
+        })
+    }else{
+        const user_data = await putBook(book_id,list,token)
+        const wishlist  = await fetchBooks(user_id,()=>{},'wishlist')
+        const reading   = await fetchBooks(user_id,()=>{},'reading')
+        const completed = await fetchBooks(user_id,()=>{},'completed')
+        dispatch({
+            type: CHANGE_VALUE,
+            payload : {
+                type : ADD_BOOK,
+                book_id : book_id,
+                offline : false,
+                data : {
+                    userData : user_data,
+                    wishlist : wishlist,
+                    reading  : reading,
+                    completed : completed
+                }
+            }
+        })
+    }
+}
+
+export const delete_book = async(book_id,token,user_id,offline,dispatch = ({type,payload}) =>{}) =>{
+    if(offline){
+        dispatch({
+            type: CHANGE_VALUE,
+            payload : {
+                type : REMOVE_BOOK,
+                book_id : book_id,
+                user_id : user_id,
+                token : token,
+                offline : true
+            }
+        })
+    }else{
+        const user_data = await deleteBook(book_id,token)
+        const wishlist  = await fetchBooks(user_id,()=>{},'wishlist')
+        const reading   = await fetchBooks(user_id,()=>{},'reading')
+        const completed = await fetchBooks(user_id,()=>{},'completed')
+        dispatch({
+            type: CHANGE_VALUE,
+            payload : {
+                type : REMOVE_BOOK,
+                book_id : book_id,
+                offline : false,
+                data : {
+                    userData : user_data,
+                    wishlist : wishlist,
+                    reading  : reading,
+                    completed : completed
                 }
             }
         })

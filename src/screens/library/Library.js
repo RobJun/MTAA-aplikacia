@@ -5,6 +5,7 @@ import { globContext } from "../../context/globContext";
 import { useNavigation } from '@react-navigation/native';
 import { fetchBooks } from "../../api_calls/user_calls";
 import { VerticalBookList } from "../../components/onLoading";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 const Library = () => {
     const {navigate} = useNavigation()
@@ -15,6 +16,7 @@ const Library = () => {
     const [bgColor, setBColor] = useState("#f17c56") 
     const [which,setWhich] = useState('reading')
     const [refreshing, setRefreshing] = useState(false);
+    const {isConnected} = useNetInfo()
 
     const onRefresh = useCallback(()=>{
         setRefreshing(true)

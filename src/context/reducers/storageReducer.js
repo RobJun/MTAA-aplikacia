@@ -1,6 +1,7 @@
 
 import React from 'react'
 import EncryptedStorage from 'react-native-encrypted-storage';
+import { put_book } from '../actions/offline';
 import { SYNC,            
     ADD_TO_QUEUE    ,
     CHANGE_VALUE   , 
@@ -24,7 +25,7 @@ import { SYNC,
     SET_BOOK_WEEK,
     REMOVE_MEMBER,
      } from '../constants/offline';
-import { joinClub, leaveClub,deleteClub,createClub, changeClub, setBookOfTheWeek, removeMembers, saveUserSettings } from './stateChangers';
+import { joinClub, leaveClub,deleteClub,createClub, changeClub, setBookOfTheWeek, removeMembers, saveUserSettings, putBooks, deleteBooks } from './stateChangers';
 
 export const userData = {
     userData : {},
@@ -109,16 +110,10 @@ export const syncReducer = (state,{type,payload})=>{
                     editedState = removeMembers(state,operation,payload.offline)
                     break;
                 case ADD_BOOK: 
-                    //var editedState = addBook(state,operation)
+                    editedState = putBooks(state,operation,payload.offline)
                     break;
                 case REMOVE_BOOK:
-                    //var editedState = removeBook(state,operation)
-                    break;
-                case RECOMMEND: 
-                    //var editedState = recommendBook(state,operation)
-                    break;
-                case UNRECOMMEND:
-                    //var editedState = unrecommendBook(state,operation)
+                    editedState = deleteBooks(state,operation,payload.offline)
                     break;
                 case SAVE_USER: 
                     //user settings

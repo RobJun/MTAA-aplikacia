@@ -45,9 +45,10 @@ import OfflineScreen from '../screens/offlineScreen';
           }
 
         await fetchInfo(user_id,(user)=>{state.userData = user})
-        await fetchBooks(user_id,(books)=>{state.wishlist = books},"wishlist")
-        await fetchBooks(user_id,(books)=>{state.reading = books},"reading")
-        await fetchBooks(user_id,(books)=>{state.completed = books},"completed")
+        state.wishlist= await fetchBooks(user_id,(books)=>{},"wishlist")
+        state.reading = await fetchBooks(user_id,(books)=>{},"reading")
+        state.completed = await fetchBooks(user_id,(books)=>{},"completed")
+        console.log('here loaded all', state.wishlist)
        
         //fetch user books info
         s = ['wishlist','reading','completed']

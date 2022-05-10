@@ -338,3 +338,119 @@ export const saveUserSettings =  (state,operation,offline) => {
         userData : temp_user
     }
 }
+
+
+export const putBooks= (state,operation,offline) => {
+     if(!offline){
+         return {
+             ...state,
+             userData : operation.data.userData,
+             wishlist : operation.data.wishlist,
+             reading : operation.data.reading,
+             completed : operation.data.completed,
+         }
+     }
+     const lists = ['wishlist','reading','completed']
+     const profile = {...state.user_book_profiles[operation.book_id]}
+     var temp_user = {...state.userData}
+     var temp_recom = [...state.userData.recommended_books]
+     var temp_wish = [...state.wishlist]
+     var temp_reading = [...state.reading]
+     var temp_completed = [...state.completed]
+    if(operation.book_op.includes('recommend')){
+        if(operation.book_op.includes('un')){
+            var index = temp_recom.findIndex(x=> x.id === operation.book_id)
+            if(index == -1) return {...state}
+            temp_recom.splice(index,1)
+        }else{
+            temp_recom.push(profile)
+        }
+    }else{
+    //najst knihu v zoznamoch a vymazat
+        var i_wish = temp_wish.findIndex(e=>e.id === operation.book_id)
+        if(i_wish !== -1){
+            temp_wish.splice(i_wish,1)
+            temp_user.wishlist-=1;
+        }
+        var i_read = temp_reading.findIndex(e=>e.id === operation.book_id)
+        if(i_read !== -1){
+            temp_reading.splice(i_read,1)
+            temp_user.reading-=1;
+        }
+        var i_comp = temp_completed.findIndex(e=>e.id === operation.book_id)
+        if(i_comp !== -1){
+            temp_completed.splice(i_comp,1)
+            temp_user.completed-=1;
+        }
+
+        //pridat knihu do zoznamu
+        // v userdatach +1 pre pridany -1 pre odbrany
+        if(operation.book_op === 'wishlist'){
+            temp_wish.push(profile)
+            temp_user.wishlist +=1;
+        }else if(operation.book_op === 'reading'){
+            temp_reading.push(profile)
+            temp_user.reading +=1;
+        }else if(operation.book_op === 'completed'){
+            temp_completed.push(profile)
+            temp_user.completed +=1;
+        }
+    }
+    console.log(temp_wish)
+    console.log(temp_reading)
+    console.log(temp_completed)
+     return {
+         ...state,
+         userData : {
+             ...temp_user,
+             recommended_books : temp_recom
+         },
+         wishlist : temp_wish,
+         reading : temp_reading,
+         completed : temp_completed
+     }
+
+}
+
+export const deleteBooks = (state,operation,offline) => {
+    if(!offline){
+        return {
+            ...state,
+            userData : operation.data.userData,
+            wishlist : operation.data.wishlist,
+            reading : operation.data.reading,
+            completed : operation.data.completed,
+        }
+    }
+    var temp_user = {...state.userData}
+    var temp_wish = [...state.wishlist]
+    var temp_reading = [...state.reading]
+    var temp_completed = [...state.completed]
+   
+    var i_wish = temp_wish.findIndex(e=>e.id === operation.book_id)
+    if(i_wish !== -1){
+        temp_wish.splice(i_wish,1)
+        temp_user.wishlist-=1;
+    }
+    var i_read = temp_reading.findIndex(e=>e.id === operation.book_id)
+    if(i_read !== -1){
+        temp_reading.splice(i_read,1)
+        temp_user.reading-=1;
+    }
+    var i_comp = temp_completed.findIndex(e=>e.id === operation.book_id)
+    if(i_comp !== -1){
+        temp_completed.splice(i_comp,1)
+        temp_user.completed-=1;
+    }
+
+    return {
+        ...state,
+        userData : {
+            ...temp_user,
+        },
+        wishlist : temp_wish,
+        reading : temp_reading,
+        completed : temp_completed
+    }
+
+}

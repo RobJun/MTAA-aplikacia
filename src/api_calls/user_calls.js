@@ -84,3 +84,44 @@ export const saveUserChanges = async (token,form) => {
         throw err
     }
 }
+
+export const putBook = async (book_id,list,token) =>{
+    try { 
+        const response = await fetch(`http://${API_SERVER}/user/book/${book_id}/?q=${list}`,{
+                        "method": "PUT",
+                        "headers" : { "Authorization" : "Token " + token}
+        })
+        if (response.status === 401 || response.status === 404 || response.status === 406) {
+            if(response.status === 401) throw('401 Neutorizovaný používateľ')
+            else if(response.status === 404) throw('Error 404 - Neexistujúca kniha')
+            else if(response.status === 406) throw('Erro 406 - Neplatný príkaz - zlá kategória')
+            return;
+        }
+        if(response.status == 409) throw 409;
+
+        const data = await response.json()
+        return data
+    } catch (err) {
+            throw err;
+    } 
+}
+
+export const deleteBook = async (book_id,token) =>{ 
+    try { 
+        const response = await fetch(`http://${API_SERVER}/user/book/${book_id}/`,{
+            "method": "DELETE",
+            "headers" : { "Authorization" : "Token " + token }
+        })
+        if (response.status === 401 || response.status === 404) {
+            if(response.status === 401)  throw ('Error 401 - Neutorizovaný používateľ')
+            else if(response.status === 404) throw('Error 404 - Neexistujúca kniha')
+        }
+        if(response.status == 409) throw 409;
+
+        const data = await response.json()
+        return data
+    } catch (err) {
+        throw err
+    } 
+
+}
