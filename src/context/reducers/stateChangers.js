@@ -350,7 +350,7 @@ export const putBooks= (state,operation,offline) => {
              completed : operation.data.completed,
          }
      }
-     const lists = ['wishlist','reading','completed']
+     
      const profile = {...state.user_book_profiles[operation.book_id]}
      var temp_user = {...state.userData}
      var temp_recom = [...state.userData.recommended_books]
@@ -358,15 +358,31 @@ export const putBooks= (state,operation,offline) => {
      var temp_reading = [...state.reading]
      var temp_completed = [...state.completed]
     if(operation.book_op.includes('recommend')){
+         //vymazanie vsetkych dani do kniznice
+         var temp_callQueue = [...state.callQueue]
+         var index = temp_callQueue.findIndex(el=> el.type == ADD_BOOK && el.book_id === operation.book_id && (el.book_op === "recommend" || el.book_op === "unrecommend"))
+         while(index !== -1){
+             temp_callQueue.splice(index,1)
+             index = temp_callQueue.findIndex(el=> el.type == ADD_BOOK && el.book_id === operation.book_id && (el.book_op === "recommend" || el.book_op === "unrecommend"))
+         }
+
         if(operation.book_op.includes('un')){
             var index = temp_recom.findIndex(x=> x.id === operation.book_id)
             if(index == -1) return {...state}
             temp_recom.splice(index,1)
-        }else{
+        } else {
             temp_recom.push(profile)
         }
-    }else{
-    //najst knihu v zoznamoch a vymazat
+    } else{
+         //vymazanie vsetkych dani do kniznice
+        var temp_callQueue = [...state.callQueue]
+        var index = temp_callQueue.findIndex(el=> el.type == ADD_BOOK && el.book_id === operation.book_id && (el.book_op === "wishlist" || el.book_op === "reading" || el.book_op === "completed"))
+        while(index !== -1){
+            temp_callQueue.splice(index,1)
+            index = temp_callQueue.findIndex(el=> el.type == ADD_BOOK && el.book_id === operation.book_id && (el.book_op === "wishlist" || el.book_op === "reading" || el.book_op === "completed"))
+        }
+
+        //najst knihu v zoznamoch a vymazat
         var i_wish = temp_wish.findIndex(e=>e.id === operation.book_id)
         if(i_wish !== -1){
             temp_wish.splice(i_wish,1)
@@ -385,20 +401,18 @@ export const putBooks= (state,operation,offline) => {
 
         //pridat knihu do zoznamu
         // v userdatach +1 pre pridany -1 pre odbrany
-        if(operation.book_op === 'wishlist'){
+        if (operation.book_op === 'wishlist'){
             temp_wish.push(profile)
             temp_user.wishlist +=1;
-        }else if(operation.book_op === 'reading'){
+        } else if (operation.book_op === 'reading'){
             temp_reading.push(profile)
             temp_user.reading +=1;
-        }else if(operation.book_op === 'completed'){
+        } else if (operation.book_op === 'completed'){
             temp_completed.push(profile)
             temp_user.completed +=1;
         }
     }
-    console.log(temp_wish)
-    console.log(temp_reading)
-    console.log(temp_completed)
+ 
      return {
          ...state,
          userData : {
@@ -426,7 +440,15 @@ export const deleteBooks = (state,operation,offline) => {
     var temp_wish = [...state.wishlist]
     var temp_reading = [...state.reading]
     var temp_completed = [...state.completed]
-   
+    
+     //vymazanie vsetkych dani do kniznice, ked sa aj tak vymaze
+     var temp_callQueue = [...state.callQueue]
+     var index = temp_callQueue.findIndex(el=>(el.type == ADD_BOOK || el.type == REMOVE_BOOK) && el.book_id === operation.book_id)
+     while(index !== -1){
+         temp_callQueue.splice(index,1)
+         index = temp_callQueue.findIndex(el=>(el.type == ADD_BOOK || el.type == REMOVE_BOOK) && el.book_id === operation.book_id)
+    }
+
     var i_wish = temp_wish.findIndex(e=>e.id === operation.book_id)
     if(i_wish !== -1){
         temp_wish.splice(i_wish,1)
