@@ -1,7 +1,7 @@
 import { elementsThatOverlapOffsets } from "react-native/Libraries/Lists/VirtualizeUtils";
 import { deleteGroup, getClubInfo, joinClub, leaveClub, saveChanges, setBook ,removeMember} from "../../api_calls/club_calls"
 import { API_SERVER } from "../../api_calls/constants";
-import { fetchInfo } from "../../api_calls/user_calls"
+import { fetchInfo, saveUserChanges } from "../../api_calls/user_calls"
 import { SYNC,            
     ADD_TO_QUEUE    ,
     CHANGE_VALUE   , 
@@ -267,5 +267,29 @@ export const remove_member = async (club_id,member_id,user_id,token, offline, di
     }
 }
 
-export const save_settings = (user_id,form,token, offline,dispatch= ({type,payload}) =>{}) =>{
+export const save_settings = async (form,token, offline,dispatch= ({type,payload}) =>{}) =>{
+    if(offline){
+        dispatch({
+            type: CHANGE_VALUE,
+            payload : {
+                type : SAVE_USER,
+                form : form,
+                token : token,
+                offline : true
+            }
+        })
+    }else{
+        const user_data = await saveUserChanges(token,form)
+        console.log('got them',user_data)
+        dispatch({
+            type : CHANGE_VALUE,
+            payload : {
+                type : SAVE_USER,
+                offline : false,
+                data : {
+                    userData : user_data
+                }
+            }
+        })
+    }
 }

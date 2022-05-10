@@ -55,3 +55,32 @@ export const fetchBooks = async (user_id,dispatch,category) => {
     }
     
 }
+
+export const saveUserChanges = async (token,form) => {
+    console.log(form["_parts"][0][0],form["_parts"][1])
+    var newForm = new FormData()
+    form["_parts"].forEach(element => {
+        newForm.append(element[0],element[1])
+    });
+    try {
+    const response = await fetch(`http://${API_SERVER}/user/modify/`,{
+        "method": "PUT",
+        "headers" : {
+            "Content-Type": "multipart/form-data; boundary=---011000010111000001101001",
+            "Authorization" : `Token ${token}`
+        },
+        body: newForm
+    })
+
+    if (response.status === 401 || response.status === 404){
+        if(response.status === 401) throw('Error 401 - Neatorizovaný používateľ')
+        else if(response.status === 404) throw('Error 404 - Prázdne pole DisplayName alebo fotka nie je podporovaný obrázok')
+    }
+
+    const body = await response.json()
+    body.photoPath = body.photoPath +`?time=${new Date().getTime()}`
+    return body
+    } catch (err) {
+        throw err
+    }
+}

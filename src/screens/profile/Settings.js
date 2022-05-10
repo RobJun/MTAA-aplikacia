@@ -8,15 +8,18 @@ import { API_SERVER } from "../../api_calls/constants";
 import { compressImage, pickImage } from "../../utils/imageCompression";
 import { CHARSET_ERROR, MAX, onlySpaces, REQUIRED, SPACES } from "../../utils/validation";
 import Button from "../../components/button";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { save_settings } from "../../context/actions/offline";
 
 const Settings = ({navigation}) => {
-    const {auth:{user:{token, user_id}},setUser, offline:{userData}} = useContext(globContext)
+    const {auth:{user:{token, user_id}},setUser, offline:{userData},setOffline} = useContext(globContext)
     const [formImage,setFormImage] = useState(false)
     const [form, setForm] = useState({})
     const [errors,setErrors] = useState({})
     const [countBio,setCountBio] = useState(0)
     const [submiting,setSubmiting] = useState(false)
     var user = userData
+    const {isConnected} = useNetInfo()
     const onChange = ({name,value}) => {
        
         if(name === 'displayName') {
@@ -100,7 +103,12 @@ const Settings = ({navigation}) => {
             }
 
             try {
-                const response = await fetch(`http://${API_SERVER}/user/modify/`,{
+                await save_settings(formb,token,!isConnected,setOffline);
+                navigation.goBack()
+            }catch (err) {
+                console.log(err)
+            } 
+                /*const response = await fetch(`http://${API_SERVER}/user/modify/`,{
                     "method": "PUT",
                     "headers" : {
                         "Content-Type": "multipart/form-data; boundary=---011000010111000001101001",
@@ -127,7 +135,7 @@ const Settings = ({navigation}) => {
                 }else {
                     alert('Network Connection error')
                 }
-            }
+            }*/
             setSubmiting(false)
     }
     
@@ -140,7 +148,7 @@ const Settings = ({navigation}) => {
                     {formImage && <ButtonSettings onPress={()=>setFormImage(false)} title='Reset profile picture'/>}
                 </View>
                 <View style = {{marginLeft: 20, marginRight: 20}}>
-                    <CredentialInput label={'Display name'} multi = {false} placeholder = {"Enter display name, max 20 characters"} value={form.displayName} onChangeText={(value)=>{onChange({name:'displayName',value})}} error={errors.displayName}/>
+                    <CredentialInput editable={isConnected} label={'Display name'} multi = {false} placeholder = {"Enter display name, max 20 characters"} value={form.displayName} onChangeText={(value)=>{onChange({name:'displayName',value})}} error={errors.displayName}/>
                     <CredentialInput label={'Bio'} multi = {true} height = {200} placeholder = {"Enter bio, max 100 characters"} value={form.bio} onChangeText={(value)=>{onChange({name:'bio',value})}} error={errors.bio}/>
                     <Text style = {{textAlign: "right" ,color: "black", marginRight: 30, marginBottom: 10}}>{countBio}/80</Text>
                 </View>

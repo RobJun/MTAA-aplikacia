@@ -16,7 +16,8 @@ const Clubs = () => {
     const {isConnected} = useNetInfo()
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
-        fetchGroups(user_id, setGroups)
+        if(isConnected)
+            fetchGroups(user_id, setGroups)
         setRefreshing(false)
     },[])
    

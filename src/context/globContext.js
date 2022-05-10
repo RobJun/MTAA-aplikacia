@@ -5,8 +5,8 @@ import { userData,syncReducer, data} from './reducers/storageReducer';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { deleteGroup, joinClub, leaveClub, removeMember, saveChanges, setBook } from '../api_calls/club_calls';
-import { fetchInfo } from '../api_calls/user_calls';
-import { CHANGE_VALUE, DELETE_CLUB, JOIN_CLUB, LEAVE_CLUB, REMOVE_MEMBER, SAVE_CLUB, SET_BOOK_WEEK, SYNC_FAILED, SYNC_SUCCESS } from './constants/offline';
+import { fetchInfo, saveUserChanges } from '../api_calls/user_calls';
+import { CHANGE_VALUE, DELETE_CLUB, JOIN_CLUB, LEAVE_CLUB, REMOVE_MEMBER, SAVE_CLUB, SAVE_USER, SET_BOOK_WEEK, SYNC_FAILED, SYNC_SUCCESS } from './constants/offline';
 export const globContext = createContext({});
 
 const GlobProvider = ({children}) => {
@@ -49,6 +49,7 @@ const GlobProvider = ({children}) => {
         const f = async()=>{
             callQ = [...offline.callQueue]
             var clubdata =  undefined
+            var userData = {...offline.userData}
             console.log('syncing : ', callQ, callQ.length)
             while(callQ.length !== 0){
                 if(isConnected === false){
@@ -73,9 +74,10 @@ const GlobProvider = ({children}) => {
                         break;
                     case REMOVE_MEMBER:
                         clubdata = await removeMember(callQ[0].token,callQ[0].club_id,callQ[0].member_id)
+                    case SAVE_USER:
+                        userData = await saveUserChanges(callQ[0].token,callQ[0].form)
                     
                 }
-                var userData = {...offline.userData}
                 if(callQ[0].user_id !== undefined){
                     userData = await fetchInfo(callQ[0].user_id,(data)=>{})
                 }

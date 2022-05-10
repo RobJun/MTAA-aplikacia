@@ -23,20 +23,24 @@ const Profile = ({navigation, route}) => {
 
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
-        fetchInfo(user_id, setUser)
+        if(isConnected)
+            fetchInfo(user_id, setUser)
         setRefreshing(false)
     },[])
 
     const fet = async ()=> {
+        if(isConnected) {
             await fetchInfo(route.params.user_id,setWorkUser)
-           
+            setOpenedUser(true)
             setLoad(false)
+        }
     }
     useEffect(()=>{
+        console.log("spustene ynovu")
         if(offline.loaded == true){
-            console.log(route)
             if(route.params === undefined || route.params.user_id == user_id){
                 setWorkUser(userData)
+                setOpenedUser(false)
                 setLoad(false)
             }
         }
@@ -49,7 +53,7 @@ const Profile = ({navigation, route}) => {
             fet()
             return;
         }
-    },[])
+    },[isConnected])
 
 
     
@@ -67,7 +71,7 @@ const Profile = ({navigation, route}) => {
         outputRange:[0,2.,0]
     })
     
-    if(openedUser != undefined && isConnected == false ) {
+    if(!isConnected && route.params?.user_id) {
         return (<OfflineScreen/>)
     }
 

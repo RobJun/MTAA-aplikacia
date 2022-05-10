@@ -1,3 +1,4 @@
+import { panGestureHandlerCustomNativeProps } from 'react-native-gesture-handler/lib/typescript/handlers/PanGestureHandler';
 import { SYNC,            
     ADD_TO_QUEUE    ,
     CHANGE_VALUE   , 
@@ -310,5 +311,30 @@ export const removeMembers = (state,operation,offline) => {
             ...state.user_club_profiles,
             [operation.club_id] : temp_club
         }
+    }
+}
+
+export const saveUserSettings =  (state,operation,offline) => {
+    if(!offline){
+        console.log("tu",operation.data.userData)
+        return {
+            ...state,
+            userData : operation.data.userData
+        }
+    }
+    console.log("tu som")
+    var temp_user = {...state.userData}
+    operation.form['_parts'].forEach(element => {
+        if(element[0] === 'photo'){
+            temp_user.photoPath = element[1].uri
+        }else if(element[0] === 'bio'){
+            temp_user.bio =  element[1]
+        }
+    })
+
+
+    return {
+        ...state,
+        userData : temp_user
     }
 }

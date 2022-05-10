@@ -72,7 +72,8 @@ const BookProfile = ({route}) => {
     
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
-        fetchInfo()
+        if(isConnected)
+            fetchInfo()
         setRefreshing(false)
     },[])
     

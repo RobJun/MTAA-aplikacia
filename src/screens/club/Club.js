@@ -47,8 +47,8 @@ const ClubScreen = ({navigation,route}) => {
             }
         } catch(err){
             alert('Connection error')
-            setRefreshing(false)
         }
+        setRefreshing(false)
     },[info])
     
     useEffect(() => {

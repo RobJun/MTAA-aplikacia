@@ -18,9 +18,11 @@ const Library = () => {
 
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
+        if(isConnected){
         fetchBooks(user_id,(books)=>{state.wishlist = books},"wishlist")
         fetchBooks(user_id,(books)=>{state.reading = books},"reading")
         fetchBooks(user_id,(books)=>{state.completed = books},"completed")
+        }
         setRefreshing(false)
     },[])
     

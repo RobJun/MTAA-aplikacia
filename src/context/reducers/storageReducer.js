@@ -24,7 +24,7 @@ import { SYNC,
     SET_BOOK_WEEK,
     REMOVE_MEMBER,
      } from '../constants/offline';
-import { joinClub, leaveClub,deleteClub,createClub, changeClub, setBookOfTheWeek, removeMembers } from './stateChangers';
+import { joinClub, leaveClub,deleteClub,createClub, changeClub, setBookOfTheWeek, removeMembers, saveUserSettings } from './stateChangers';
 
 export const userData = {
     userData : {},
@@ -91,22 +91,22 @@ export const syncReducer = (state,{type,payload})=>{
             var editedState = {...state}
             switch(payload.type){
                 case JOIN_CLUB:
-                    var editedState = joinClub(state,operation, payload.offline)
+                    editedState = joinClub(state,operation, payload.offline)
                     break
                 case LEAVE_CLUB:
-                    var editedState = leaveClub(state,operation,payload.offline)
+                    editedState = leaveClub(state,operation,payload.offline)
                     break;
                 case DELETE_CLUB:
-                    var editedState = deleteClub(state,operation,payload.offline)
+                    editedState = deleteClub(state,operation,payload.offline)
                     break;
                 case CREATE_CLUB:
-                    var editedState = createClub(state,operation,payload.offline)
+                    editedState = createClub(state,operation,payload.offline)
                     break;
                 case SET_BOOK_WEEK:
-                    var editedState = setBookOfTheWeek(state,operation,payload.offline)
+                    editedState = setBookOfTheWeek(state,operation,payload.offline)
                     break;
                 case REMOVE_MEMBER:
-                    var editedState = removeMembers(state,operation,payload.offline)
+                    editedState = removeMembers(state,operation,payload.offline)
                     break;
                 case ADD_BOOK: 
                     //var editedState = addBook(state,operation)
@@ -122,9 +122,10 @@ export const syncReducer = (state,{type,payload})=>{
                     break;
                 case SAVE_USER: 
                     //user settings
+                    editedState = saveUserSettings(state,operation,payload.offline)
                     break;
                 case SAVE_CLUB:
-                    var editedState = changeClub(state,operation,payload.offline)
+                    editedState = changeClub(state,operation,payload.offline)
                     break;
                 default:
                     return {...state}

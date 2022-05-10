@@ -13,12 +13,14 @@ const HomeScreen = ({navigation}) => {
     const [refreshing, setRefreshing] = useState(false);
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
+        if(isConnected){
         try {
-        fetchGroups(user_id, setGroups)
-        fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
-        } catch (err) {
-           
-        }
+            fetchGroups(user_id, setGroups)
+            fetchBooks(user_id,(books)=>{setLibrary((prev)=>{return {...prev , reading : books}})},"reading")
+            } catch (err) {
+            
+            }
+        }   
         setRefreshing(false)
     },[])
 
