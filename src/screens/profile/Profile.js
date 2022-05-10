@@ -1,12 +1,14 @@
 import React, {useContext,useState,useEffect, useCallback} from "react"
-import {View, Text,StyleSheet, ScrollView, FlatList, TouchableOpacity, RefreshControl,Animated} from 'react-native'
+import {View, Text,StyleSheet, ScrollView, FlatList, TouchableOpacity, RefreshControl,Animated, Image} from 'react-native'
 import ButtonSettings from "./button"
 import ProfileImage from "../../components/profileImage"
-import BookCover from "../../components/BookCover"
 import { useNavigation } from '@react-navigation/native';
 import { globContext } from "../../context/globContext";
 import { fetchInfo } from "../../api_calls/user_calls"
 import { HorizontalBookList, LoadingList, LoadingProfilePhoto, LoadingText } from "../../components/onLoading"
+import { useIsConnected } from "react-native-offline";
+import OfflineScreen from "../offlineScreen";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 const Profile = ({navigation, route}) => {
     const {navigate} = useNavigation()
@@ -17,6 +19,8 @@ const Profile = ({navigation, route}) => {
     const [workUser,setWorkUser] = useState({clubs : [0]})
     const [load,setLoad] = useState(true)
     
+    var {isConnected} = useNetInfo()
+
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
         fetchInfo(user_id, setUser)
@@ -62,8 +66,11 @@ const Profile = ({navigation, route}) => {
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
     })
-
     
+    if(openedUser != undefined && isConnected == false ) {
+        return (<OfflineScreen/>)
+    }
+
     return (
         <ScrollView refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style={{backgroundColor: "#c6d7b9", flexDirection:'row',  alignItems:"center", justifyContent: "space-evenly",paddingBottom:20}}>
@@ -137,10 +144,15 @@ const Profile = ({navigation, route}) => {
                             data={workUser.recommended_books}
                             renderItem={({item})=>{
                                 return (
-                                <View style = {{marginRight: 15}}>
-                                    <BookCover onPress = {()=>{navigate('ProfileNav', {screen: 'Book', params:{bookID:item.id}})}} 
-                                    source = {item.cover} size =  {130}/>   
-                                </View>)
+                                <TouchableOpacity onPress = {()=>{navigate('ProfileNav', {screen: 'Book', params:{bookID:item.id}})}}>
+                                        <View style = {{alignItems: "center", marginRight: 10}}>
+                                            <Image source={{uri:item.cover}} style={{width: 120, height: 180, resizeMode: "contain", marginBottom: 5, backgroundColor:'grey'}}/>
+                                            <Text style = {{color: "black", marginBottom: 10}}>
+                                                {item.title.length > 10 ? `${item.title.substring(0,12)}...` : item.title}
+                                            </Text>
+                                        </View>
+                                </TouchableOpacity>
+                               )
                             }}
                             keyExtractor={(item)=>item.id}
                         />

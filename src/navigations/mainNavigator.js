@@ -14,7 +14,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { getClubInfo } from '../api_calls/club_calls';
 import { API_SERVER } from '../api_calls/constants';
 import { LOAD_FROM_MEMORY, LOAD_INITIAL } from '../context/constants/offline';
-
+import OfflineScreen from '../screens/offlineScreen';
 
   const Tab = createBottomTabNavigator();
   

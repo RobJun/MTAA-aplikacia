@@ -52,11 +52,16 @@ const HomeScreen = ({navigation}) => {
                         showsHorizontalScrollIndicator={false}
                         data={reading}
                         renderItem={({item})=>{
-                            return (<View>
-                                <BookCover onPress = {()=>{navigation.navigate('Book',{bookID:item.id})}} 
-                                source = {item.cover_path} size =  {150} style = {{marginLeft: 20}}/>   
-                                </View>)
-                        }}
+                            return (
+                                <TouchableOpacity onPress = {()=>{navigation.navigate('Book',{bookID:item.id})}}>
+                                        <View style = {{alignItems: "center", marginLeft: 20}}>
+                                            <Image source={{uri:item.cover_path}} style={{width: 150, height: 230, resizeMode: "contain", marginBottom: 5, backgroundColor:'grey'}}/>
+                                            <Text style = {{color: "black", marginBottom: 10}}>
+                                                {item.title.length > 10 ? `${item.title.substring(0,17)}...12345678910` : item.title}
+                                            </Text>
+                                        </View>
+                                </TouchableOpacity>
+                        )}}
                         keyExtractor={(item)=>item.id}
                     /> }
             </View>

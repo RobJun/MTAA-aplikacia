@@ -1,5 +1,5 @@
-import React, {useContext, useEffect, useState} from "react"
-import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity,Animated, Image} from 'react-native'
+import React, {useContext, useEffect, useState, useCallback} from "react"
+import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity,Animated, Image, RefreshControl} from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { API_SERVER } from "../../api_calls/constants";
 import ProfileImage from "../../components/profileImage";
@@ -17,6 +17,7 @@ const SearchScreen = () => {
     const [searching,setSearching] = useState(true)
     const isConnected = useIsConnected()
     const {offline:{user_book_profiles, user_club_profiles}} = useContext(globContext)
+    const [refreshing, setRefreshing] = useState(false);
 
     const fetchBooks = async (query) => {
        
@@ -101,6 +102,13 @@ const SearchScreen = () => {
         fet('')
     }, [], [])
 
+
+    const onRefresh = useCallback(()=>{
+        setRefreshing(true)
+        fet("")
+        setRefreshing(false)
+    },[])
+
     const pos = new Animated.Value(0)
     useEffect(()=>{
         Animated.loop(
@@ -135,7 +143,7 @@ const SearchScreen = () => {
                 style = {{width: "95%", marginTop: 15, height: 50, borderRadius: 20}}
             />
         </View>
-        <ScrollView style = {{marginBottom: 70}}>
+        <ScrollView style = {{marginBottom: 70}} refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh}/>}>
             <Text style={styles.text}>Bookclubs</Text>
                 <View style = {{marginLeft: 20}}>
                 {searching ? <LoadingList position={position} size={100} photoStyle={styles.image} viewStyle={{marginRight: 15}} textStyle={styles.name}/> :
@@ -172,7 +180,12 @@ const SearchScreen = () => {
                         renderItem={({item})=>{ return (
                             <View style = {{marginRight: 15}}>
                                 <TouchableOpacity onPress = {()=>{navigate('SearchNav', {screen: 'Book', params:{bookID:item.id}})}} >
-                                    <Image source={{uri:item.cover}} style={{width: 120, height: 180, resizeMode: "contain", marginBottom: 10}}/>
+                                    <View style = {{alignItems: "center"}}>
+                                        <Image source={{uri:item.cover}} style={{width: 120, height: 180, resizeMode: "contain", marginBottom: 5, backgroundColor:'grey'}}/>
+                                        <Text style = {{color: "black", marginBottom: 10}}>
+                                            {item.title.length > 10 ? `${item.title.substring(0,10)}...` : item.title}
+                                        </Text>
+                                    </View>
                                 </TouchableOpacity>
                             </View>
                         ) 

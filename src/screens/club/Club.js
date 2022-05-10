@@ -15,6 +15,7 @@ import { useIsConnected } from 'react-native-offline';
 import { join_club, leave_club } from "../../context/actions/offline";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { ADD_CLUB } from "../../context/constants/offline";
+import OfflineScreen from "../offlineScreen";
 
 const ClubScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
@@ -133,10 +134,7 @@ const ClubScreen = ({navigation,route}) => {
         outputRange:[0,2.,0]
     })
     if(offline.user_club_profiles[clubID] === undefined && isConnected == false ) {
-        return (<View><Text>error</Text></View>)
-    }
-    if(offline.user_club_profiles[clubID] === undefined){
-        return (<View><Text>undefined</Text></View>)
+        return (<OfflineScreen/>)
     }
     return (
         <ScrollView

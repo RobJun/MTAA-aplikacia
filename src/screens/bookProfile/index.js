@@ -7,7 +7,8 @@ import RecommendedButton from "./RecommendedButton";
 import { fetchBooks } from "../../api_calls/user_calls";
 import {LoadingBookCover, LoadingText} from '../../components/onLoading'
 import { useIsConnected } from "react-native-offline";
-
+import OfflineScreen from "../offlineScreen";
+import { ADD_BOOK } from "../../context/constants/offline";
 
 const BookProfile = ({route}) => {
     const {auth:{user:{token,user_id}},user,library, setUser,setLibrary,setAuth,offline,setOffline} = useContext(globContext)
@@ -39,12 +40,15 @@ const BookProfile = ({route}) => {
                     alert("Error 404 - Book not found")
                     return
                 }
-                    data = await response.json()
+                data = await response.json()
+                console.log('what')
+                setOffline({type: ADD_BOOK,payload: data})
             }else {
                
                 data = offline.user_book_profiles[bookID]
             }
             setInfo(data)
+            if(data == undefined) return;
             if(offline.userData.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
             if(offline.wishlist.find(x=> x.id === data.id) !== undefined) {
                 setValue('wishlist')
@@ -167,6 +171,10 @@ const BookProfile = ({route}) => {
         }
     }
 
+    useEffect(()=>{
+         fetchInfo()
+    },[isConnected])
+
     
     const pos = new Animated.Value(0)
     useEffect(()=>{
@@ -176,22 +184,23 @@ const BookProfile = ({route}) => {
             duration: 3000,
             useNativeDriver: false
         }),{iterations:-1}).start()
-        fetchInfo()
     },[])
     const position = pos.interpolate({
         inputRange: [0,500,1000],
         outputRange:[0,2.,0]
     })
-
+    if(offline.user_book_profiles[bookID] === undefined && isConnected === false ) {
+        return (<OfflineScreen/>)
+    }
     return (
         <ScrollView showsVerticalScrollIndicator={false} refreshControl = {<RefreshControl  refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style={{backgroundColor: `rgb(${((info.genre.color & 0xff000000)>>24)& 0xff},${(info.genre.color & 0x00ff0000)>>16},${(info.genre.color & 0x0000ff00)>>8})`, alignItems:"center"}}>
                 {loading ? (<View style={{alignItems:"center"}}>
-                                <LoadingBookCover style={ styles.image} size={220} position={position}/>
+                                <LoadingBookCover style={styles.image} size={220} position={position}/>
                                 <LoadingText position={position} height={40} width={150} containerStyle={{marginBottom: 20}}/>
                             </View>) :
                             (<View style={{alignItems:"center"}}>
-                                <Image source={{uri:info.cover}} style={ styles.image}/>
+                                <Image source={{uri:info.cover}} style={styles.image}/>
                                 <Text style = {styles.title}> {info.author[0].name} : {info.title}</Text>
                             </View>) }
                 <View style={{flexDirection:'row'}}>
@@ -271,10 +280,11 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     image: {
-        width:  240, 
+        width:  190, 
         height: 300, 
         margin: 20, 
-        resizeMode: 'contain'
+        resizeMode: 'contain',
+        backgroundColor:'grey'
     },
     text : {
         display:'flex',

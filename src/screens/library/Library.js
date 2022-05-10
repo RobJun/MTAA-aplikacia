@@ -99,6 +99,7 @@ const Library = () => {
         resizeMode: 'contain', 
         marginBottom: 5,
         borderWidth:5,
+        backgroundColor:'grey'
     },
     title : {
         flexWrap: 'wrap', 

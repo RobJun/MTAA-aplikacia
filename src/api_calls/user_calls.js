@@ -48,8 +48,10 @@ export const fetchBooks = async (user_id,dispatch,category) => {
         }
         const data = await response.json()
         dispatch(data)
+        return data
     } catch {
         alert("Error - No internet connection")
         throw err
     }
+    
 }

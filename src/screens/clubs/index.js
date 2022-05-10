@@ -16,7 +16,6 @@ const Clubs = () => {
     const {isConnected} = useNetInfo()
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
-        if(is)
         fetchGroups(user_id, setGroups)
         setRefreshing(false)
     },[])
@@ -43,7 +42,7 @@ const Clubs = () => {
                 <Text style = {styles.title1}>My bookclubs</Text>
                 <ButtonNewClub onPress={()=>{navigate('ClubsNav',{screen:'Create_Club'})}} title="+"/>
             </View>
-            <View>
+            <View >
                 {loading ? <VerticalClubList position={position} size={100}/> : (
                 clubs.length === 0 ? (<View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
                     <View style = {{flex: 1, alignItems: "center", width: "100%", height: Dimensions.get('window').height - 140}}>

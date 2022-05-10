@@ -68,7 +68,14 @@ export const syncReducer = (state,{type,payload})=>{
                     [payload.id] : payload
                 }
             }
-
+        case ADD_BOOK:
+            return{
+                ...state,
+                user_book_profiles : {
+                    ...state.user_book_profiles,
+                    [payload.id] : payload
+                }
+            }    
         case CHANGE_VALUE:
             const operation = {
                 type : payload?.type,

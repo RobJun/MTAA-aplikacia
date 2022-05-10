@@ -266,3 +266,6 @@ export const remove_member = async (club_id,member_id,user_id,token, offline, di
         })
     }
 }
+
+export const save_settings = (user_id,form,token, offline,dispatch= ({type,payload}) =>{}) =>{
+}

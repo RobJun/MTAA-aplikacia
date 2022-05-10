@@ -7,7 +7,7 @@ const BookCover = ({onPress, size, source, style = {}}) =>{
     return (
         <TouchableOpacity onPress = {onPress}>
             <Image source={{uri:source}} 
-            style={[{width:size, height:size*1.5, resizeMode: "contain"}, style]}/>
+            style={[{width:size, height:size*1.5, resizeMode: "contain"}, style,  {backgroundColor:'grey'}]}/>
         </TouchableOpacity>
     )
 }
