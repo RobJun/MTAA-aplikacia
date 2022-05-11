@@ -48,22 +48,26 @@ const BookProfile = ({route}) => {
                 setOffline({type: ADD_BOOK,payload: data})
             }else {
                 data = offline.user_book_profiles[bookID]
+                setL(true)
             }
             if(data == undefined) return;
             setInfo(data)
             if(offline.userData.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
-            if(value !== null) return;
+            console.log('here')
             if(offline.wishlist.find(x=> x.id === data.id) !== undefined) {
                 setValue('wishlist')
-                setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
+                if(items.length == 3)
+                    setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
             }
             else if (offline.reading.find(x=> x.id === data.id) !== undefined) {
                 setValue('reading')
-                setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
+                if(items.length == 3)
+                    setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
             }
             else if (offline.completed.find(x=> x.id === data.id) !== undefined) {
                 setValue("completed")
-                setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
+                if(items.length == 3)
+                    setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
             }
             setLoading(false)
         } catch (err) {
@@ -180,10 +184,12 @@ const BookProfile = ({route}) => {
                     listParentLabelStyle={{fontSize: 17}}
                     dropDownContainerStyle={{backgroundColor: 'white',zIndex: 1000, elevation: 1000}}
                     onChangeValue={(item)=>{
+                        console.log('changedVal')
                         if(!l) {
                             setL(true)
                             return;
                         }
+                        console.log('changedVal2')
                         if(item === null || item ==='remove'){
                             setValue(null)
                            
