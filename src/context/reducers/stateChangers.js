@@ -329,6 +329,8 @@ export const saveUserSettings =  (state,operation,offline) => {
             temp_user.photoPath = element[1].uri
         }else if(element[0] === 'bio'){
             temp_user.bio =  element[1]
+        }else if(element[0] === 'displayName'){
+            temp_user.displayName =  element[1]
         }
     })
 

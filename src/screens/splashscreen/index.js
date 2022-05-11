@@ -2,10 +2,11 @@ import React from 'react';
 import {View,Image,Text,StyleSheet, ActivityIndicator} from 'react-native'
 
 
-const SplashScreen = () => {
+const SplashScreen = ({message}) => {
  return <View style = {styles.view}>
      <Image source={require('../../../assets/logo.png')} style={styles.logo}></Image>
      <ActivityIndicator />
+     <Text>{message}</Text>
      <Text style={styles.text}>BookRef</Text>
      <Text style={styles.credit}>App by Dana Hrivnákova & Róbert Junas</Text>
  </View>

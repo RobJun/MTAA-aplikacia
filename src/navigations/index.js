@@ -32,6 +32,7 @@ const AppContainer = () =>{
                 const data = await EncryptedStorage.getItem("user_data")
                 setBody(s)
                 setOffline({type: LOAD_FROM_MEMORY, payload : JSON.parse(data)})
+                setAuth({type: "LOGIN", payload : s})
                 return true;
             }
             if (session !== undefined && session !== null) {
@@ -105,7 +106,7 @@ const AppContainer = () =>{
    
     if(!loading) {
         console.log('I AM HERE LOGGING')
-        return <SplashScreen/>
+        return <SplashScreen message={body ? (offline.syncing ? 'syncing with server' : 'Synced') : 'trying to login'}/>
     }
 
     return(
