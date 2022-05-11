@@ -58,7 +58,7 @@ const MemberSettings = ({club_id}) => {
                             onChangeText={(text) => {setSearch(text)}}
                             onSearchPress={(text) =>console.log('searching: ', text)}
                             style={{marginBottom:15}}/>
-                        <UserList users={filtred} onSelect={onSelect} selectArray={removeUserIDs}/>
+                        <UserList users={filtred} userData = {offline.userData} onSelect={onSelect} selectArray={removeUserIDs}/>
                         <Button title='Remove Members' onPress={removing ? ()=>{} :removeMembers} style={styles.deleteButton} visible={removing}></Button>
             </View>)
 }

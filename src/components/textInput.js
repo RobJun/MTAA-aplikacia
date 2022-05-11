@@ -26,6 +26,7 @@ const CredentialInput = ({label,value,onChangeText,password,error, placeholder, 
         editable={editable}
        />
       {error && <Text style={styles.error}>{error}</Text>}
+      {!editable && <Text style={styles.error}>{"neda sa menit offline"}</Text>}
     </View>
   );
 };

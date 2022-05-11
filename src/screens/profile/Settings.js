@@ -148,7 +148,7 @@ const Settings = ({navigation}) => {
                     {formImage && <ButtonSettings onPress={()=>setFormImage(false)} title='Reset profile picture'/>}
                 </View>
                 <View style = {{marginLeft: 20, marginRight: 20}}>
-                    <CredentialInput editable={isConnected} label={'Display name'} multi = {false} placeholder = {"Enter display name, max 20 characters"} value={form.displayName} onChangeText={(value)=>{onChange({name:'displayName',value})}} error={errors.displayName}/>
+                    <CredentialInput label={'Display name'} multi = {false} placeholder = {"Enter display name, max 20 characters"} value={form.displayName} onChangeText={(value)=>{onChange({name:'displayName',value})}} error={errors.displayName}/>
                     <CredentialInput label={'Bio'} multi = {true} height = {200} placeholder = {"Enter bio, max 100 characters"} value={form.bio} onChangeText={(value)=>{onChange({name:'bio',value})}} error={errors.bio}/>
                     <Text style = {{textAlign: "right" ,color: "black", marginRight: 30, marginBottom: 10}}>{countBio}/80</Text>
                 </View>

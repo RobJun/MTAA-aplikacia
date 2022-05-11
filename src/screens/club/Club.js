@@ -16,6 +16,7 @@ import { join_club, leave_club } from "../../context/actions/offline";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { ADD_CLUB } from "../../context/constants/offline";
 import OfflineScreen from "../offlineScreen";
+import { userData } from "../../context/reducers/storageReducer";
 
 const ClubScreen = ({navigation,route}) => {
     const clubID = route.params.clubID
@@ -192,7 +193,7 @@ const ClubScreen = ({navigation,route}) => {
                     <Text style={styles.header}>Members</Text>
                     <View style = {{marginRight: 20}}>
                     { loading ? <LoadingList  position={position}/> :
-                        <UserList users={offline.user_club_profiles[clubID].users} onSelect={(item)=>{navigation.navigate('Club_Member',{user_id:item.id})}} selectArray={[]}/>}
+                        <UserList users={offline.user_club_profiles[clubID].users} userData = {offline.userData} onSelect={(item)=>{navigation.navigate('Club_Member',{user_id:item.id})}} selectArray={[]}/>}
                     </View>
                 </View>
                 <View style={styles.fourthSection}>

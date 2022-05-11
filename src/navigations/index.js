@@ -46,8 +46,8 @@ const AppContainer = () =>{
 
                 const data = await EncryptedStorage.getItem("user_data")
                 setBody(log.body)
+                if(data == null) return true;
                 setOffline({type: LOAD_FROM_MEMORY, payload : JSON.parse(data)})
-                setBody(log.body)
                 return false;
             }
         } catch (error) {

@@ -2,8 +2,7 @@ import React from "react";
 import {StyleSheet,View,Text,FlatList,TouchableOpacity, Image} from 'react-native'
 import ProfileImage from "./profileImage";
 
-
-const UserList = ({users, onSelect,selectArray}) =>{
+const UserList = ({users, userData, onSelect,selectArray}) =>{
     return <FlatList
     horizontal
     scrollEnabled
@@ -11,6 +10,16 @@ const UserList = ({users, onSelect,selectArray}) =>{
     data={users}
     extraData={selectArray}
     renderItem={({item})=>{
+        if (item.id === userData.id) {
+            return (
+                <TouchableOpacity onPress={()=>{onSelect(item)}}>
+            <View>
+                <ProfileImage source={userData.photoPath} size={70} style={[styles.member,selectArray.indexOf(userData.id) > -1 &&{borderColor:'red',borderWidth:7}]}/>
+                <Text style={styles.name} key={userData.id}>{userData.displayName.length > 6 ? `${userData.displayName.substring(0,5)}...` : userData.displayName}</Text>
+            </View>
+            </TouchableOpacity>)
+        }
+
         return (
             <TouchableOpacity onPress={()=>{onSelect(item)}}>
         <View>
