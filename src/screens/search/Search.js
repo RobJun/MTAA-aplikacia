@@ -17,6 +17,7 @@ const SearchScreen = () => {
     const [search,setSearch] = useState("")
     const [searching,setSearching] = useState(true)
     const {isConnected} = useNetInfo()
+    const [loaded,setLoaded] = useState(false)
     const {offline:{user_book_profiles, user_club_profiles}} = useContext(globContext)
     const [refreshing, setRefreshing] = useState(false);
 
@@ -100,7 +101,10 @@ const SearchScreen = () => {
     },[search])
     
     useEffect(() => {
-        fet('')
+        if(!isConnected && !loaded || isConnected){
+            fet('')
+            setLoaded(true)
+        }
     }, [isConnected])
 
 
