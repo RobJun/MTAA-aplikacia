@@ -21,6 +21,9 @@ Kód je napísaný v jazyku JavaScript s React Native rozhraním. Celá aplikác
 -	Components – časti kódu, ktoré sa viackrát používajú v kóde, ako napríklad tlačidlá, profilové fotky, textové polia na overovanie vstupov...
 -	Api_calls – väčšina API volaní
 
+### Offline
+Jedina funkcionalita, ktorá nie je povolená v offline režime je vytváranie klubov a menenie názvu klubu (z dôvodu, že nevieme hneď overiť, že či klub s menom už náhodou už existuje. Zároveň sa nedá pripojiť do videohovoru, registrovať a ani prihlasiť (ak používateľ predtým nebol už prihlásený). Zvyšná funkcionalita je funkčná aj v offline režime.
+
 ### Odkazy
 API volania: https://app.swaggerhub.com/apis/RobJun/MTAA/1.5.1-oas3 
 Backend: https://github.com/dnhrvnk/MTAA-backend
