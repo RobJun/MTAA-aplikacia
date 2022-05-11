@@ -52,6 +52,7 @@ const BookProfile = ({route}) => {
             if(data == undefined) return;
             setInfo(data)
             if(offline.userData.recommended_books.find(x=> x.id === data.id) !== undefined) setTextRecommendButton('Recommended')
+            if(value !== null) return;
             if(offline.wishlist.find(x=> x.id === data.id) !== undefined) {
                 setValue('wishlist')
                 setItems(prev=> [...prev, {label: 'Remove', value:'remove'}])
@@ -74,8 +75,8 @@ const BookProfile = ({route}) => {
     
     const onRefresh = useCallback(()=>{
         setRefreshing(true)
-        if(isConnected)
-            fetchInfo()
+        //if(isConnected)
+        //    fetchInfo()
         setRefreshing(false)
     },[])
     
